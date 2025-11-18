@@ -63,12 +63,27 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      // TODO: Implement actual registration
-      console.log('Signup attempt:', formData);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      // Redirect to email verification page
-      router.push('/verify-email');
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          language: formData.language,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrors({ email: data.error || 'Signup failed' });
+        return;
+      }
+
+      // Redirect to verification success page
+      router.push('/verify-email?email=' + encodeURIComponent(formData.email));
     } catch (err) {
       setErrors({ email: 'An error occurred. Please try again.' });
     } finally {

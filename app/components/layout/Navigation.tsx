@@ -3,9 +3,22 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import Button from '../ui/Button';
+import { useAuth } from '@/app/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { LogOut, User } from 'lucide-react';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const { user, signOut } = useAuth();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut();
+    setShowUserMenu(false);
+    router.push('/');
+    router.refresh();
+  };
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -27,16 +40,47 @@ export default function Navigation() {
             <Link href="/sessions" className="text-gray-700 hover:text-blue-600 transition-colors">
               Sessions
             </Link>
-            <Link href="/my-sessions" className="text-gray-700 hover:text-blue-600 transition-colors">
-              My Sessions
-            </Link>
+            {user && (
+              <Link href="/my-sessions" className="text-gray-700 hover:text-blue-600 transition-colors">
+                My Sessions
+              </Link>
+            )}
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
-                <Link href="/login">Login</Link>
-              </Button>
-              <Button variant="primary" size="sm">
-                <Link href="/signup">Sign Up</Link>
-              </Button>
+              {user ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    <span className="text-sm">{user.email}</span>
+                  </button>
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button variant="outline" size="sm">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link href="/signup">
+                    <Button variant="primary" size="sm">
+                      Sign Up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -88,20 +132,47 @@ export default function Navigation() {
               >
                 Sessions
               </Link>
-              <Link
-                href="/my-sessions"
-                className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                My Sessions
-              </Link>
-              <div className="flex flex-col space-y-2 pt-2">
-                <Button variant="outline" fullWidth>
-                  <Link href="/login">Login</Link>
-                </Button>
-                <Button variant="primary" fullWidth>
-                  <Link href="/signup">Sign Up</Link>
-                </Button>
+              {user && (
+                <Link
+                  href="/my-sessions"
+                  className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Sessions
+                </Link>
+              )}
+              <div className="flex flex-col space-y-2 pt-2 border-t">
+                {user ? (
+                  <>
+                    <div className="px-3 py-2 text-sm text-gray-600">
+                      {user.email}
+                    </div>
+                    <Button
+                      variant="outline"
+                      fullWidth
+                      onClick={() => {
+                        handleSignOut();
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="outline" fullWidth>
+                        Login
+                      </Button>
+                    </Link>
+                    <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="primary" fullWidth>
+                        Sign Up
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>

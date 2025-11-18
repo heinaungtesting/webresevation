@@ -20,13 +20,28 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // TODO: Implement actual authentication
-      console.log('Login attempt:', { email, password });
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push('/');
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Login failed');
+        return;
+      }
+
+      // Redirect to home or previous page
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectTo = searchParams.get('redirectTo') || '/';
+      router.push(redirectTo);
+      router.refresh();
     } catch (err) {
-      setError('Invalid email or password');
+      setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
