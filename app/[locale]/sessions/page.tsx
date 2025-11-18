@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import SessionCard from '../components/SessionCard';
+import SessionCard from '@/app/components/SessionCard';
 import { Session, SportType, SkillLevel } from '@/types';
-import Select from '../components/ui/Select';
-import Input from '../components/ui/Input';
-import Button from '../components/ui/Button';
+import Select from '@/app/components/ui/Select';
+import Input from '@/app/components/ui/Input';
+import Button from '@/app/components/ui/Button';
 import { Search, Filter } from 'lucide-react';
 
 // Mock data - same as homepage

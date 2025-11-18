@@ -35,17 +35,24 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protected routes
+  // Protected routes (check path without locale)
   const protectedRoutes = ['/my-sessions', '/profile'];
+
+  // Extract locale from pathname (e.g., /en/my-sessions -> my-sessions)
+  const pathWithoutLocale = request.nextUrl.pathname.replace(/^\/(en|ja)/, '');
+
   const isProtectedRoute = protectedRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route)
+    pathWithoutLocale.startsWith(route)
   );
 
   if (isProtectedRoute && !user) {
     // Redirect to login if not authenticated
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('redirectTo', request.nextUrl.pathname);
+    // Extract locale from current path
+    const localeMatch = request.nextUrl.pathname.match(/^\/(en|ja)/);
+    const locale = localeMatch ? localeMatch[1] : 'en';
+    url.pathname = `/${locale}/login`;
+    url.searchParams.set('redirectTo', pathWithoutLocale);
     return NextResponse.redirect(url);
   }
 

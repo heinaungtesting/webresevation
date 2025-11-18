@@ -1,0 +1,184 @@
+{
+  "nav": {
+    "home": "Home",
+    "sessions": "Sessions",
+    "mySessions": "My Sessions",
+    "login": "Login",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out"
+  },
+  "home": {
+    "hero": {
+      "title": "Find Your Sports Partner in Tokyo",
+      "subtitle": "Connect with players, join sessions, and stay active",
+      "browseSessions": "Browse Sessions",
+      "signUpFree": "Sign Up Free"
+    },
+    "features": {
+      "findPartners": {
+        "title": "Find Partners",
+        "description": "Connect with players of similar skill levels and interests"
+      },
+      "joinSessions": {
+        "title": "Join Sessions",
+        "description": "Browse and join sports sessions at convenient times"
+      },
+      "localVenues": {
+        "title": "Local Venues",
+        "description": "Find sessions at top sport centers across Tokyo"
+      }
+    },
+    "upcomingSessions": "Upcoming Sessions",
+    "viewAll": "View All",
+    "cta": {
+      "title": "Ready to Get Started?",
+      "subtitle": "Join our community and find your next game today",
+      "createAccount": "Create Free Account"
+    }
+  },
+  "sessions": {
+    "title": "Browse Sessions",
+    "subtitle": "Find and join sports sessions near you",
+    "search": "Search by sport or location...",
+    "filters": "Filters",
+    "sportType": "Sport Type",
+    "skillLevel": "Skill Level",
+    "allSports": "All Sports",
+    "allLevels": "All Levels",
+    "badminton": "Badminton",
+    "basketball": "Basketball",
+    "volleyball": "Volleyball",
+    "tennis": "Tennis",
+    "soccer": "Soccer",
+    "futsal": "Futsal",
+    "tableTennis": "Table Tennis",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "sessionsFound": "{count} session found",
+    "sessionsFound_other": "{count} sessions found",
+    "noSessions": "No sessions found matching your criteria",
+    "clearFilters": "Clear Filters",
+    "viewDetails": "View Details",
+    "imGoing": "I'm Going!",
+    "full": "Full",
+    "going": "going",
+    "spots": "{count} spot left",
+    "spots_other": "{count} spots left"
+  },
+  "sessionDetail": {
+    "backToSessions": "Back to Sessions",
+    "description": "Description",
+    "noDescription": "No description provided.",
+    "whosGoing": "Who's Going ({count})",
+    "player": "Player {number}",
+    "joinSession": "Join this session",
+    "attending": "You're attending this session",
+    "cancelAttendance": "Cancel Attendance",
+    "openChatRoom": "Open Chat Room",
+    "sessionFull": "This session is full",
+    "free": "Free to join • No payment required",
+    "rules": {
+      "title": "Session Rules",
+      "respectful": "Be respectful to all players",
+      "onTime": "Arrive on time",
+      "equipment": "Bring your own equipment",
+      "cancel": "Cancel at least 2 hours before if you can't make it"
+    },
+    "joining": "Joining...",
+    "canceling": "Canceling...",
+    "loading": "Loading...",
+    "sessionNotFound": "Session not found",
+    "errorLoading": "Failed to load session",
+    "minutes": "minutes",
+    "duration": "Duration: {minutes} minutes",
+    "participants": "{current} / {max} participants",
+    "participantsNoMax": "{current} participants",
+    "near": "Near {station}"
+  },
+  "mySessions": {
+    "title": "My Sessions",
+    "subtitle": "View and manage your sports sessions",
+    "upcomingSessions": "Upcoming Sessions",
+    "pastSessions": "Past Sessions",
+    "totalSessions": "Total Sessions",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "noUpcoming": "No Upcoming Sessions",
+    "noPast": "No Past Sessions",
+    "noUpcomingDescription": "You haven't signed up for any sessions yet.",
+    "noPastDescription": "You haven't attended any sessions yet.",
+    "browseSessions": "Browse Sessions",
+    "cancelAttendance": "Cancel Attendance",
+    "canceling": "Canceling...",
+    "completed": "Completed",
+    "confirmCancel": "Are you sure you want to cancel your attendance?"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Log in to your SportsMatch account",
+      "email": "Email",
+      "password": "Password",
+      "emailPlaceholder": "you@example.com",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Forgot password?",
+      "loginButton": "Log In",
+      "loggingIn": "Logging in...",
+      "noAccount": "Don't have an account?",
+      "signUpLink": "Sign up"
+    },
+    "signup": {
+      "title": "Create Account",
+      "subtitle": "Join SportsMatch Tokyo and find your game",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "language": "Preferred Language",
+      "english": "English",
+      "japanese": "日本語 (Japanese)",
+      "emailPlaceholder": "you@example.com",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "termsAgree": "By signing up, you agree to our",
+      "termsOfService": "Terms of Service",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy",
+      "signUpButton": "Sign Up",
+      "signingUp": "Creating account...",
+      "haveAccount": "Already have an account?",
+      "loginLink": "Log in",
+      "errors": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email format",
+        "passwordRequired": "Password is required",
+        "passwordLength": "Password must be at least 8 characters",
+        "passwordMismatch": "Passwords do not match"
+      }
+    },
+    "verify": {
+      "title": "Check Your Email",
+      "sentTo": "We've sent a verification link to",
+      "checkInbox": "Check your inbox",
+      "clickLink": "Click the verification link in the email to activate your account.",
+      "didntReceive": "Didn't receive the email?",
+      "checkSpam": "Check your spam or junk folder",
+      "correctEmail": "Make sure you entered the correct email address",
+      "waitMinutes": "Wait a few minutes and refresh your inbox",
+      "backToLogin": "Back to Login",
+      "alreadyVerified": "Already verified?",
+      "loginHere": "Log in"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "tryAgain": "Try Again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back"
+  }
+}

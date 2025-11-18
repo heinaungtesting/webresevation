@@ -4,6 +4,14 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+let prismaInstance: PrismaClient | undefined;
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+try {
+  prismaInstance = globalForPrisma.prisma ?? new PrismaClient();
+  if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prismaInstance;
+} catch (error) {
+  console.warn('Prisma client not initialized. Database operations will fail at runtime.');
+  prismaInstance = undefined;
+}
+
+export const prisma = prismaInstance as PrismaClient;

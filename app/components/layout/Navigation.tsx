@@ -2,16 +2,19 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import Button from '../ui/Button';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { LogOut, User } from 'lucide-react';
+import LanguageSwitcher from '../LanguageSwitcher';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { user, signOut } = useAuth();
   const router = useRouter();
+  const t = useTranslations('nav');
 
   const handleSignOut = async () => {
     await signOut();
@@ -35,17 +38,18 @@ export default function Navigation() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <Link href="/" className="text-gray-700 hover:text-blue-600 transition-colors">
-              Home
+              {t('home')}
             </Link>
             <Link href="/sessions" className="text-gray-700 hover:text-blue-600 transition-colors">
-              Sessions
+              {t('sessions')}
             </Link>
             {user && (
               <Link href="/my-sessions" className="text-gray-700 hover:text-blue-600 transition-colors">
-                My Sessions
+                {t('mySessions')}
               </Link>
             )}
             <div className="flex items-center space-x-3">
+              <LanguageSwitcher />
               {user ? (
                 <div className="relative">
                   <button
@@ -62,7 +66,7 @@ export default function Navigation() {
                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       >
                         <LogOut className="w-4 h-4" />
-                        Sign Out
+                        {t('signOut')}
                       </button>
                     </div>
                   )}
@@ -71,12 +75,12 @@ export default function Navigation() {
                 <>
                   <Link href="/login">
                     <Button variant="outline" size="sm">
-                      Login
+                      {t('login')}
                     </Button>
                   </Link>
                   <Link href="/signup">
                     <Button variant="primary" size="sm">
-                      Sign Up
+                      {t('signUp')}
                     </Button>
                   </Link>
                 </>
@@ -123,14 +127,14 @@ export default function Navigation() {
                 className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Home
+                {t('home')}
               </Link>
               <Link
                 href="/sessions"
                 className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Sessions
+                {t('sessions')}
               </Link>
               {user && (
                 <Link
@@ -138,10 +142,13 @@ export default function Navigation() {
                   className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  My Sessions
+                  {t('mySessions')}
                 </Link>
               )}
               <div className="flex flex-col space-y-2 pt-2 border-t">
+                <div className="px-3">
+                  <LanguageSwitcher />
+                </div>
                 {user ? (
                   <>
                     <div className="px-3 py-2 text-sm text-gray-600">
@@ -156,19 +163,19 @@ export default function Navigation() {
                       }}
                     >
                       <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
+                      {t('signOut')}
                     </Button>
                   </>
                 ) : (
                   <>
                     <Link href="/login" onClick={() => setIsMenuOpen(false)}>
                       <Button variant="outline" fullWidth>
-                        Login
+                        {t('login')}
                       </Button>
                     </Link>
                     <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
                       <Button variant="primary" fullWidth>
-                        Sign Up
+                        {t('signUp')}
                       </Button>
                     </Link>
                   </>

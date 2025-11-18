@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import Button from './components/ui/Button';
-import SessionCard from './components/SessionCard';
+import Button from '@/app/components/ui/Button';
+import SessionCard from '@/app/components/SessionCard';
 import { Session } from '@/types';
 import { Search, Users, Calendar, MapPin } from 'lucide-react';
 
