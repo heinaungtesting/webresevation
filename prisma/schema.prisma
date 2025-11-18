@@ -28,6 +28,7 @@ model User {
   email_verified       Boolean        @default(false)
   phone_number         String?        @unique
   phone_verified       Boolean        @default(false)
+  is_admin             Boolean        @default(false)
   created_at           DateTime       @default(now())
   updated_at           DateTime       @updatedAt
 

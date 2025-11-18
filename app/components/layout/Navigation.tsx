@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import Button from '../ui/Button';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { LogOut, User, Settings, UserCircle } from 'lucide-react';
+import { LogOut, User, Settings, UserCircle, Shield } from 'lucide-react';
 import LanguageSwitcher from '../LanguageSwitcher';
 
 export default function Navigation() {
@@ -81,6 +81,14 @@ export default function Navigation() {
                       >
                         <Settings className="w-4 h-4" />
                         {t('settings')}
+                      </Link>
+                      <Link
+                        href="/admin"
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <Shield className="w-4 h-4" />
+                        Admin
                       </Link>
                       <div className="border-t border-gray-200 my-1"></div>
                       <button
