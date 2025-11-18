@@ -1,0 +1,164 @@
+// Prisma Schema for SportsMatch Tokyo
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// User model
+model User {
+  id                   String         @id @default(uuid())
+  email                String         @unique
+  username             String?        @unique
+  display_name         String?
+  bio                  String?        @db.Text
+  avatar_url           String?
+  location             String?        // City or area in Tokyo
+  sport_preferences    String[]       // Array of preferred sports
+  skill_levels         Json?          // JSON object of sport -> skill level
+  notification_email   Boolean        @default(true)
+  notification_push    Boolean        @default(true)
+  language_preference  String         @default("en") // 'en' or 'ja'
+  email_verified       Boolean        @default(false)
+  phone_number         String?        @unique
+  phone_verified       Boolean        @default(false)
+  is_admin             Boolean        @default(false)
+  created_at           DateTime       @default(now())
+  updated_at           DateTime       @updatedAt
+
+  // Relations
+  created_sessions     Session[]      @relation("SessionCreator")
+  user_sessions        UserSession[]
+  sent_messages        Message[]      @relation("MessageSender")
+  conversation_participants ConversationParticipant[]
+
+  @@index([email])
+  @@index([phone_number])
+  @@index([username])
+}
+
+// Sport Center model
+model SportCenter {
+  id          String    @id @default(uuid())
+  name_en     String
+  name_ja     String
+  address_en  String
+  address_ja  String
+  station_en  String?
+  station_ja  String?
+  latitude    Float?
+  longitude   Float?
+  image_url   String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  // Relations
+  sessions    Session[]
+
+  @@index([name_en])
+  @@index([name_ja])
+}
+
+// Session model
+model Session {
+  id                    String        @id @default(uuid())
+  sport_center_id       String
+  sport_type            String        // badminton, basketball, etc.
+  skill_level           String        // beginner, intermediate, advanced
+  date_time             DateTime
+  duration_minutes      Int
+  max_participants      Int?
+  description_en        String?       @db.Text
+  description_ja        String?       @db.Text
+  created_by            String
+  created_at            DateTime      @default(now())
+  updated_at            DateTime      @updatedAt
+
+  // Relations
+  sport_center          SportCenter   @relation(fields: [sport_center_id], references: [id], onDelete: Cascade)
+  creator               User          @relation("SessionCreator", fields: [created_by], references: [id], onDelete: Cascade)
+  user_sessions         UserSession[]
+  conversation          Conversation? @relation("SessionConversation")
+
+  @@index([sport_type])
+  @@index([skill_level])
+  @@index([date_time])
+  @@index([sport_center_id])
+  @@index([created_by])
+}
+
+// UserSession model (attendance tracking)
+model UserSession {
+  id          String    @id @default(uuid())
+  user_id     String
+  session_id  String
+  marked_at   DateTime  @default(now())
+
+  // Relations
+  user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  session     Session   @relation(fields: [session_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, session_id])
+  @@index([user_id])
+  @@index([session_id])
+}
+
+// Conversation model
+model Conversation {
+  id              String                    @id @default(uuid())
+  type            String                    @default("direct") // 'direct' or 'session'
+  session_id      String?                   @unique
+  name            String?                   // For group chats
+  created_at      DateTime                  @default(now())
+  updated_at      DateTime                  @updatedAt
+  last_message_at DateTime?
+
+  // Relations
+  session         Session?                  @relation("SessionConversation", fields: [session_id], references: [id], onDelete: Cascade)
+  participants    ConversationParticipant[]
+  messages        Message[]
+
+  @@index([session_id])
+  @@index([last_message_at])
+}
+
+// ConversationParticipant model
+model ConversationParticipant {
+  id              String       @id @default(uuid())
+  conversation_id String
+  user_id         String
+  joined_at       DateTime     @default(now())
+  last_read_at    DateTime?
+
+  // Relations
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([conversation_id, user_id])
+  @@index([conversation_id])
+  @@index([user_id])
+}
+
+// Message model
+model Message {
+  id              String       @id @default(uuid())
+  conversation_id String
+  sender_id       String
+  content         String       @db.Text
+  created_at      DateTime     @default(now())
+  updated_at      DateTime     @updatedAt
+
+  // Relations
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  sender          User         @relation("MessageSender", fields: [sender_id], references: [id], onDelete: Cascade)
+
+  @@index([conversation_id])
+  @@index([sender_id])
+  @@index([created_at])
+}
