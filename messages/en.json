@@ -3,10 +3,12 @@
     "home": "Home",
     "sessions": "Sessions",
     "mySessions": "My Sessions",
+    "messages": "Messages",
+    "profile": "Profile",
+    "settings": "Settings",
     "login": "Login",
     "signUp": "Sign Up",
-    "signOut": "Sign Out",
-    "messages": "Messages"
+    "signOut": "Sign Out"
   },
   "messages": {
     "title": "Messages",

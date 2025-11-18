@@ -16,6 +16,14 @@ model User {
   id                   String         @id @default(uuid())
   email                String         @unique
   username             String?        @unique
+  display_name         String?
+  bio                  String?        @db.Text
+  avatar_url           String?
+  location             String?        // City or area in Tokyo
+  sport_preferences    String[]       // Array of preferred sports
+  skill_levels         Json?          // JSON object of sport -> skill level
+  notification_email   Boolean        @default(true)
+  notification_push    Boolean        @default(true)
   language_preference  String         @default("en") // 'en' or 'ja'
   email_verified       Boolean        @default(false)
   phone_number         String?        @unique
@@ -31,6 +39,7 @@ model User {
 
   @@index([email])
   @@index([phone_number])
+  @@index([username])
 }
 
 // Sport Center model
