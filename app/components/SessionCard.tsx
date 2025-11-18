@@ -32,12 +32,12 @@ export default function SessionCard({ session }: SessionCardProps) {
   const isFull = Boolean(session.max_participants && session.current_participants >= session.max_participants);
 
   return (
-    <Card hoverable variant="elevated" className="h-full flex flex-col">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-3xl">{sportIcon}</span>
+    <Card hoverable variant="elevated" className="h-full flex flex-col transition-all duration-200 hover:shadow-lg active:scale-[0.98]">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <span className="text-4xl sm:text-3xl">{sportIcon}</span>
           <div>
-            <h3 className="font-semibold text-lg capitalize">
+            <h3 className="font-semibold text-lg sm:text-base capitalize">
               {session.sport_type.replace('-', ' ')}
             </h3>
             <Badge variant={skillColors[session.skill_level]} size="sm">
@@ -72,17 +72,17 @@ export default function SessionCard({ session }: SessionCardProps) {
         </div>
       </div>
 
-      <div className="flex gap-2">
-        <Link href={`/sessions/${session.id}`} className="flex-grow">
-          <Button variant="outline" fullWidth size="sm">
+      <div className="flex flex-col sm:flex-row gap-2">
+        <Link href={`/sessions/${session.id}`} className="flex-1">
+          <Button variant="outline" fullWidth size="md">
             View Details
           </Button>
         </Link>
         <Button
           variant="primary"
-          size="sm"
+          size="md"
           disabled={isFull}
-          className="flex-grow"
+          className="flex-1"
         >
           {isFull ? 'Full' : "I'm Going!"}
         </Button>

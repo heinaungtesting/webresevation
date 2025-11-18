@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Button from '@/app/components/ui/Button';
 import Input from '@/app/components/ui/Input';
 import Card from '@/app/components/ui/Card';
+import { AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -61,6 +62,13 @@ export default function LoginPage() {
 
         <Card padding="lg">
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            )}
+
             <Input
               label="Email"
               type="email"
@@ -69,7 +77,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               fullWidth
-              error={error}
+              autoComplete="email"
             />
 
             <Input
@@ -80,6 +88,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               fullWidth
+              autoComplete="current-password"
             />
 
             <div className="flex items-center justify-between text-sm">
@@ -96,9 +105,9 @@ export default function LoginPage() {
               variant="primary"
               size="lg"
               fullWidth
-              disabled={loading}
+              loading={loading}
             >
-              {loading ? 'Logging in...' : 'Log In'}
+              Log In
             </Button>
           </form>
 

@@ -20,9 +20,11 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           className={cn(
-            'px-3 py-2 border border-gray-300 rounded-lg bg-white',
+            'px-4 py-3 border border-gray-300 rounded-lg bg-white text-base',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             'disabled:bg-gray-100 disabled:cursor-not-allowed',
+            'transition-all duration-200',
+            'min-h-[44px]', // Minimum touch target size for mobile
             error && 'border-red-500 focus:ring-red-500',
             fullWidth && 'w-full',
             className

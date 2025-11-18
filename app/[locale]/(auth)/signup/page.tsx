@@ -114,6 +114,7 @@ export default function SignupPage() {
               onChange={handleChange}
               required
               fullWidth
+              autoComplete="email"
               error={errors.email}
             />
 
@@ -126,6 +127,7 @@ export default function SignupPage() {
               onChange={handleChange}
               required
               fullWidth
+              autoComplete="new-password"
               error={errors.password}
             />
 
@@ -138,6 +140,7 @@ export default function SignupPage() {
               onChange={handleChange}
               required
               fullWidth
+              autoComplete="new-password"
               error={errors.confirmPassword}
             />
 
@@ -170,9 +173,9 @@ export default function SignupPage() {
               variant="primary"
               size="lg"
               fullWidth
-              disabled={loading}
+              loading={loading}
             >
-              {loading ? 'Creating account...' : 'Sign Up'}
+              Sign Up
             </Button>
           </form>
 
