@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { sendMessageNotificationEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -122,6 +123,7 @@ export async function POST(
               id: true,
               email: true,
               username: true,
+              display_name: true,
             },
           },
         },
@@ -133,6 +135,46 @@ export async function POST(
         },
       }),
     ]);
+
+    // Send email notifications to other participants (non-blocking)
+    const otherParticipants = await prisma.conversationParticipant.findMany({
+      where: {
+        conversation_id: id,
+        user_id: { not: user.id }, // Exclude sender
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            display_name: true,
+            notification_email: true,
+          },
+        },
+      },
+    });
+
+    // Send notifications in background
+    const senderName = message.sender.display_name || message.sender.username || message.sender.email.split('@')[0];
+    const messagePreview = content.length > 100 ? content.substring(0, 100) + '...' : content;
+
+    otherParticipants.forEach((participant: any) => {
+      if (participant.user.notification_email) {
+        const userName = participant.user.display_name || participant.user.username || participant.user.email.split('@')[0];
+        sendMessageNotificationEmail(
+          participant.user.email,
+          userName,
+          {
+            senderName,
+            messagePreview,
+            conversationId: id,
+          }
+        ).catch((err) => {
+          console.error('Failed to send message notification email:', err);
+        });
+      }
+    });
 
     return NextResponse.json(message, { status: 201 });
   } catch (error) {

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { sendWelcomeEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +46,15 @@ export async function POST(request: Request) {
             language_preference: language,
             email_verified: false,
           },
+        });
+
+        // Send welcome email (non-blocking)
+        sendWelcomeEmail(
+          data.user.email!,
+          data.user.email!.split('@')[0] // Use email username as default name
+        ).catch((err) => {
+          console.error('Failed to send welcome email:', err);
+          // Don't fail signup if email fails
         });
       } catch (dbError) {
         console.error('Database error:', dbError);
