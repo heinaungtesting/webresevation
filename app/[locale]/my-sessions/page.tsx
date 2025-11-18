@@ -8,7 +8,7 @@ import SessionCard from '@/app/components/SessionCard';
 import Card from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import Badge from '@/app/components/ui/Badge';
-import { Calendar, Clock, TrendingUp, History, Loader2 } from 'lucide-react';
+import { Calendar, Clock, TrendingUp, History, Loader2, Plus } from 'lucide-react';
 
 interface AttendedSession {
   attendance_id: string;
@@ -115,12 +115,24 @@ export default function MySessionsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            My Sessions
-          </h1>
-          <p className="text-gray-600">
-            View and manage your sports sessions
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                My Sessions
+              </h1>
+              <p className="text-gray-600">
+                View and manage your sports sessions
+              </p>
+            </div>
+            <Button
+              variant="primary"
+              onClick={() => router.push('/my-sessions/created')}
+              className="gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              My Created Sessions
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
