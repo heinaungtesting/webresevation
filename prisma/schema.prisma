@@ -26,6 +26,8 @@ model User {
   // Relations
   created_sessions     Session[]      @relation("SessionCreator")
   user_sessions        UserSession[]
+  sent_messages        Message[]      @relation("MessageSender")
+  conversation_participants ConversationParticipant[]
 
   @@index([email])
   @@index([phone_number])
@@ -72,6 +74,7 @@ model Session {
   sport_center          SportCenter   @relation(fields: [sport_center_id], references: [id], onDelete: Cascade)
   creator               User          @relation("SessionCreator", fields: [created_by], references: [id], onDelete: Cascade)
   user_sessions         UserSession[]
+  conversation          Conversation? @relation("SessionConversation")
 
   @@index([sport_type])
   @@index([skill_level])
@@ -94,4 +97,58 @@ model UserSession {
   @@unique([user_id, session_id])
   @@index([user_id])
   @@index([session_id])
+}
+
+// Conversation model
+model Conversation {
+  id              String                    @id @default(uuid())
+  type            String                    @default("direct") // 'direct' or 'session'
+  session_id      String?                   @unique
+  name            String?                   // For group chats
+  created_at      DateTime                  @default(now())
+  updated_at      DateTime                  @updatedAt
+  last_message_at DateTime?
+
+  // Relations
+  session         Session?                  @relation("SessionConversation", fields: [session_id], references: [id], onDelete: Cascade)
+  participants    ConversationParticipant[]
+  messages        Message[]
+
+  @@index([session_id])
+  @@index([last_message_at])
+}
+
+// ConversationParticipant model
+model ConversationParticipant {
+  id              String       @id @default(uuid())
+  conversation_id String
+  user_id         String
+  joined_at       DateTime     @default(now())
+  last_read_at    DateTime?
+
+  // Relations
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([conversation_id, user_id])
+  @@index([conversation_id])
+  @@index([user_id])
+}
+
+// Message model
+model Message {
+  id              String       @id @default(uuid())
+  conversation_id String
+  sender_id       String
+  content         String       @db.Text
+  created_at      DateTime     @default(now())
+  updated_at      DateTime     @updatedAt
+
+  // Relations
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  sender          User         @relation("MessageSender", fields: [sender_id], references: [id], onDelete: Cascade)
+
+  @@index([conversation_id])
+  @@index([sender_id])
+  @@index([created_at])
 }

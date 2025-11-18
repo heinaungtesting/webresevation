@@ -5,7 +5,18 @@
     "mySessions": "My Sessions",
     "login": "Login",
     "signUp": "Sign Up",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "messages": "Messages"
+  },
+  "messages": {
+    "title": "Messages",
+    "noMessages": "No messages yet",
+    "startConversation": "Start a conversation with other players or join a session chat",
+    "loadingConversations": "Loading conversations...",
+    "loadingMessages": "Loading messages...",
+    "typeMessage": "Type a message...",
+    "send": "Send"
+
   },
   "home": {
     "hero": {

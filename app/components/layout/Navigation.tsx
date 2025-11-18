@@ -44,9 +44,14 @@ export default function Navigation() {
               {t('sessions')}
             </Link>
             {user && (
-              <Link href="/my-sessions" className="text-gray-700 hover:text-blue-600 transition-colors">
-                {t('mySessions')}
-              </Link>
+              <>
+                <Link href="/my-sessions" className="text-gray-700 hover:text-blue-600 transition-colors">
+                  {t('mySessions')}
+                </Link>
+                <Link href="/messages" className="text-gray-700 hover:text-blue-600 transition-colors">
+                  {t('messages')}
+                </Link>
+              </>
             )}
             <div className="flex items-center space-x-3">
               <LanguageSwitcher />
@@ -137,13 +142,22 @@ export default function Navigation() {
                 {t('sessions')}
               </Link>
               {user && (
-                <Link
-                  href="/my-sessions"
-                  className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {t('mySessions')}
-                </Link>
+                <>
+                  <Link
+                    href="/my-sessions"
+                    className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {t('mySessions')}
+                  </Link>
+                  <Link
+                    href="/messages"
+                    className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {t('messages')}
+                  </Link>
+                </>
               )}
               <div className="flex flex-col space-y-2 pt-2 border-t">
                 <div className="px-3">
