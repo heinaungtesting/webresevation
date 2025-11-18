@@ -1,58 +1,149 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/app/contexts/AuthContext';
 import Button from '@/app/components/ui/Button';
 import Card from '@/app/components/ui/Card';
 import Badge from '@/app/components/ui/Badge';
 import { Session } from '@/types';
-import { formatDate, formatTime } from '@/lib/utils';
-import { MapPin, Clock, Users, Info, ArrowLeft } from 'lucide-react';
-
-// Mock data
-const mockSession: Session = {
-  id: '1',
-  sport_center_id: '1',
-  sport_type: 'badminton',
-  skill_level: 'intermediate',
-  date_time: new Date(Date.now() + 86400000).toISOString(),
-  duration_minutes: 120,
-  max_participants: 8,
-  current_participants: 5,
-  description_en: 'Fun badminton session for intermediate players. Bring your own racket and shuttlecock. We will have casual doubles games. All skill levels welcome!',
-  created_by: 'user1',
-  created_at: new Date().toISOString(),
-  sport_center: {
-    id: '1',
-    name_en: 'Tokyo Sport Center',
-    name_ja: '東京スポーツセンター',
-    address_en: '1-2-3 Shibuya, Tokyo',
-    address_ja: '東京都渋谷区1-2-3',
-    station_en: 'Shibuya Station',
-    station_ja: '渋谷駅',
-  },
-};
+import { formatDate } from '@/lib/utils';
+import { MapPin, Clock, Users, Info, ArrowLeft, Loader2 } from 'lucide-react';
 
 export default function SessionDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
+  const [session, setSession] = useState<Session | null>(null);
   const [isAttending, setIsAttending] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const session = mockSession; // In real app, fetch by params.id
+  useEffect(() => {
+    fetchSession();
+  }, [params.id]);
 
-  const handleAttendance = async () => {
-    setLoading(true);
+  const fetchSession = async () => {
     try {
-      // TODO: Implement actual attendance marking
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setIsAttending(!isAttending);
+      setLoading(true);
+      // For now, we'll use mock data since we don't have sessions in the database yet
+      // In production, this would be: const response = await fetch(`/api/sessions/${params.id}`);
+
+      // Mock data
+      const mockSession: Session = {
+        id: params.id as string,
+        sport_center_id: '1',
+        sport_type: 'badminton',
+        skill_level: 'intermediate',
+        date_time: new Date(Date.now() + 86400000).toISOString(),
+        duration_minutes: 120,
+        max_participants: 8,
+        current_participants: 5,
+        description_en: 'Fun badminton session for intermediate players. Bring your own racket and shuttlecock. We will have casual doubles games. All skill levels welcome!',
+        created_by: 'user1',
+        created_at: new Date().toISOString(),
+        sport_center: {
+          id: '1',
+          name_en: 'Tokyo Sport Center',
+          name_ja: '東京スポーツセンター',
+          address_en: '1-2-3 Shibuya, Tokyo',
+          address_ja: '東京都渋谷区1-2-3',
+          station_en: 'Shibuya Station',
+          station_ja: '渋谷駅',
+        },
+      };
+
+      setSession(mockSession);
+      // TODO: Check if user is already attending
     } catch (err) {
+      setError('Failed to load session');
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleAttendance = async () => {
+    if (!user) {
+      router.push(`/login?redirectTo=/sessions/${params.id}`);
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      if (isAttending) {
+        // Cancel attendance
+        const response = await fetch('/api/attendance', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ session_id: session?.id }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to cancel attendance');
+        }
+
+        setIsAttending(false);
+        // Refresh session data
+        await fetchSession();
+      } else {
+        // Mark attendance
+        const response = await fetch('/api/attendance', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ session_id: session?.id }),
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to mark attendance');
+        }
+
+        setIsAttending(true);
+        // Refresh session data
+        await fetchSession();
+      }
+    } catch (err: any) {
+      alert(err.message || 'An error occurred');
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !session) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Card padding="lg">
+            <div className="text-center py-12">
+              <p className="text-red-600 mb-4">{error || 'Session not found'}</p>
+              <Button onClick={() => router.push('/sessions')}>
+                Back to Sessions
+              </Button>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   const isFull = session.max_participants && session.current_participants >= session.max_participants;
   const spotsLeft = session.max_participants ? session.max_participants - session.current_participants : null;
@@ -175,9 +266,16 @@ export default function SessionDetailPage() {
                     variant="danger"
                     fullWidth
                     onClick={handleAttendance}
-                    disabled={loading}
+                    disabled={actionLoading}
                   >
-                    {loading ? 'Canceling...' : 'Cancel Attendance'}
+                    {actionLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Canceling...
+                      </>
+                    ) : (
+                      'Cancel Attendance'
+                    )}
                   </Button>
                   <Button variant="primary" fullWidth>
                     Open Chat Room
