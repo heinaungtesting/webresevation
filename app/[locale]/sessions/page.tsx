@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/contexts/AuthContext';
 import SessionCard from '@/app/components/SessionCard';
 import { Session, SportType, SkillLevel } from '@/types';
 import Select from '@/app/components/ui/Select';
 import Input from '@/app/components/ui/Input';
 import Button from '@/app/components/ui/Button';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Plus } from 'lucide-react';
 
 // Mock data - same as homepage
 const mockSessions: Session[] = [
@@ -113,6 +115,8 @@ const mockSessions: Session[] = [
 ];
 
 export default function SessionsPage() {
+  const router = useRouter();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [sportFilter, setSportFilter] = useState<string>('all');
   const [skillFilter, setSkillFilter] = useState<string>('all');
@@ -135,9 +139,21 @@ export default function SessionsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Browse Sessions
-          </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Browse Sessions
+            </h1>
+            {user && (
+              <Button
+                variant="primary"
+                onClick={() => router.push('/sessions/create')}
+                className="gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Create Session
+              </Button>
+            )}
+          </div>
           <p className="text-gray-600">
             Find and join sports sessions near you
           </p>
