@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "./[locale]/globals.css";
 
 export const metadata: Metadata = {
   title: "SportsMatch Tokyo - Find Sports Partners & Sessions",
@@ -10,5 +11,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen bg-gray-50">{children}</body>
+    </html>
+  );
 }

@@ -10,7 +10,7 @@ const intlMiddleware = createMiddleware({
   localePrefix: 'always',
 });
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // First, handle i18n routing
   const response = intlMiddleware(request);
 
