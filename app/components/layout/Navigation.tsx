@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import Button from '../ui/Button';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { LogOut, User, Settings, UserCircle, Shield, X, Menu } from 'lucide-react';
+import { LogOut, User, Settings, UserCircle, Shield, X, Menu, Heart } from 'lucide-react';
 import LanguageSwitcher from '../LanguageSwitcher';
 
 export default function Navigation() {
@@ -115,6 +115,14 @@ export default function Navigation() {
                       >
                         <UserCircle className="w-4 h-4" />
                         {t('profile')}
+                      </Link>
+                      <Link
+                        href="/favorites"
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <Heart className="w-4 h-4" />
+                        Favorites
                       </Link>
                       <Link
                         href="/settings"
@@ -246,6 +254,14 @@ export default function Navigation() {
                   >
                     <UserCircle className="w-5 h-5" />
                     {t('profile')}
+                  </Link>
+                  <Link
+                    href="/favorites"
+                    className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Heart className="w-5 h-5" />
+                    Favorites
                   </Link>
                   <Link
                     href="/settings"

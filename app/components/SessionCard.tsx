@@ -3,6 +3,7 @@ import { Session, SportType, SkillLevel } from '@/types';
 import Card from './ui/Card';
 import Badge from './ui/Badge';
 import Button from './ui/Button';
+import FavoriteButton from './sessions/FavoriteButton';
 import { formatDate, formatTime } from '@/lib/utils';
 import { Users, Clock, MapPin } from 'lucide-react';
 
@@ -45,11 +46,14 @@ export default function SessionCard({ session }: SessionCardProps) {
             </Badge>
           </div>
         </div>
-        {isFull && (
-          <Badge variant="danger" size="sm">
-            Full
-          </Badge>
-        )}
+        <div className="flex items-center gap-1">
+          {isFull && (
+            <Badge variant="danger" size="sm">
+              Full
+            </Badge>
+          )}
+          <FavoriteButton sessionId={session.id} size="sm" />
+        </div>
       </div>
 
       <div className="space-y-2 mb-4 flex-grow">

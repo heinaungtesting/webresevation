@@ -23,6 +23,8 @@ export async function GET(
               select: {
                 id: true,
                 username: true,
+                display_name: true,
+                avatar_url: true,
                 email: true,
               },
             },
@@ -38,10 +40,12 @@ export async function GET(
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
-    // Map to include current_participants
+    // Map to include current_participants and participants array
     const sessionWithCount = {
       ...session,
       current_participants: session._count.user_sessions,
+      participants: session.user_sessions.map((us: any) => us.user),
+      user_sessions: undefined,
       _count: undefined,
     };
 
