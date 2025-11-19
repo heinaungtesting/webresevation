@@ -11,11 +11,30 @@ export async function GET(request: Request) {
     const sportType = searchParams.get('sport_type');
     const skillLevel = searchParams.get('skill_level');
     const search = searchParams.get('search');
+    const startDate = searchParams.get('start_date');
+    const endDate = searchParams.get('end_date');
+
+    // Build date filter
+    const dateFilter: any = {
+      gte: new Date(), // Default: Only future sessions
+    };
+
+    // If start date is provided, use it (but ensure it's not in the past)
+    if (startDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      dateFilter.gte = start > new Date() ? start : new Date();
+    }
+
+    // If end date is provided, set the upper bound
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      dateFilter.lte = end;
+    }
 
     const where: any = {
-      date_time: {
-        gte: new Date(), // Only future sessions
-      },
+      date_time: dateFilter,
     };
 
     if (sportType && sportType !== 'all') {

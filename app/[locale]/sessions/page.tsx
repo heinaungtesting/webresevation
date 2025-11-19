@@ -9,7 +9,7 @@ import Select from '@/app/components/ui/Select';
 import Input from '@/app/components/ui/Input';
 import Button from '@/app/components/ui/Button';
 import Loading from '@/app/components/ui/Loading';
-import { Search, Filter, Plus, RefreshCw } from 'lucide-react';
+import { Search, Filter, Plus, RefreshCw, Calendar } from 'lucide-react';
 
 export default function SessionsPage() {
   const router = useRouter();
@@ -20,11 +20,13 @@ export default function SessionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sportFilter, setSportFilter] = useState<string>('all');
   const [skillFilter, setSkillFilter] = useState<string>('all');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     fetchSessions();
-  }, [sportFilter, skillFilter]);
+  }, [sportFilter, skillFilter, startDate, endDate]);
 
   const fetchSessions = async () => {
     try {
@@ -36,6 +38,8 @@ export default function SessionsPage() {
       if (sportFilter !== 'all') params.append('sport_type', sportFilter);
       if (skillFilter !== 'all') params.append('skill_level', skillFilter);
       if (searchQuery) params.append('search', searchQuery);
+      if (startDate) params.append('start_date', startDate);
+      if (endDate) params.append('end_date', endDate);
 
       const response = await fetch(`/api/sessions?${params}`);
       if (!response.ok) throw new Error('Failed to fetch sessions');
@@ -59,6 +63,8 @@ export default function SessionsPage() {
     setSearchQuery('');
     setSportFilter('all');
     setSkillFilter('all');
+    setStartDate('');
+    setEndDate('');
   };
 
   return (
@@ -114,35 +120,81 @@ export default function SessionsPage() {
           </form>
 
           {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t">
-              <Select
-                label="Sport Type"
-                value={sportFilter}
-                onChange={(e) => setSportFilter(e.target.value)}
-                fullWidth
-                options={[
-                  { value: 'all', label: 'All Sports' },
-                  { value: 'badminton', label: 'Badminton' },
-                  { value: 'basketball', label: 'Basketball' },
-                  { value: 'volleyball', label: 'Volleyball' },
-                  { value: 'tennis', label: 'Tennis' },
-                  { value: 'soccer', label: 'Soccer' },
-                  { value: 'futsal', label: 'Futsal' },
-                  { value: 'table-tennis', label: 'Table Tennis' },
-                ]}
-              />
-              <Select
-                label="Skill Level"
-                value={skillFilter}
-                onChange={(e) => setSkillFilter(e.target.value)}
-                fullWidth
-                options={[
-                  { value: 'all', label: 'All Levels' },
-                  { value: 'beginner', label: 'Beginner' },
-                  { value: 'intermediate', label: 'Intermediate' },
-                  { value: 'advanced', label: 'Advanced' },
-                ]}
-              />
+            <div className="mt-4 pt-4 border-t space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Select
+                  label="Sport Type"
+                  value={sportFilter}
+                  onChange={(e) => setSportFilter(e.target.value)}
+                  fullWidth
+                  options={[
+                    { value: 'all', label: 'All Sports' },
+                    { value: 'badminton', label: 'Badminton' },
+                    { value: 'basketball', label: 'Basketball' },
+                    { value: 'volleyball', label: 'Volleyball' },
+                    { value: 'tennis', label: 'Tennis' },
+                    { value: 'soccer', label: 'Soccer' },
+                    { value: 'futsal', label: 'Futsal' },
+                    { value: 'table-tennis', label: 'Table Tennis' },
+                  ]}
+                />
+                <Select
+                  label="Skill Level"
+                  value={skillFilter}
+                  onChange={(e) => setSkillFilter(e.target.value)}
+                  fullWidth
+                  options={[
+                    { value: 'all', label: 'All Levels' },
+                    { value: 'beginner', label: 'Beginner' },
+                    { value: 'intermediate', label: 'Intermediate' },
+                    { value: 'advanced', label: 'Advanced' },
+                  ]}
+                />
+              </div>
+
+              {/* Date Range Filter */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    From Date
+                  </label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[44px] w-full"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    To Date
+                  </label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    min={startDate || new Date().toISOString().split('T')[0]}
+                    className="px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[44px] w-full"
+                  />
+                </div>
+              </div>
+
+              {/* Clear Filters Button */}
+              {(sportFilter !== 'all' || skillFilter !== 'all' || startDate || endDate) && (
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearFilters}
+                  >
+                    Clear All Filters
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>
