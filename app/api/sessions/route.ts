@@ -119,6 +119,14 @@ export async function POST(request: Request) {
       },
     });
 
+    // Auto-join creator as first participant
+    await prisma.userSession.create({
+      data: {
+        user_id: user.id,
+        session_id: session.id,
+      },
+    });
+
     return NextResponse.json(session, { status: 201 });
   } catch (error) {
     console.error('Error creating session:', error);

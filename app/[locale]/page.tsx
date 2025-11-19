@@ -1,74 +1,45 @@
 import Link from 'next/link';
 import Button from '@/app/components/ui/Button';
 import SessionCard from '@/app/components/SessionCard';
-import { Session } from '@/types';
+import { prisma } from '@/lib/prisma';
 import { Search, Users, Calendar, MapPin } from 'lucide-react';
 
-// Mock data for demo
-const mockSessions: Session[] = [
-  {
-    id: '1',
-    sport_center_id: '1',
-    sport_type: 'badminton',
-    skill_level: 'intermediate',
-    date_time: new Date(Date.now() + 86400000).toISOString(),
-    duration_minutes: 120,
-    max_participants: 8,
-    current_participants: 5,
-    description_en: 'Fun badminton session for intermediate players',
-    created_by: 'user1',
-    created_at: new Date().toISOString(),
-    sport_center: {
-      id: '1',
-      name_en: 'Tokyo Sport Center',
-      name_ja: '東京スポーツセンター',
-      address_en: 'Shibuya, Tokyo',
-      address_ja: '東京都渋谷区',
-    },
-  },
-  {
-    id: '2',
-    sport_center_id: '2',
-    sport_type: 'basketball',
-    skill_level: 'beginner',
-    date_time: new Date(Date.now() + 172800000).toISOString(),
-    duration_minutes: 90,
-    max_participants: 10,
-    current_participants: 3,
-    description_en: 'Casual basketball game for beginners',
-    created_by: 'user2',
-    created_at: new Date().toISOString(),
-    sport_center: {
-      id: '2',
-      name_en: 'Shinjuku Sports Plaza',
-      name_ja: '新宿スポーツプラザ',
-      address_en: 'Shinjuku, Tokyo',
-      address_ja: '東京都新宿区',
-    },
-  },
-  {
-    id: '3',
-    sport_center_id: '3',
-    sport_type: 'tennis',
-    skill_level: 'advanced',
-    date_time: new Date(Date.now() + 259200000).toISOString(),
-    duration_minutes: 120,
-    max_participants: 4,
-    current_participants: 4,
-    description_en: 'Advanced tennis doubles match',
-    created_by: 'user3',
-    created_at: new Date().toISOString(),
-    sport_center: {
-      id: '3',
-      name_en: 'Roppongi Tennis Club',
-      name_ja: '六本木テニスクラブ',
-      address_en: 'Roppongi, Tokyo',
-      address_ja: '東京都港区六本木',
-    },
-  },
-];
+// Fetch upcoming sessions from database
+async function getUpcomingSessions() {
+  try {
+    const sessions = await prisma.session.findMany({
+      where: {
+        date_time: {
+          gte: new Date(),
+        },
+      },
+      include: {
+        sport_center: true,
+        _count: {
+          select: { user_sessions: true },
+        },
+      },
+      orderBy: {
+        date_time: 'asc',
+      },
+      take: 3, // Show 3 featured sessions
+    });
 
-export default function Home() {
+    // Map to include current_participants
+    return sessions.map((session: any) => ({
+      ...session,
+      current_participants: session._count.user_sessions,
+      _count: undefined,
+    }));
+  } catch (error) {
+    console.error('Error fetching sessions:', error);
+    return [];
+  }
+}
+
+export default async function Home() {
+  const sessions = await getUpcomingSessions();
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -144,11 +115,23 @@ export default function Home() {
               <Button variant="outline">View All</Button>
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockSessions.map((session) => (
-              <SessionCard key={session.id} session={session} />
-            ))}
-          </div>
+          {sessions.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {sessions.map((session: any) => (
+                <SessionCard key={session.id} session={session} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+              <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg mb-4">
+                No upcoming sessions available
+              </p>
+              <Link href="/sessions/create">
+                <Button variant="primary">Create First Session</Button>
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
