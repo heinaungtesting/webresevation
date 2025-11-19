@@ -6,8 +6,9 @@ import { useTranslations } from 'next-intl';
 import Button from '../ui/Button';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { LogOut, User, Settings, UserCircle, Shield, X, Menu, Heart } from 'lucide-react';
+import { LogOut, User, Settings, UserCircle, Shield, X, Menu, Heart, Bell } from 'lucide-react';
 import LanguageSwitcher from '../LanguageSwitcher';
+import NotificationBell from '../notifications/NotificationBell';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -86,7 +87,9 @@ export default function Navigation() {
             <div className="flex items-center space-x-3">
               <LanguageSwitcher />
               {user ? (
-                <div className="relative" ref={userMenuRef}>
+                <>
+                  <NotificationBell />
+                  <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors min-h-[44px]"
@@ -151,6 +154,7 @@ export default function Navigation() {
                     </div>
                   )}
                 </div>
+                </>
               ) : (
                 <>
                   <Link href="/login">
@@ -262,6 +266,14 @@ export default function Navigation() {
                   >
                     <Heart className="w-5 h-5" />
                     Favorites
+                  </Link>
+                  <Link
+                    href="/notifications"
+                    className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Bell className="w-5 h-5" />
+                    Notifications
                   </Link>
                   <Link
                     href="/settings"

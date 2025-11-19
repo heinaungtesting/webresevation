@@ -39,6 +39,7 @@ model User {
   conversation_participants ConversationParticipant[]
   favorites            Favorite[]
   reviews              Review[]
+  notifications        Notification[]
 
   @@index([email])
   @@index([phone_number])
@@ -201,4 +202,23 @@ model Review {
   @@index([user_id])
   @@index([session_id])
   @@index([rating])
+}
+
+// Notification model
+model Notification {
+  id          String   @id @default(uuid())
+  user_id     String
+  type        String   // 'session_reminder', 'new_message', 'session_update', 'new_review', etc.
+  title       String
+  message     String
+  link        String?  // URL to navigate to when clicked
+  read        Boolean  @default(false)
+  created_at  DateTime @default(now())
+
+  // Relations
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([read])
+  @@index([created_at])
 }
