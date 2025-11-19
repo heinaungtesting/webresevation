@@ -32,12 +32,12 @@ export default function SessionCard({ session }: SessionCardProps) {
   const isFull = Boolean(session.max_participants && session.current_participants >= session.max_participants);
 
   return (
-    <Card hoverable variant="elevated" className="h-full flex flex-col transition-all duration-200 hover:shadow-lg active:scale-[0.98]">
+    <Card hoverable variant="elevated" className="h-full flex flex-col transition-all duration-200 hover:shadow-lg active:scale-[0.98] touch-manipulation">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <span className="text-4xl sm:text-3xl">{sportIcon}</span>
+          <span className="text-3xl sm:text-4xl">{sportIcon}</span>
           <div>
-            <h3 className="font-semibold text-lg sm:text-base capitalize">
+            <h3 className="font-semibold text-base sm:text-lg capitalize">
               {session.sport_type.replace('-', ' ')}
             </h3>
             <Badge variant={skillColors[session.skill_level]} size="sm">

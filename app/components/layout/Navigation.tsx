@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import Button from '../ui/Button';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { LogOut, User, Settings, UserCircle, Shield } from 'lucide-react';
+import { LogOut, User, Settings, UserCircle, Shield, X, Menu } from 'lucide-react';
 import LanguageSwitcher from '../LanguageSwitcher';
 
 export default function Navigation() {
@@ -15,10 +15,37 @@ export default function Navigation() {
   const { user, signOut } = useAuth();
   const router = useRouter();
   const t = useTranslations('nav');
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
 
   const handleSignOut = async () => {
     await signOut();
     setShowUserMenu(false);
+    setIsMenuOpen(false);
     router.push('/');
     router.refresh();
   };
@@ -56,16 +83,16 @@ export default function Navigation() {
             <div className="flex items-center space-x-3">
               <LanguageSwitcher />
               {user ? (
-                <div className="relative">
+                <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors min-h-[44px]"
                   >
-                    <User className="w-4 h-4" />
-                    <span className="text-sm">{user.email}</span>
+                    <User className="w-5 h-5" />
+                    <span className="text-sm max-w-[150px] truncate">{user.email}</span>
                   </button>
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                       <Link
                         href="/profile"
                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -121,47 +148,35 @@ export default function Navigation() {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 active:bg-gray-200 min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors"
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
+            {isMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
 
         {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
-            <div className="flex flex-col space-y-3">
+          <div
+            ref={mobileMenuRef}
+            className="md:hidden fixed inset-x-0 top-[65px] bottom-0 bg-white z-50 overflow-y-auto animate-in slide-in-from-top duration-200"
+          >
+            <div className="flex flex-col p-4 space-y-1">
+              {/* Navigation Links */}
               <Link
                 href="/"
-                className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {t('home')}
               </Link>
               <Link
                 href="/sessions"
-                className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {t('sessions')}
@@ -170,43 +185,78 @@ export default function Navigation() {
                 <>
                   <Link
                     href="/my-sessions"
-                    className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                    className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {t('mySessions')}
                   </Link>
                   <Link
                     href="/messages"
-                    className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                    className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {t('messages')}
                   </Link>
                 </>
               )}
-              <div className="flex flex-col space-y-2 pt-2 border-t">
-                <div className="px-3">
-                  <LanguageSwitcher />
-                </div>
-                {user ? (
-                  <>
-                    <div className="px-3 py-2 text-sm text-gray-600">
-                      {user.email}
-                    </div>
+
+              <div className="my-2 border-t border-gray-200" />
+
+              {/* User Section */}
+              {user ? (
+                <>
+                  <div className="px-4 py-2 text-sm text-gray-500 font-medium">
+                    {user.email}
+                  </div>
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <UserCircle className="w-5 h-5" />
+                    {t('profile')}
+                  </Link>
+                  <Link
+                    href="/settings"
+                    className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Settings className="w-5 h-5" />
+                    {t('settings')}
+                  </Link>
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Shield className="w-5 h-5" />
+                    Admin
+                  </Link>
+
+                  <div className="my-2 border-t border-gray-200" />
+
+                  <div className="px-4 py-2">
+                    <LanguageSwitcher />
+                  </div>
+
+                  <div className="px-4 pt-2">
                     <Button
                       variant="outline"
                       fullWidth
-                      onClick={() => {
-                        handleSignOut();
-                        setIsMenuOpen(false);
-                      }}
+                      onClick={handleSignOut}
+                      className="justify-center"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       {t('signOut')}
                     </Button>
-                  </>
-                ) : (
-                  <>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="px-4 py-2">
+                    <LanguageSwitcher />
+                  </div>
+                  <div className="px-4 pt-2 space-y-2">
                     <Link href="/login" onClick={() => setIsMenuOpen(false)}>
                       <Button variant="outline" fullWidth>
                         {t('login')}
@@ -217,9 +267,9 @@ export default function Navigation() {
                         {t('signUp')}
                       </Button>
                     </Link>
-                  </>
-                )}
-              </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
