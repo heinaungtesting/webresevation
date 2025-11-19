@@ -9,15 +9,18 @@ import Input from '@/app/components/ui/Input';
 import Card from '@/app/components/ui/Card';
 import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
+import AvatarUpload from '@/app/components/profile/AvatarUpload';
 
 export default function ProfileEditPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     username: '',
@@ -49,6 +52,7 @@ export default function ProfileEditPage() {
       if (!response.ok) throw new Error('Failed to fetch profile');
       const data = await response.json();
       setProfile(data);
+      setAvatarUrl(data.avatar_url || null);
       setFormData({
         username: data.username || '',
         display_name: data.display_name || '',
@@ -164,6 +168,22 @@ export default function ProfileEditPage() {
                 Profile updated successfully! Redirecting...
               </div>
             )}
+
+            {/* Avatar Upload */}
+            <div className="flex justify-center pb-4 border-b border-gray-200">
+              <AvatarUpload
+                currentAvatarUrl={avatarUrl}
+                displayName={formData.display_name || formData.username || profile?.email?.split('@')[0] || 'User'}
+                onUploadComplete={(url) => {
+                  setAvatarUrl(url);
+                  refreshProfile();
+                }}
+                onDelete={() => {
+                  setAvatarUrl(null);
+                  refreshProfile();
+                }}
+              />
+            </div>
 
             <Input
               label="Username"
