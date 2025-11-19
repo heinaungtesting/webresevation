@@ -212,7 +212,9 @@ export default function NotificationsPage() {
         </div>
 
         {error && (
-          <ErrorMessage title="Error" message={error} className="mb-6" />
+          <div className="mb-6">
+            <ErrorMessage title="Error" message={error} />
+          </div>
         )}
 
         {/* Notifications List */}
