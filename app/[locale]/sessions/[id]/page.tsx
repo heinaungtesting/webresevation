@@ -9,6 +9,8 @@ import Badge from '@/app/components/ui/Badge';
 import { Session } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { MapPin, Clock, Users, Info, ArrowLeft, Loader2 } from 'lucide-react';
+import ReviewSection from '@/app/components/sessions/ReviewSection';
+import FavoriteButton from '@/app/components/sessions/FavoriteButton';
 
 export default function SessionDetailPage() {
   const params = useParams();
@@ -27,35 +29,20 @@ export default function SessionDetailPage() {
   const fetchSession = async () => {
     try {
       setLoading(true);
-      // For now, we'll use mock data since we don't have sessions in the database yet
-      // In production, this would be: const response = await fetch(`/api/sessions/${params.id}`);
+      const response = await fetch(`/api/sessions/${params.id}`);
 
-      // Mock data
-      const mockSession: Session = {
-        id: params.id as string,
-        sport_center_id: '1',
-        sport_type: 'badminton',
-        skill_level: 'intermediate',
-        date_time: new Date(Date.now() + 86400000).toISOString(),
-        duration_minutes: 120,
-        max_participants: 8,
-        current_participants: 5,
-        description_en: 'Fun badminton session for intermediate players. Bring your own racket and shuttlecock. We will have casual doubles games. All skill levels welcome!',
-        created_by: 'user1',
-        created_at: new Date().toISOString(),
-        sport_center: {
-          id: '1',
-          name_en: 'Tokyo Sport Center',
-          name_ja: '東京スポーツセンター',
-          address_en: '1-2-3 Shibuya, Tokyo',
-          address_ja: '東京都渋谷区1-2-3',
-          station_en: 'Shibuya Station',
-          station_ja: '渋谷駅',
-        },
-      };
+      if (!response.ok) {
+        throw new Error('Session not found');
+      }
 
-      setSession(mockSession);
-      // TODO: Check if user is already attending
+      const data = await response.json();
+      setSession(data);
+
+      // Check if user is attending
+      if (user && data.participants) {
+        const isUserAttending = data.participants.some((p: any) => p.id === user.id);
+        setIsAttending(isUserAttending);
+      }
     } catch (err) {
       setError('Failed to load session');
       console.error(err);
@@ -179,6 +166,7 @@ export default function SessionDetailPage() {
                     {isFull && <Badge variant="danger">Full</Badge>}
                   </div>
                 </div>
+                <FavoriteButton sessionId={session.id} size="lg" />
               </div>
 
               <div className="space-y-4">
@@ -238,16 +226,44 @@ export default function SessionDetailPage() {
                 Who's Going ({session.current_participants})
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {[...Array(session.current_participants)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                    <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-semibold">
-                      {String.fromCharCode(65 + i)}
+                {session.participants && session.participants.length > 0 ? (
+                  session.participants.map((participant: any) => (
+                    <div key={participant.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                      {participant.avatar_url ? (
+                        <img
+                          src={participant.avatar_url}
+                          alt={participant.display_name || participant.username || 'Player'}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-semibold">
+                          {(participant.display_name || participant.username || 'P').charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <span className="text-sm truncate">
+                        {participant.display_name || participant.username || 'Player'}
+                      </span>
                     </div>
-                    <span className="text-sm">Player {i + 1}</span>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  [...Array(session.current_participants)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                      <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-semibold">
+                        {String.fromCharCode(65 + i)}
+                      </div>
+                      <span className="text-sm">Player {i + 1}</span>
+                    </div>
+                  ))
+                )}
               </div>
             </Card>
+
+            {/* Reviews Section */}
+            <ReviewSection
+              sessionId={session.id}
+              sessionDate={session.date_time}
+              hasAttended={isAttending}
+            />
           </div>
 
           {/* Right Column - Action Card */}

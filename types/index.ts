@@ -16,10 +16,20 @@ export interface User {
   id: string;
   email: string;
   username?: string;
+  display_name?: string;
+  avatar_url?: string;
   language_preference: Language;
   email_verified: boolean;
   phone_verified: boolean;
   created_at: string;
+}
+
+export interface Participant {
+  id: string;
+  username?: string;
+  display_name?: string;
+  avatar_url?: string;
+  email?: string;
 }
 
 export interface SportCenter {
@@ -49,6 +59,7 @@ export interface Session {
   created_by: string;
   created_at: string;
   sport_center?: SportCenter;
+  participants?: Participant[];
 }
 
 export interface UserSession {

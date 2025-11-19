@@ -37,6 +37,9 @@ model User {
   user_sessions        UserSession[]
   sent_messages        Message[]      @relation("MessageSender")
   conversation_participants ConversationParticipant[]
+  favorites            Favorite[]
+  reviews              Review[]
+  notifications        Notification[]
 
   @@index([email])
   @@index([phone_number])
@@ -85,6 +88,8 @@ model Session {
   creator               User          @relation("SessionCreator", fields: [created_by], references: [id], onDelete: Cascade)
   user_sessions         UserSession[]
   conversation          Conversation? @relation("SessionConversation")
+  favorites             Favorite[]
+  reviews               Review[]
 
   @@index([sport_type])
   @@index([skill_level])
@@ -160,5 +165,60 @@ model Message {
 
   @@index([conversation_id])
   @@index([sender_id])
+  @@index([created_at])
+}
+
+// Favorite model (bookmarked sessions)
+model Favorite {
+  id          String   @id @default(uuid())
+  user_id     String
+  session_id  String
+  created_at  DateTime @default(now())
+
+  // Relations
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  session     Session  @relation(fields: [session_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, session_id])
+  @@index([user_id])
+  @@index([session_id])
+}
+
+// Review model (session feedback)
+model Review {
+  id          String   @id @default(uuid())
+  user_id     String
+  session_id  String
+  rating      Int      // 1-5 stars
+  comment     String?  @db.Text
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  // Relations
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  session     Session  @relation(fields: [session_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, session_id])
+  @@index([user_id])
+  @@index([session_id])
+  @@index([rating])
+}
+
+// Notification model
+model Notification {
+  id          String   @id @default(uuid())
+  user_id     String
+  type        String   // 'session_reminder', 'new_message', 'session_update', 'new_review', etc.
+  title       String
+  message     String
+  link        String?  // URL to navigate to when clicked
+  read        Boolean  @default(false)
+  created_at  DateTime @default(now())
+
+  // Relations
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([read])
   @@index([created_at])
 }

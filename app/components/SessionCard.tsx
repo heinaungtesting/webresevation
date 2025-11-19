@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { Session, SportType, SkillLevel } from '@/types';
 import Badge from './ui/Badge';
 import Button from './ui/Button';
-import { formatDate } from '@/lib/utils';
+import FavoriteButton from './sessions/FavoriteButton';
+import { formatDate, formatTime } from '@/lib/utils';
 import { Users, Clock, MapPin, ArrowRight } from 'lucide-react';
 
 interface SessionCardProps {
@@ -55,11 +56,14 @@ export default function SessionCard({ session }: SessionCardProps) {
               </Badge>
             </div>
           </div>
-          {isFull && (
-            <Badge variant="danger" size="sm" className="animate-pulse">
-              Full
-            </Badge>
-          )}
+          <div className="flex items-center gap-1">
+            {isFull && (
+              <Badge variant="danger" size="sm" className="animate-pulse">
+                Full
+              </Badge>
+            )}
+            <FavoriteButton sessionId={session.id} size="sm" />
+          </div>
         </div>
 
         {/* Session details */}

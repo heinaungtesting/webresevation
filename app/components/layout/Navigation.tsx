@@ -1,21 +1,51 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import Button from '../ui/Button';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { LogOut, Settings, UserCircle, Shield, Menu, X, ChevronDown } from 'lucide-react';
+import { LogOut, User, Settings, UserCircle, Shield, Menu, X, ChevronDown, Heart, Bell } from 'lucide-react';
 import LanguageSwitcher from '../LanguageSwitcher';
+import NotificationBell from '../notifications/NotificationBell';
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const router = useRouter();
   const t = useTranslations('nav');
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Get display name for avatar fallback
+  const displayName = profile?.display_name || profile?.username || user?.email?.split('@')[0] || 'U';
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
 
   // Handle scroll effect
   useEffect(() => {
@@ -29,20 +59,10 @@ export default function Navigation() {
   const handleSignOut = async () => {
     await signOut();
     setShowUserMenu(false);
+    setIsMenuOpen(false);
     router.push('/');
     router.refresh();
   };
-
-  // Close menus when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (showUserMenu && !(e.target as Element).closest('.user-menu-container')) {
-        setShowUserMenu(false);
-      }
-    };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [showUserMenu]);
 
   return (
     <nav
@@ -103,94 +123,111 @@ export default function Navigation() {
                 </Link>
               </>
             )}
-          </div>
+            <div className="flex items-center space-x-3">
+              <LanguageSwitcher />
+              {user ? (
+                <>
+                  <NotificationBell />
+                  <div className="relative" ref={userMenuRef}>
+                    <button
+                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100 transition-all duration-200 group"
+                    >
+                      {profile?.avatar_url ? (
+                        <img
+                          src={profile.avatar_url}
+                          alt={displayName}
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center text-white text-sm font-medium">
+                          {displayName.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <span className="text-sm font-medium text-slate-700 max-w-[120px] truncate hidden lg:block">
+                        {displayName}
+                      </span>
+                      <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} />
+                    </button>
 
-          {/* Desktop Right Section */}
-          <div className="hidden md:flex items-center gap-3">
-            <LanguageSwitcher />
-            {user ? (
-              <div className="relative user-menu-container">
-                <button
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100 transition-all duration-200 group"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center text-white text-sm font-medium">
-                    {user.email?.[0]?.toUpperCase() || 'U'}
+                    {/* User dropdown menu */}
+                    {showUserMenu && (
+                      <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white shadow-large border border-slate-100 py-2 animate-scaleIn origin-top-right z-50">
+                        <div className="px-4 py-2 border-b border-slate-100">
+                          <p className="text-sm font-medium text-slate-900 truncate">{displayName}</p>
+                          <p className="text-xs text-slate-500">Manage your account</p>
+                        </div>
+
+                        <div className="py-1">
+                          <Link
+                            href="/profile"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <UserCircle className="w-4 h-4 text-slate-400" />
+                            {t('profile')}
+                          </Link>
+                          <Link
+                            href="/favorites"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <Heart className="w-4 h-4 text-slate-400" />
+                            Favorites
+                          </Link>
+                          <Link
+                            href="/settings"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <Settings className="w-4 h-4 text-slate-400" />
+                            {t('settings')}
+                          </Link>
+                          <Link
+                            href="/admin"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <Shield className="w-4 h-4 text-slate-400" />
+                            Admin
+                          </Link>
+                        </div>
+
+                        <div className="border-t border-slate-100 pt-1">
+                          <button
+                            onClick={handleSignOut}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            {t('signOut')}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <span className="text-sm font-medium text-slate-700 max-w-[120px] truncate">
-                    {user.email?.split('@')[0]}
-                  </span>
-                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} />
-                </button>
-
-                {/* User dropdown menu */}
-                {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white shadow-large border border-slate-100 py-2 animate-scaleIn origin-top-right">
-                    <div className="px-4 py-2 border-b border-slate-100">
-                      <p className="text-sm font-medium text-slate-900 truncate">{user.email}</p>
-                      <p className="text-xs text-slate-500">Manage your account</p>
-                    </div>
-
-                    <div className="py-1">
-                      <Link
-                        href="/profile"
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        <UserCircle className="w-4 h-4 text-slate-400" />
-                        {t('profile')}
-                      </Link>
-                      <Link
-                        href="/settings"
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        <Settings className="w-4 h-4 text-slate-400" />
-                        {t('settings')}
-                      </Link>
-                      <Link
-                        href="/admin"
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        <Shield className="w-4 h-4 text-slate-400" />
-                        Admin
-                      </Link>
-                    </div>
-
-                    <div className="border-t border-slate-100 pt-1">
-                      <button
-                        onClick={handleSignOut}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        {t('signOut')}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link href="/login">
-                  <Button variant="ghost" size="sm">
-                    {t('login')}
-                  </Button>
-                </Link>
-                <Link href="/signup">
-                  <Button variant="gradient" size="sm">
-                    {t('signUp')}
-                  </Button>
-                </Link>
-              </div>
-            )}
+                </>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button variant="ghost" size="sm">
+                      {t('login')}
+                    </Button>
+                  </Link>
+                  <Link href="/signup">
+                    <Button variant="gradient" size="sm">
+                      {t('signUp')}
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-xl hover:bg-slate-100 transition-colors"
-            aria-label="Toggle menu"
+            className="md:hidden p-2 rounded-xl hover:bg-slate-100 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {isMenuOpen ? (
               <X className="w-6 h-6 text-slate-700" />
@@ -202,18 +239,22 @@ export default function Navigation() {
 
         {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="md:hidden mt-4 py-4 border-t border-slate-200 animate-fadeInDown">
-            <div className="flex flex-col gap-1">
+          <div
+            ref={mobileMenuRef}
+            className="md:hidden fixed inset-x-0 top-[65px] bottom-0 bg-white z-50 overflow-y-auto animate-in slide-in-from-top duration-200"
+          >
+            <div className="flex flex-col p-4 space-y-1">
+              {/* Navigation Links */}
               <Link
                 href="/"
-                className="px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl font-medium transition-colors"
+                className="flex items-center px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl font-medium transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {t('home')}
               </Link>
               <Link
                 href="/sessions"
-                className="px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl font-medium transition-colors"
+                className="flex items-center px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl font-medium transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {t('sessions')}
@@ -222,14 +263,14 @@ export default function Navigation() {
                 <>
                   <Link
                     href="/my-sessions"
-                    className="px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl font-medium transition-colors"
+                    className="flex items-center px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl font-medium transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {t('mySessions')}
                   </Link>
                   <Link
                     href="/messages"
-                    className="px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl font-medium transition-colors"
+                    className="flex items-center px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl font-medium transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {t('messages')}
@@ -237,58 +278,93 @@ export default function Navigation() {
                 </>
               )}
 
-              <div className="border-t border-slate-200 mt-3 pt-3">
-                <div className="px-4 py-2">
-                  <LanguageSwitcher />
-                </div>
+              <div className="my-2 border-t border-slate-200" />
 
-                {user ? (
-                  <div className="mt-2 space-y-2">
-                    <div className="px-4 py-2 flex items-center gap-3">
+              {/* User Section */}
+              {user ? (
+                <>
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    {profile?.avatar_url ? (
+                      <img
+                        src={profile.avatar_url}
+                        alt={displayName}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
                       <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-medium">
-                        {user.email?.[0]?.toUpperCase() || 'U'}
+                        {displayName.charAt(0).toUpperCase()}
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-slate-900">
-                          {user.email?.split('@')[0]}
-                        </p>
-                        <p className="text-xs text-slate-500 truncate max-w-[200px]">
-                          {user.email}
-                        </p>
-                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900 truncate">{displayName}</p>
+                      <p className="text-xs text-slate-500 truncate">{user.email}</p>
                     </div>
+                  </div>
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <UserCircle className="w-5 h-5 text-slate-400" />
+                    {t('profile')}
+                  </Link>
+                  <Link
+                    href="/favorites"
+                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Heart className="w-5 h-5 text-slate-400" />
+                    Favorites
+                  </Link>
+                  <Link
+                    href="/notifications"
+                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Bell className="w-5 h-5 text-slate-400" />
+                    Notifications
+                  </Link>
+                  <Link
+                    href="/settings"
+                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Settings className="w-5 h-5 text-slate-400" />
+                    {t('settings')}
+                  </Link>
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Shield className="w-5 h-5 text-slate-400" />
+                    Admin
+                  </Link>
 
-                    <Link
-                      href="/profile"
-                      className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <UserCircle className="w-5 h-5 text-slate-400" />
-                      {t('profile')}
-                    </Link>
+                  <div className="my-2 border-t border-slate-200" />
 
-                    <Link
-                      href="/settings"
-                      className="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <Settings className="w-5 h-5 text-slate-400" />
-                      {t('settings')}
-                    </Link>
+                  <div className="px-4 py-2">
+                    <LanguageSwitcher />
+                  </div>
 
-                    <button
-                      onClick={() => {
-                        handleSignOut();
-                        setIsMenuOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                  <div className="px-4 pt-2">
+                    <Button
+                      variant="outline"
+                      fullWidth
+                      onClick={handleSignOut}
+                      className="justify-center"
                     >
                       <LogOut className="w-5 h-5" />
                       {t('signOut')}
-                    </button>
+                    </Button>
                   </div>
-                ) : (
-                  <div className="mt-3 space-y-2 px-4">
+                </>
+              ) : (
+                <>
+                  <div className="px-4 py-2">
+                    <LanguageSwitcher />
+                  </div>
+                  <div className="px-4 pt-2 space-y-2">
                     <Link href="/login" onClick={() => setIsMenuOpen(false)}>
                       <Button variant="outline" fullWidth>
                         {t('login')}
@@ -300,8 +376,8 @@ export default function Navigation() {
                       </Button>
                     </Link>
                   </div>
-                )}
-              </div>
+                </>
+              )}
             </div>
           </div>
         )}

@@ -11,11 +11,30 @@ export async function GET(request: Request) {
     const sportType = searchParams.get('sport_type');
     const skillLevel = searchParams.get('skill_level');
     const search = searchParams.get('search');
+    const startDate = searchParams.get('start_date');
+    const endDate = searchParams.get('end_date');
+
+    // Build date filter
+    const dateFilter: any = {
+      gte: new Date(), // Default: Only future sessions
+    };
+
+    // If start date is provided, use it (but ensure it's not in the past)
+    if (startDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      dateFilter.gte = start > new Date() ? start : new Date();
+    }
+
+    // If end date is provided, set the upper bound
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      dateFilter.lte = end;
+    }
 
     const where: any = {
-      date_time: {
-        gte: new Date(), // Only future sessions
-      },
+      date_time: dateFilter,
     };
 
     if (sportType && sportType !== 'all') {
@@ -102,24 +121,46 @@ export async function POST(request: Request) {
       );
     }
 
-    const session = await prisma.session.create({
-      data: {
-        sport_center_id,
-        sport_type,
-        skill_level,
-        date_time: new Date(date_time),
-        duration_minutes: parseInt(duration_minutes),
-        max_participants: max_participants ? parseInt(max_participants) : null,
-        description_en,
-        description_ja,
-        created_by: user.id,
-      },
-      include: {
-        sport_center: true,
-      },
+    // Use transaction to create session and auto-join creator
+    const session = await prisma.$transaction(async (tx: any) => {
+      const newSession = await tx.session.create({
+        data: {
+          sport_center_id,
+          sport_type,
+          skill_level,
+          date_time: new Date(date_time),
+          duration_minutes: parseInt(duration_minutes),
+          max_participants: max_participants ? parseInt(max_participants) : null,
+          description_en,
+          description_ja,
+          created_by: user.id,
+        },
+      });
+
+      // Auto-join creator as first participant
+      await tx.userSession.create({
+        data: {
+          user_id: user.id,
+          session_id: newSession.id,
+        },
+      });
+
+      // Return session with sport_center and participant count
+      return tx.session.findUnique({
+        where: { id: newSession.id },
+        include: {
+          sport_center: true,
+          _count: {
+            select: { user_sessions: true },
+          },
+        },
+      });
     });
 
-    return NextResponse.json(session, { status: 201 });
+    return NextResponse.json({
+      ...session,
+      current_participants: session?._count?.user_sessions || 1,
+    }, { status: 201 });
   } catch (error) {
     console.error('Error creating session:', error);
     return NextResponse.json(

@@ -189,6 +189,11 @@ body {
   overscroll-behavior-y: none;
   line-height: 1.6;
   letter-spacing: var(--tracking-normal);
+  /* Safe area insets for notched phones */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 /* Typography Base */
@@ -341,6 +346,17 @@ button {
   50% { transform: scale(1.05); }
 }
 
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ===========================================
    UTILITY CLASSES
    =========================================== */
@@ -479,6 +495,26 @@ button {
 
   .animate-heartbeat {
     animation: heartbeat 1.5s ease-in-out infinite;
+  }
+
+  .animate-in {
+    animation-fill-mode: both;
+  }
+
+  .fade-in {
+    animation-name: fadeIn;
+  }
+
+  .slide-in-from-top {
+    animation-name: slideInFromTop;
+  }
+
+  .slide-in-from-top-2 {
+    animation-name: slideInFromTop;
+  }
+
+  .duration-200 {
+    animation-duration: 200ms;
   }
 
   /* Animation Delays */
@@ -658,7 +694,22 @@ button {
     touch-action: manipulation;
   }
 
-  /* Scrollbar Styling */
+  /* Bottom safe area for fixed bottom elements */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom scrollbar for webkit browsers */
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
     height: 6px;
