@@ -6,7 +6,7 @@ import { Session } from '@/types';
 import SessionCard from '@/app/components/SessionCard';
 import CompactSessionCard from '@/app/components/CompactSessionCard';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { Bell, Plus, ChevronRight, Sparkles, Calendar, MapPin, Zap } from 'lucide-react';
+import { Bell, Plus, ChevronRight, Sparkles, Calendar, MapPin, Zap, Map, List } from 'lucide-react';
 import Button from '@/app/components/ui/Button';
 
 interface HomeFeedProps {
@@ -15,6 +15,7 @@ interface HomeFeedProps {
 }
 
 type FilterType = 'all' | 'badminton' | 'tennis' | 'basketball' | 'soccer' | 'today' | 'weekend';
+type ViewMode = 'list' | 'map';
 
 const sportFilters: { id: FilterType; label: string; icon?: string }[] = [
   { id: 'all', label: 'All' },
@@ -59,6 +60,7 @@ function isThisWeekend(date: Date): boolean {
 export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
   const { user, profile } = useAuth();
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
 
   const displayName = profile?.display_name || profile?.username || user?.email?.split('@')[0] || 'there';
   const greeting = getGreeting();
@@ -86,7 +88,7 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
   return (
     <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-40 glass-strong border-b border-white/20">
+      <header className="sticky top-0 z-40 glass-strong border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
@@ -117,8 +119,8 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
         </div>
       </header>
 
-      {/* Quick Filters */}
-      <div className="sticky top-[73px] z-30 bg-white/80 backdrop-blur-sm border-b border-slate-100">
+      {/* Sticky Quick Filters with Glass Effect */}
+      <div className="sticky top-[73px] z-30 glass-strong border-b border-white/10">
         <div className="max-w-7xl mx-auto">
           <div className="flex gap-2 px-4 py-3 overflow-x-auto scrollbar-hide">
             {sportFilters.map((filter) => (
@@ -129,8 +131,8 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
                   flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium
                   whitespace-nowrap transition-all duration-200
                   ${activeFilter === filter.id
-                    ? 'bg-primary-600 text-white shadow-colored'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:border-primary-300 hover:text-primary-600'
+                    ? 'bg-slate-900 text-white shadow-lg'
+                    : 'bg-white text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:text-slate-900'
                   }
                 `}
               >
@@ -227,7 +229,7 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
               {/* Explore Card */}
               <Link
                 href="/sessions"
-                className="p-6 rounded-2xl bg-white border border-slate-200 hover:border-primary-300 hover:shadow-soft transition-all duration-300 group"
+                className="p-6 rounded-2xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 group"
               >
                 <div className="p-3 rounded-xl bg-slate-100 w-fit mb-4 group-hover:bg-primary-100 transition-colors">
                   <MapPin className="w-5 h-5 text-slate-600 group-hover:text-primary-600 transition-colors" />
@@ -239,7 +241,7 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
               </Link>
 
               {/* Calendar Card */}
-              <div className="p-6 rounded-2xl bg-white border border-slate-200">
+              <div className="p-6 rounded-2xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                 <div className="p-3 rounded-xl bg-slate-100 w-fit mb-4">
                   <Calendar className="w-5 h-5 text-slate-600" />
                 </div>
@@ -253,7 +255,7 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
               </div>
 
               {/* Quick Tip Card */}
-              <div className="col-span-2 md:col-span-1 p-6 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200">
+              <div className="col-span-2 md:col-span-1 p-6 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                 <div className="flex items-start gap-3">
                   <div className="p-2 rounded-lg bg-amber-100">
                     <Sparkles className="w-4 h-4 text-amber-600" />
@@ -270,6 +272,31 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
           )}
         </section>
       </main>
+
+      {/* Map/List Toggle FAB */}
+      <button
+        onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
+        className="
+          fixed bottom-28 left-1/2 -translate-x-1/2 z-40 md:hidden
+          flex items-center gap-2 px-5 py-3 rounded-full
+          bg-slate-900 text-white
+          shadow-[0_8px_30px_rgb(0,0,0,0.3)]
+          hover:bg-slate-800 active:scale-95
+          transition-all duration-200
+        "
+      >
+        {viewMode === 'list' ? (
+          <>
+            <Map className="w-4 h-4" />
+            <span className="text-sm font-medium">Map</span>
+          </>
+        ) : (
+          <>
+            <List className="w-4 h-4" />
+            <span className="text-sm font-medium">List</span>
+          </>
+        )}
+      </button>
     </div>
   );
 }

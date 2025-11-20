@@ -49,19 +49,21 @@ export default function CompactSessionCard({ session, variant = 'horizontal' }: 
 
   return (
     <Link href={`/sessions/${session.id}`}>
-      <div className="group relative h-full flex flex-col p-4 rounded-xl bg-white border border-slate-100 shadow-soft hover:shadow-medium hover:-translate-y-0.5 transition-all duration-200">
+      <div className="group relative h-full flex flex-col p-4 rounded-2xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-200">
         {/* Header */}
         <div className="flex items-center gap-3 mb-3">
-          <div className={`flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br ${sport.gradient} text-lg shadow-sm`}>
+          <div className={`flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br ${sport.gradient} text-lg shadow-sm`}>
             {sport.icon}
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-sm text-slate-900 capitalize truncate">
               {session.sport_type.replace('-', ' ')}
             </h3>
-            <div className="flex items-center gap-1 text-xs text-slate-500">
-              <Clock className="w-3 h-3" />
-              <span className={diffMins < 60 ? 'text-accent-rose font-medium' : ''}>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <Clock className="w-3 h-3 text-slate-400" />
+              <span className={`text-[10px] font-medium uppercase tracking-wider ${
+                diffMins < 60 ? 'text-accent-rose' : 'text-slate-500'
+              }`}>
                 {timeLabel}
               </span>
             </div>
@@ -75,18 +77,18 @@ export default function CompactSessionCard({ session, variant = 'horizontal' }: 
         </div>
 
         {/* Details */}
-        <div className="space-y-1.5 mb-3 flex-grow">
-          <div className="flex items-center gap-2 text-xs text-slate-600">
+        <div className="space-y-2 mb-3 flex-grow">
+          <div className="flex items-center gap-2">
             <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
-            <span className="truncate">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500 truncate">
               {session.sport_center?.name_en || 'Sport Center'}
             </span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-600">
+          <div className="flex items-center gap-2">
             <Users className="w-3 h-3 text-slate-400 flex-shrink-0" />
-            <span>
+            <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
               {session.current_participants}
-              {session.max_participants && ` / ${session.max_participants}`}
+              {session.max_participants && ` / ${session.max_participants}`} PLAYERS
             </span>
           </div>
         </div>
@@ -108,7 +110,7 @@ export default function CompactSessionCard({ session, variant = 'horizontal' }: 
         )}
 
         {/* Hover glow effect */}
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary-500/10 to-accent-cyan/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-500/5 to-accent-cyan/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
       </div>
     </Link>
   );

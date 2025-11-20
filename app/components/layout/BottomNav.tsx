@@ -41,9 +41,9 @@ export default function BottomNav() {
     <>
       {/* Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        {/* Glass background */}
-        <div className="glass-strong border-t border-white/20 pb-safe">
-          <div className="h-16 flex items-center justify-around px-2">
+        {/* Glass background with safe area padding */}
+        <div className="glass-strong border-t border-white/10 pb-[env(safe-area-inset-bottom)]">
+          <div className="h-[72px] flex items-center justify-around px-2">
             {navItems.map((item) => {
               // Skip auth-required items if not logged in
               if (item.requiresAuth && !user) {
@@ -58,33 +58,35 @@ export default function BottomNav() {
                   key={item.href}
                   href={getHref(item.href)}
                   className={`
-                    flex flex-col items-center justify-center gap-0.5 px-3 py-2 rounded-xl
-                    transition-all duration-200 min-w-[64px] min-h-[44px]
+                    relative flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl
+                    transition-all duration-200 min-w-[64px] min-h-[48px]
                     ${active
                       ? 'text-primary-600'
-                      : 'text-slate-500 hover:text-slate-700 active:scale-95'
+                      : 'text-slate-400 hover:text-slate-600 active:scale-95'
                     }
                   `}
                 >
+                  {/* Active indicator dot */}
+                  {active && (
+                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary-600 animate-scaleIn" />
+                  )}
+
                   <div className={`
-                    relative p-1.5 rounded-xl transition-all duration-200
-                    ${active
-                      ? 'bg-primary-100 shadow-glow-sm'
-                      : ''
-                    }
+                    relative transition-all duration-200
+                    ${active ? 'scale-110' : ''}
                   `}>
                     <Icon
                       className={`
-                        w-5 h-5 transition-all duration-200
-                        ${active ? 'text-primary-600' : ''}
+                        w-6 h-6 transition-all duration-200
+                        ${active
+                          ? 'text-primary-600 drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]'
+                          : ''
+                        }
                       `}
                     />
-                    {active && (
-                      <div className="absolute inset-0 rounded-xl bg-primary-500/20 blur-md -z-10" />
-                    )}
                   </div>
                   <span className={`
-                    text-[10px] font-medium transition-all duration-200
+                    text-[10px] font-semibold transition-all duration-200
                     ${active ? 'text-primary-600' : ''}
                   `}>
                     {item.label}
@@ -97,14 +99,12 @@ export default function BottomNav() {
             {!user && (
               <Link
                 href={getHref('/login')}
-                className="flex flex-col items-center justify-center gap-0.5 px-3 py-2 rounded-xl
-                  transition-all duration-200 min-w-[64px] min-h-[44px]
-                  text-slate-500 hover:text-slate-700 active:scale-95"
+                className="relative flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl
+                  transition-all duration-200 min-w-[64px] min-h-[48px]
+                  text-slate-400 hover:text-slate-600 active:scale-95"
               >
-                <div className="p-1.5">
-                  <User className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] font-medium">Login</span>
+                <User className="w-6 h-6" />
+                <span className="text-[10px] font-semibold">Login</span>
               </Link>
             )}
           </div>
@@ -116,7 +116,7 @@ export default function BottomNav() {
         <Link
           href={getHref('/sessions/create')}
           className="
-            fixed bottom-20 right-4 z-50 md:hidden
+            fixed bottom-24 right-4 z-50 md:hidden
             w-14 h-14 rounded-full
             bg-gradient-primary shadow-glow
             flex items-center justify-center
@@ -131,7 +131,7 @@ export default function BottomNav() {
       )}
 
       {/* Spacer to prevent content from being hidden behind bottom nav */}
-      <div className="h-16 md:hidden" />
+      <div className="h-20 md:hidden" />
     </>
   );
 }
