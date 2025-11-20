@@ -169,7 +169,7 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
               </Link>
             </div>
             {/* Horizontal scroll with snap for iOS-like feel */}
-            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 snap-x snap-mandatory">
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide px-4 snap-x snap-mandatory -mx-4">
               {happeningNow.map((session) => (
                 <div key={session.id} className="flex-shrink-0 w-[85vw] sm:w-80 snap-center">
                   <CompactSessionCard session={session} variant="horizontal" />
