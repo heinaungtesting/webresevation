@@ -150,9 +150,11 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
           <section>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-accent-rose/10">
-                  <Zap className="w-4 h-4 text-accent-rose" />
-                </div>
+                {/* Pulse animation indicator */}
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-rose opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent-rose"></span>
+                </span>
                 <h2 className="text-lg font-semibold text-slate-900">Happening Now</h2>
                 <span className="px-2 py-0.5 rounded-full bg-accent-rose/10 text-accent-rose text-xs font-medium">
                   Live
@@ -166,9 +168,10 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
+            {/* Horizontal scroll with snap for iOS-like feel */}
+            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 snap-x snap-mandatory">
               {happeningNow.map((session) => (
-                <div key={session.id} className="flex-shrink-0 w-72">
+                <div key={session.id} className="flex-shrink-0 w-[85vw] sm:w-80 snap-center">
                   <CompactSessionCard session={session} variant="horizontal" />
                 </div>
               ))}
@@ -194,7 +197,20 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
             </Link>
           </div>
 
-          {filteredSessions.length > 0 ? (
+          {viewMode === 'map' ? (
+            /* Map View Placeholder */
+            <div className="h-[60vh] w-full rounded-3xl bg-slate-200 flex items-center justify-center animate-fadeIn">
+              <div className="text-center p-6">
+                <MapPin className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-slate-700 mb-1">Map View</h3>
+                <p className="text-slate-500 text-sm">
+                  See sessions near you visually.
+                  <br />
+                  <span className="text-xs text-slate-400">(Coming in Phase 3)</span>
+                </p>
+              </div>
+            </div>
+          ) : filteredSessions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {filteredSessions.map((session, index) => (
                 <div

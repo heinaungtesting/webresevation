@@ -61,7 +61,7 @@ export default function CompactSessionCard({ session, variant = 'horizontal' }: 
             </h3>
             <div className="flex items-center gap-1.5 mt-0.5">
               <Clock className="w-3 h-3 text-slate-400" />
-              <span className={`text-[10px] font-medium uppercase tracking-wider ${
+              <span className={`text-xs font-semibold uppercase tracking-wide ${
                 diffMins < 60 ? 'text-accent-rose' : 'text-slate-500'
               }`}>
                 {timeLabel}
@@ -80,15 +80,15 @@ export default function CompactSessionCard({ session, variant = 'horizontal' }: 
         <div className="space-y-2 mb-3 flex-grow">
           <div className="flex items-center gap-2">
             <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
-            <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500 truncate">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 truncate">
               {session.sport_center?.name_en || 'Sport Center'}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <Users className="w-3 h-3 text-slate-400 flex-shrink-0" />
-            <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               {session.current_participants}
-              {session.max_participants && ` / ${session.max_participants}`} PLAYERS
+              {session.max_participants && ` / ${session.max_participants}`} players
             </span>
           </div>
         </div>
