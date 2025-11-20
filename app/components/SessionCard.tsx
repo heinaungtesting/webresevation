@@ -37,18 +37,23 @@ export default function SessionCard({ session }: SessionCardProps) {
     ? (session.current_participants / session.max_participants) * 100
     : 0;
 
+  // Calculate spots left for urgency
+  const spotsLeft = session.max_participants
+    ? session.max_participants - session.current_participants
+    : null;
+
   return (
     <div className="group relative h-full">
       {/* Card */}
-      <div className="relative h-full flex flex-col p-6 rounded-2xl bg-white border border-slate-100 shadow-soft hover:shadow-large hover:-translate-y-1 transition-all duration-300">
+      <div className="relative h-full flex flex-col p-4 sm:p-5 rounded-2xl bg-white border border-slate-100 shadow-soft hover:shadow-large hover:-translate-y-1 transition-all duration-300">
         {/* Sport badge with gradient background */}
-        <div className="flex items-start justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <div className={`flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${sport.gradient} text-2xl shadow-soft`}>
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className={`flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br ${sport.gradient} text-xl sm:text-2xl shadow-soft`}>
               {sport.icon}
             </div>
             <div>
-              <h3 className="font-semibold text-lg text-slate-900 capitalize">
+              <h3 className="font-semibold text-base text-slate-900 capitalize">
                 {session.sport_type.replace('-', ' ')}
               </h3>
               <Badge variant={skill.color} size="sm">
@@ -57,40 +62,44 @@ export default function SessionCard({ session }: SessionCardProps) {
             </div>
           </div>
           <div className="flex items-center gap-1">
-            {isFull && (
+            {isFull ? (
               <Badge variant="danger" size="sm" className="animate-pulse">
                 Full
               </Badge>
-            )}
+            ) : spotsLeft && spotsLeft <= 3 ? (
+              <Badge variant="warning" size="sm" className="text-amber-700 bg-amber-50 border-amber-200">
+                {spotsLeft === 1 ? '1 spot left!' : `${spotsLeft} spots left`}
+              </Badge>
+            ) : null}
             <FavoriteButton sessionId={session.id} size="sm" />
           </div>
         </div>
 
         {/* Session details */}
-        <div className="space-y-3 mb-5 flex-grow">
-          <div className="flex items-center gap-3 text-sm text-slate-600">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100">
-              <MapPin className="w-4 h-4 text-slate-500" />
+        <div className="space-y-2.5 mb-4 flex-grow">
+          <div className="flex items-center gap-2.5 text-sm text-slate-600">
+            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100">
+              <MapPin className="w-3.5 h-3.5 text-slate-500" />
             </div>
-            <span className="line-clamp-1 font-medium">
+            <span className="line-clamp-1 font-medium text-sm">
               {session.sport_center?.name_en || 'Sport Center'}
             </span>
           </div>
 
-          <div className="flex items-center gap-3 text-sm text-slate-600">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100">
-              <Clock className="w-4 h-4 text-slate-500" />
+          <div className="flex items-center gap-2.5 text-sm text-slate-600">
+            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100">
+              <Clock className="w-3.5 h-3.5 text-slate-500" />
             </div>
-            <span className="font-medium">{formatDate(session.date_time)}</span>
+            <span className="font-medium text-sm">{formatDate(session.date_time)}</span>
           </div>
 
-          <div className="flex items-center gap-3 text-sm text-slate-600">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100">
-              <Users className="w-4 h-4 text-slate-500" />
+          <div className="flex items-center gap-2.5 text-sm text-slate-600">
+            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100">
+              <Users className="w-3.5 h-3.5 text-slate-500" />
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
-                <span className="font-medium">
+                <span className="font-medium text-sm">
                   {session.current_participants}
                   {session.max_participants && ` / ${session.max_participants}`} going
                 </span>
@@ -102,7 +111,7 @@ export default function SessionCard({ session }: SessionCardProps) {
               </div>
               {/* Progress bar */}
               {session.max_participants && (
-                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
                       isFull
@@ -120,9 +129,9 @@ export default function SessionCard({ session }: SessionCardProps) {
         </div>
 
         {/* Action buttons */}
-        <div className="flex gap-3 pt-4 border-t border-slate-100">
+        <div className="flex gap-2 pt-3 border-t border-slate-100">
           <Link href={`/sessions/${session.id}`} className="flex-1">
-            <Button variant="outline" fullWidth size="sm" className="group/btn">
+            <Button variant="outline" fullWidth size="sm" className="group/btn min-h-[44px]">
               Details
               <ArrowRight className="w-3.5 h-3.5 ml-1 opacity-0 -translate-x-2 group-hover/btn:opacity-100 group-hover/btn:translate-x-0 transition-all" />
             </Button>
@@ -131,7 +140,7 @@ export default function SessionCard({ session }: SessionCardProps) {
             variant={isFull ? 'ghost' : 'gradient'}
             size="sm"
             disabled={isFull}
-            className="flex-1"
+            className="flex-1 min-h-[44px]"
           >
             {isFull ? 'Full' : "Join"}
           </Button>

@@ -3,6 +3,7 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales } from '@/i18n';
 import Navigation from '@/app/components/layout/Navigation';
+import BottomNav from '@/app/components/layout/BottomNav';
 import { AuthProvider } from '@/app/contexts/AuthContext';
 
 export function generateStaticParams() {
@@ -31,7 +32,8 @@ export default async function LocaleLayout({
     <NextIntlClientProvider messages={messages}>
       <AuthProvider>
         <Navigation />
-        <main>{children}</main>
+        <main className="pt-14 md:pt-16">{children}</main>
+        <BottomNav />
       </AuthProvider>
     </NextIntlClientProvider>
   );
