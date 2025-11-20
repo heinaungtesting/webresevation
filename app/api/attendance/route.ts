@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+// Zod schemas for input validation
+const AttendanceSchema = z.object({
+  session_id: z.string().uuid('Invalid session ID format'),
+});
 
 // POST /api/attendance - Mark attendance for a session
 export async function POST(request: Request) {
@@ -16,14 +22,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { session_id } = await request.json();
+    const body = await request.json();
 
-    if (!session_id) {
-      return NextResponse.json(
-        { error: 'Session ID is required' },
-        { status: 400 }
-      );
+    // Validate input with Zod
+    const validationResult = AttendanceSchema.safeParse(body);
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(e => e.message).join(', ');
+      return NextResponse.json({ error: errors }, { status: 400 });
     }
+
+    const { session_id } = validationResult.data;
 
     // Use a transaction to prevent race conditions
     // This ensures atomicity between checking capacity and creating the record
@@ -127,14 +135,16 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { session_id } = await request.json();
+    const body = await request.json();
 
-    if (!session_id) {
-      return NextResponse.json(
-        { error: 'Session ID is required' },
-        { status: 400 }
-      );
+    // Validate input with Zod
+    const validationResult = AttendanceSchema.safeParse(body);
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(e => e.message).join(', ');
+      return NextResponse.json({ error: errors }, { status: 400 });
     }
+
+    const { session_id } = validationResult.data;
 
     // Delete attendance record
     await prisma.userSession.delete({
@@ -147,8 +157,17 @@ export async function DELETE(request: Request) {
     });
 
     return NextResponse.json({ message: 'Attendance cancelled successfully' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error cancelling attendance:', error);
+
+    // Handle case where attendance record doesn't exist
+    if (error.code === 'P2025') {
+      return NextResponse.json(
+        { error: 'Attendance record not found' },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to cancel attendance' },
       { status: 500 }
