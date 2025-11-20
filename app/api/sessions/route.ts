@@ -1,8 +1,35 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
+
+// Zod schema for session creation validation
+const CreateSessionSchema = z.object({
+  sport_center_id: z.string().uuid('Invalid sport center ID'),
+  sport_type: z.string().min(1, 'Sport type is required'),
+  skill_level: z.enum(['beginner', 'intermediate', 'advanced'], {
+    errorMap: () => ({ message: 'Skill level must be beginner, intermediate, or advanced' }),
+  }),
+  date_time: z.string().refine(
+    (val) => !isNaN(Date.parse(val)),
+    'Invalid date/time format'
+  ),
+  duration_minutes: z.union([z.number(), z.string()])
+    .transform((val) => typeof val === 'string' ? parseInt(val, 10) : val)
+    .pipe(z.number().min(1, 'Duration must be at least 1 minute').max(480, 'Duration cannot exceed 8 hours')),
+  max_participants: z.union([z.number(), z.string(), z.null()])
+    .optional()
+    .transform((val) => {
+      if (val === null || val === undefined) return null;
+      const num = typeof val === 'string' ? parseInt(val, 10) : val;
+      return isNaN(num) ? null : num;
+    })
+    .pipe(z.number().min(2, 'Must allow at least 2 participants').nullable()),
+  description_en: z.string().max(1000, 'Description too long').optional(),
+  description_ja: z.string().max(1000, 'Description too long').optional(),
+});
 
 // GET /api/sessions - List all sessions with filters
 export async function GET(request: Request) {
@@ -96,6 +123,17 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
+
+    // Validate input with Zod schema
+    const validationResult = CreateSessionSchema.safeParse(body);
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(e => e.message).join(', ');
+      return NextResponse.json(
+        { error: errors },
+        { status: 400 }
+      );
+    }
+
     const {
       sport_center_id,
       sport_type,
@@ -105,21 +143,7 @@ export async function POST(request: Request) {
       max_participants,
       description_en,
       description_ja,
-    } = body;
-
-    // Validate required fields
-    if (
-      !sport_center_id ||
-      !sport_type ||
-      !skill_level ||
-      !date_time ||
-      !duration_minutes
-    ) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
+    } = validationResult.data;
 
     // Use transaction to create session and auto-join creator
     const session = await prisma.$transaction(async (tx: any) => {
@@ -129,8 +153,8 @@ export async function POST(request: Request) {
           sport_type,
           skill_level,
           date_time: new Date(date_time),
-          duration_minutes: parseInt(duration_minutes),
-          max_participants: max_participants ? parseInt(max_participants) : null,
+          duration_minutes,
+          max_participants,
           description_en,
           description_ja,
           created_by: user.id,

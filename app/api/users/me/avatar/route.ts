@@ -70,37 +70,52 @@ export async function POST(request: Request) {
 
     const avatarUrl = urlData.publicUrl;
 
-    // Delete old avatar if exists
+    // Get old avatar URL before updating
     const existingUser = await prisma.user.findUnique({
       where: { id: user.id },
       select: { avatar_url: true },
     });
 
-    if (existingUser?.avatar_url) {
-      // Extract old file path from URL
-      const oldPath = existingUser.avatar_url.split('/avatars/').pop();
-      if (oldPath) {
-        await supabase.storage
-          .from('avatars')
-          .remove([`avatars/${oldPath}`])
-          .catch((err) => console.error('Failed to delete old avatar:', err));
+    // Update database FIRST to prevent orphan file issue
+    // If this fails, we can safely delete the new file
+    try {
+      const updatedUser = await prisma.user.update({
+        where: { id: user.id },
+        data: { avatar_url: avatarUrl },
+        select: {
+          id: true,
+          avatar_url: true,
+        },
+      });
+
+      // Only delete old avatar AFTER successful database update
+      if (existingUser?.avatar_url) {
+        const oldPath = existingUser.avatar_url.split('/avatars/').pop();
+        if (oldPath) {
+          await supabase.storage
+            .from('avatars')
+            .remove([`avatars/${oldPath}`])
+            .catch((err) => console.error('Failed to delete old avatar:', err));
+        }
       }
+
+      return NextResponse.json({
+        avatar_url: updatedUser.avatar_url,
+        message: 'Avatar uploaded successfully',
+      });
+    } catch (dbError) {
+      // Database update failed - clean up the newly uploaded file
+      console.error('Database update failed:', dbError);
+      await supabase.storage
+        .from('avatars')
+        .remove([filePath])
+        .catch((err) => console.error('Failed to cleanup new avatar:', err));
+
+      return NextResponse.json(
+        { error: 'Failed to update avatar in database' },
+        { status: 500 }
+      );
     }
-
-    // Update user avatar_url in database
-    const updatedUser = await prisma.user.update({
-      where: { id: user.id },
-      data: { avatar_url: avatarUrl },
-      select: {
-        id: true,
-        avatar_url: true,
-      },
-    });
-
-    return NextResponse.json({
-      avatar_url: updatedUser.avatar_url,
-      message: 'Avatar uploaded successfully',
-    });
   } catch (error) {
     console.error('Error uploading avatar:', error);
     return NextResponse.json(

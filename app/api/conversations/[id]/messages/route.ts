@@ -25,6 +25,18 @@ export async function GET(
     const limit = parseInt(searchParams.get('limit') || '50');
     const before = searchParams.get('before'); // For pagination
 
+    // Validate 'before' date parameter to prevent invalid date errors
+    let beforeDate: Date | undefined;
+    if (before) {
+      beforeDate = new Date(before);
+      if (isNaN(beforeDate.getTime())) {
+        return NextResponse.json(
+          { error: 'Invalid date format for "before" parameter' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Check if user is a participant
     const participant = await prisma.conversationParticipant.findFirst({
       where: {
@@ -40,9 +52,9 @@ export async function GET(
     const messages = await prisma.message.findMany({
       where: {
         conversation_id: id,
-        ...(before && {
+        ...(beforeDate && {
           created_at: {
-            lt: new Date(before),
+            lt: beforeDate,
           },
         }),
       },
