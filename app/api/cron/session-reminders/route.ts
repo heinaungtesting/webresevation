@@ -37,7 +37,7 @@ export async function GET(request: Request) {
       },
       include: {
         sport_center: true,
-        participants: {
+        user_sessions: {
           include: {
             user: {
               select: {
@@ -70,13 +70,13 @@ export async function GET(request: Request) {
         minute: '2-digit',
       });
 
-      for (const participant of session.participants) {
-        if (participant.user.notification_email) {
-          const userName = participant.user.display_name || participant.user.username || participant.user.email.split('@')[0];
+      for (const userSession of session.user_sessions) {
+        if (userSession.user.notification_email) {
+          const userName = userSession.user.display_name || userSession.user.username || userSession.user.email.split('@')[0];
 
           try {
             await sendSessionReminderEmail(
-              participant.user.email,
+              userSession.user.email,
               userName,
               {
                 sportType: session.sport_type.charAt(0).toUpperCase() + session.sport_type.slice(1),
@@ -87,7 +87,7 @@ export async function GET(request: Request) {
             );
             emailsSent++;
           } catch (error) {
-            console.error(`Failed to send reminder to ${participant.user.email}:`, error);
+            console.error(`Failed to send reminder to ${userSession.user.email}:`, error);
             emailsFailed++;
           }
         }
