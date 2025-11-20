@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { sendWelcomeEmail } from '@/lib/email';
@@ -58,8 +59,22 @@ export async function POST(request: Request) {
         });
       } catch (dbError) {
         console.error('Database error:', dbError);
-        // User created in Supabase but not in database
-        // You might want to handle this differently
+
+        // CRITICAL: Clean up Supabase auth user to prevent ghost user state
+        // This prevents users from existing in Supabase Auth but not in the database
+        try {
+          const adminClient = createAdminClient();
+          await adminClient.auth.admin.deleteUser(data.user.id);
+          console.log(`Cleaned up Supabase auth user ${data.user.id} after database error`);
+        } catch (cleanupError) {
+          console.error('Failed to cleanup Supabase auth user:', cleanupError);
+          // Log for manual cleanup if automatic cleanup fails
+        }
+
+        return NextResponse.json(
+          { error: 'Failed to create user account. Please try again.' },
+          { status: 500 }
+        );
       }
     }
 

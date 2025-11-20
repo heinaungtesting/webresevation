@@ -36,7 +36,15 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Protected routes (check path without locale)
-  const protectedRoutes = ['/my-sessions', '/profile'];
+  const protectedRoutes = [
+    '/my-sessions',
+    '/profile',
+    '/messages',
+    '/favorites',
+    '/settings',
+    '/admin',
+    '/notifications',
+  ];
 
   // Extract locale from pathname (e.g., /en/my-sessions -> my-sessions)
   const pathWithoutLocale = request.nextUrl.pathname.replace(/^\/(en|ja)/, '');

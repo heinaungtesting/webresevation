@@ -62,6 +62,7 @@ export async function GET(request: Request) {
     for (const session of upcomingSessions) {
       const sessionDateTime = new Date(session.date_time);
       const formattedDateTime = sessionDateTime.toLocaleString('en-US', {
+        timeZone: 'Asia/Tokyo', // CRITICAL: Force Tokyo timezone for correct local time
         weekday: 'long',
         year: 'numeric',
         month: 'long',
