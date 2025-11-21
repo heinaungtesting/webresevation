@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { Bell, Globe, Save } from 'lucide-react';
+import { Bell, Globe, Save, FileText, Shield, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 import Button from '@/app/components/ui/Button';
 import Card from '@/app/components/ui/Card';
 import Select from '@/app/components/ui/Select';
@@ -235,6 +236,52 @@ export default function SettingsPage() {
             </Button>
           </div>
         </form>
+
+        {/* Legal Section */}
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Legal</h2>
+          <Card padding="none">
+            <Link
+              href="/terms"
+              className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-slate-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
+                    Terms of Service
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Our rules and guidelines
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" />
+            </Link>
+
+            <Link
+              href="/privacy"
+              className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-slate-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
+                    Privacy Policy
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    How we handle your data
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" />
+            </Link>
+          </Card>
+        </div>
       </div>
     </div>
   );
