@@ -29,6 +29,52 @@ const CreateSessionSchema = z.object({
   description_ja: z.string().max(1000, 'Description too long').optional(),
 });
 
+/**
+ * Helper function to get today's date range
+ */
+function getTodayRange(): { start: Date; end: Date } {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  return { start, end };
+}
+
+/**
+ * Helper function to get this weekend's date range
+ */
+function getWeekendRange(): { start: Date; end: Date } {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+
+  // Calculate days until Saturday (0 = Sunday, 6 = Saturday)
+  const daysUntilSaturday = dayOfWeek === 0 ? 6 : 6 - dayOfWeek;
+  const daysUntilSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+
+  // If today is Saturday or Sunday, include today
+  const saturday = new Date(now);
+  const sunday = new Date(now);
+
+  if (dayOfWeek === 6) {
+    // Today is Saturday
+    saturday.setHours(0, 0, 0, 0);
+    sunday.setDate(now.getDate() + 1);
+  } else if (dayOfWeek === 0) {
+    // Today is Sunday
+    saturday.setDate(now.getDate() - 1);
+    saturday.setHours(0, 0, 0, 0);
+    sunday.setHours(0, 0, 0, 0);
+  } else {
+    // Weekday - calculate next weekend
+    saturday.setDate(now.getDate() + daysUntilSaturday);
+    saturday.setHours(0, 0, 0, 0);
+    sunday.setDate(now.getDate() + daysUntilSunday);
+  }
+
+  sunday.setHours(23, 59, 59, 999);
+
+  return { start: saturday, end: sunday };
+}
+
 // GET /api/sessions - List all sessions with filters
 export async function GET(request: Request) {
   try {
@@ -38,28 +84,45 @@ export async function GET(request: Request) {
     const search = searchParams.get('search');
     const startDate = searchParams.get('start_date');
     const endDate = searchParams.get('end_date');
+    const dateFilter = searchParams.get('date'); // 'today', 'weekend', or null
 
-    // Build date filter
-    const dateFilter: any = {
+    // Build date filter based on date parameter
+    let dateRange: { gte: Date; lte?: Date } = {
       gte: new Date(), // Default: Only future sessions
     };
 
-    // If start date is provided, use it (but ensure it's not in the past)
-    if (startDate) {
-      const start = new Date(startDate);
-      start.setHours(0, 0, 0, 0);
-      dateFilter.gte = start > new Date() ? start : new Date();
-    }
+    // Handle special date filters
+    if (dateFilter === 'today') {
+      const { start, end } = getTodayRange();
+      // Ensure we don't show past sessions even if today
+      dateRange = {
+        gte: new Date() > start ? new Date() : start,
+        lte: end,
+      };
+    } else if (dateFilter === 'weekend') {
+      const { start, end } = getWeekendRange();
+      // Ensure we don't show past sessions
+      dateRange = {
+        gte: new Date() > start ? new Date() : start,
+        lte: end,
+      };
+    } else {
+      // Custom date range
+      if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        dateRange.gte = start > new Date() ? start : new Date();
+      }
 
-    // If end date is provided, set the upper bound
-    if (endDate) {
-      const end = new Date(endDate);
-      end.setHours(23, 59, 59, 999);
-      dateFilter.lte = end;
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        dateRange.lte = end;
+      }
     }
 
     const where: any = {
-      date_time: dateFilter,
+      date_time: dateRange,
     };
 
     if (sportType && sportType !== 'all') {

@@ -3,10 +3,27 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { sendWelcomeEmail } from '@/lib/email';
+import { authRateLimiter, createRateLimitHeaders } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  // Apply rate limiting: 10 requests per 10 seconds per IP
+  const rateLimitResult = authRateLimiter.check(request);
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      {
+        error: 'Too Many Requests',
+        message: 'Too many signup attempts. Please try again later.',
+        retryAfter: rateLimitResult.reset - Math.floor(Date.now() / 1000),
+      },
+      {
+        status: 429,
+        headers: createRateLimitHeaders(rateLimitResult),
+      }
+    );
+  }
+
   try {
     const { email, password, language = 'en' } = await request.json();
 
@@ -83,7 +100,10 @@ export async function POST(request: Request) {
         message: 'Signup successful! Please check your email to verify your account.',
         user: data.user,
       },
-      { status: 201 }
+      {
+        status: 201,
+        headers: createRateLimitHeaders(rateLimitResult),
+      }
     );
   } catch (error) {
     console.error('Signup error:', error);

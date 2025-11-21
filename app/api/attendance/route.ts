@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
     // Use a transaction to prevent race conditions
     // This ensures atomicity between checking capacity and creating the record
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Check if session exists and get current participant count
       const session = await tx.session.findUnique({
         where: { id: session_id },

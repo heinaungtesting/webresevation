@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Session } from '@/types';
 import SessionCard from '@/app/components/SessionCard';
 import CompactSessionCard from '@/app/components/CompactSessionCard';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { Bell, Plus, ChevronRight, Sparkles, Calendar, MapPin, Zap, Map, List, Search, Filter } from 'lucide-react';
+import { Bell, Plus, ChevronRight, Sparkles, MapPin, Map, List, Search, Filter, Loader2, RefreshCw } from 'lucide-react';
 import Button from '@/app/components/ui/Button';
-import Input from '@/app/components/ui/Input';
 import { cn } from '@/lib/utils';
+import { useQuery } from '@tanstack/react-query';
+import { useDebouncedCallback } from 'use-debounce';
 
 interface HomeFeedProps {
   sessions: Session[];
@@ -36,62 +37,121 @@ function getGreeting(): string {
   return 'Good Evening';
 }
 
-function isToday(date: Date): boolean {
-  const today = new Date();
-  return (
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear()
-  );
+/**
+ * Fetch sessions from the API with filters
+ */
+async function fetchSessions(params: {
+  sportType?: string;
+  date?: string;
+  search?: string;
+}): Promise<Session[]> {
+  const searchParams = new URLSearchParams();
+
+  // Add sport type filter (for specific sports)
+  if (params.sportType && params.sportType !== 'all' && params.sportType !== 'today' && params.sportType !== 'weekend') {
+    searchParams.set('sport_type', params.sportType);
+  }
+
+  // Add date filter
+  if (params.date === 'today' || params.date === 'weekend') {
+    searchParams.set('date', params.date);
+  }
+
+  // Add search query
+  if (params.search && params.search.trim()) {
+    searchParams.set('search', params.search.trim());
+  }
+
+  const url = `/api/sessions${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch sessions');
+  }
+
+  return response.json();
 }
 
-function isThisWeekend(date: Date): boolean {
-  const today = new Date();
-  const dayOfWeek = today.getDay();
-  const saturday = new Date(today);
-  saturday.setDate(today.getDate() + (6 - dayOfWeek));
-  const sunday = new Date(saturday);
-  sunday.setDate(saturday.getDate() + 1);
-
-  return (
-    (date.getDate() === saturday.getDate() && date.getMonth() === saturday.getMonth()) ||
-    (date.getDate() === sunday.getDate() && date.getMonth() === sunday.getMonth())
-  );
-}
-
-export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
+export default function HomeFeed({ sessions: initialSessions, happeningNow }: HomeFeedProps) {
   const { user, profile } = useAuth();
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const displayName = profile?.display_name || profile?.username || user?.email?.split('@')[0] || 'there';
   const greeting = getGreeting();
 
-  const filteredSessions = useMemo(() => {
-    return sessions.filter((session) => {
-      const sessionDate = new Date(session.date_time);
-      const matchesSearch = searchQuery === '' ||
-        session.sport_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        session.sport_center?.name_en?.toLowerCase().includes(searchQuery.toLowerCase());
+  // Debounce search input to prevent API spamming (300ms delay)
+  const handleSearchChange = useDebouncedCallback((value: string) => {
+    setDebouncedSearch(value);
+  }, 300);
 
-      if (!matchesSearch) return false;
+  // Determine if we should fetch from API (filters are applied)
+  const hasFilters = activeFilter !== 'all' || debouncedSearch.trim() !== '';
 
-      switch (activeFilter) {
-        case 'badminton':
-        case 'tennis':
-        case 'basketball':
-        case 'soccer':
-          return session.sport_type === activeFilter;
-        case 'today':
-          return isToday(sessionDate);
-        case 'weekend':
-          return isThisWeekend(sessionDate);
-        default:
-          return true;
-      }
-    });
-  }, [sessions, activeFilter, searchQuery]);
+  // Build query parameters based on active filter
+  const getQueryParams = () => {
+    const params: { sportType?: string; date?: string; search?: string } = {};
+
+    // Handle sport type vs date filters
+    if (['badminton', 'tennis', 'basketball', 'soccer'].includes(activeFilter)) {
+      params.sportType = activeFilter;
+    } else if (activeFilter === 'today' || activeFilter === 'weekend') {
+      params.date = activeFilter;
+    }
+
+    if (debouncedSearch.trim()) {
+      params.search = debouncedSearch.trim();
+    }
+
+    return params;
+  };
+
+  // Use React Query for data fetching with automatic caching and revalidation
+  const {
+    data: filteredSessions,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+  } = useQuery({
+    queryKey: ['sessions', activeFilter, debouncedSearch],
+    queryFn: () => fetchSessions(getQueryParams()),
+    // Use initial server-rendered data when no filters are applied
+    initialData: hasFilters ? undefined : initialSessions,
+    // Only fetch when filters change (not on mount if no filters)
+    enabled: hasFilters,
+    // Keep previous data while fetching new data
+    placeholderData: (previousData) => previousData,
+    // Stale time: 30 seconds (data considered fresh)
+    staleTime: 30 * 1000,
+    // Cache time: 5 minutes
+    gcTime: 5 * 60 * 1000,
+    // Retry configuration
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+  });
+
+  // Use initial sessions if no filters, otherwise use query data
+  const sessionsToDisplay = hasFilters ? (filteredSessions ?? []) : initialSessions;
+
+  const handleFilterChange = (filter: FilterType) => {
+    setActiveFilter(filter);
+  };
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    handleSearchChange(value);
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setDebouncedSearch('');
+    setActiveFilter('all');
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 pb-24 md:pb-10">
@@ -134,10 +194,16 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
               <input
                 type="text"
                 placeholder="Search sports, venues..."
-                className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 sm:text-sm"
+                className="block w-full pl-10 pr-10 py-2.5 border border-slate-200 rounded-xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 sm:text-sm"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchInputChange}
               />
+              {/* Loading indicator in search bar */}
+              {isFetching && (
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <Loader2 className="h-4 w-4 text-primary-500 animate-spin" />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -150,7 +216,7 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
             {sportFilters.map((filter) => (
               <button
                 key={filter.id}
-                onClick={() => setActiveFilter(filter.id)}
+                onClick={() => handleFilterChange(filter.id)}
                 className={cn(
                   "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 border",
                   activeFilter === filter.id
@@ -205,114 +271,159 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
                 <Sparkles className="w-4 h-4" />
               </div>
               <h2 className="text-lg font-bold text-slate-900">For You</h2>
+              {isFetching && !isLoading && (
+                <Loader2 className="w-4 h-4 text-primary-500 animate-spin ml-2" />
+              )}
             </div>
-            <Link
-              href="/sessions"
-              className="text-sm text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1 group"
-            >
-              View all
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-          </div>
-
-          {viewMode === 'map' ? (
-            /* Map View Placeholder */
-            <div className="h-[60vh] w-full rounded-3xl bg-slate-100 border-2 border-dashed border-slate-200 flex items-center justify-center animate-fadeIn relative overflow-hidden group">
-              <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-5" />
-              <div className="text-center p-6 relative z-10">
-                <div className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <MapPin className="w-8 h-8 text-primary-500" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Map View</h3>
-                <p className="text-slate-500 text-sm max-w-xs mx-auto">
-                  Visualize sessions near you on an interactive map.
-                  <br />
-                  <span className="inline-block mt-2 px-3 py-1 rounded-full bg-slate-200 text-slate-600 text-xs font-medium">
-                    Coming Soon
-                  </span>
-                </p>
-              </div>
-            </div>
-          ) : filteredSessions.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {filteredSessions.map((session, index) => (
-                <div
-                  key={session.id}
-                  className="animate-fadeInUp"
-                  style={{ animationDelay: `${index * 50}ms` }}
+            <div className="flex items-center gap-2">
+              {hasFilters && (
+                <button
+                  onClick={() => refetch()}
+                  className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1"
+                  title="Refresh"
                 >
-                  <SessionCard session={session} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            /* Empty State - Bento Grid */
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fadeIn">
-              {/* Create Session Card */}
-              <Link
-                href="/sessions/create"
-                className="col-span-1 md:col-span-2 p-8 rounded-3xl bg-gradient-ocean text-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-3xl -ml-12 -mb-12" />
-
-                <div className="relative z-10">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-sm">
-                      <Plus className="w-8 h-8" />
-                    </div>
-                    <div className="p-2 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <ChevronRight className="w-5 h-5" />
-                    </div>
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2">Create a Session</h3>
-                  <p className="text-white/90 text-base max-w-md">
-                    Be the first to host a game. Set the time, place, and let others join you.
-                  </p>
-                </div>
-              </Link>
-
-              {/* Explore Card */}
+                  <RefreshCw className={cn("w-4 h-4", isFetching && "animate-spin")} />
+                </button>
+              )}
               <Link
                 href="/sessions"
-                className="p-8 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
+                className="text-sm text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1 group"
               >
-                <div className="p-3 rounded-2xl bg-primary-50 w-fit mb-6 group-hover:bg-primary-100 transition-colors">
-                  <MapPin className="w-8 h-8 text-primary-600" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Explore Venues</h3>
-                <p className="text-slate-500">
-                  Discover sport centers near you
-                </p>
+                View all
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
+            </div>
+          </div>
 
-              {/* Status Card */}
-              <div className="md:col-span-3 p-8 rounded-3xl bg-slate-50 border border-slate-100 text-center">
-                <div className="inline-flex p-4 rounded-full bg-white shadow-sm mb-4">
-                  <Filter className="w-6 h-6 text-slate-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-1">No matches found</h3>
-                <p className="text-slate-500">
-                  {searchQuery
-                    ? `No results for "${searchQuery}"`
-                    : activeFilter !== 'all'
-                      ? `No ${activeFilter} sessions available right now`
-                      : 'Check back soon for new games'
-                  }
-                </p>
-                {(searchQuery || activeFilter !== 'all') && (
-                  <button
-                    onClick={() => {
-                      setSearchQuery('');
-                      setActiveFilter('all');
-                    }}
-                    className="mt-4 text-primary-600 font-medium hover:underline"
-                  >
-                    Clear filters
-                  </button>
-                )}
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center">
+                <Loader2 className="w-8 h-8 text-primary-500 animate-spin mx-auto mb-4" />
+                <p className="text-slate-500">Loading sessions...</p>
               </div>
             </div>
+          )}
+
+          {/* Error State */}
+          {isError && (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center">
+                <div className="inline-flex p-4 rounded-full bg-red-50 mb-4">
+                  <Filter className="w-6 h-6 text-red-500" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900 mb-1">Failed to load sessions</h3>
+                <p className="text-slate-500 mb-4">
+                  {error instanceof Error ? error.message : 'An error occurred'}
+                </p>
+                <Button onClick={() => refetch()} variant="outline" size="sm">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Try Again
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Content */}
+          {!isLoading && !isError && (
+            <>
+              {viewMode === 'map' ? (
+                /* Map View Placeholder */
+                <div className="h-[60vh] w-full rounded-3xl bg-slate-100 border-2 border-dashed border-slate-200 flex items-center justify-center animate-fadeIn relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-5" />
+                  <div className="text-center p-6 relative z-10">
+                    <div className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                      <MapPin className="w-8 h-8 text-primary-500" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Map View</h3>
+                    <p className="text-slate-500 text-sm max-w-xs mx-auto">
+                      Visualize sessions near you on an interactive map.
+                      <br />
+                      <span className="inline-block mt-2 px-3 py-1 rounded-full bg-slate-200 text-slate-600 text-xs font-medium">
+                        Coming Soon
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              ) : sessionsToDisplay.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                  {sessionsToDisplay.map((session, index) => (
+                    <div
+                      key={session.id}
+                      className="animate-fadeInUp"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <SessionCard session={session} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* Empty State - Bento Grid */
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fadeIn">
+                  {/* Create Session Card */}
+                  <Link
+                    href="/sessions/create"
+                    className="col-span-1 md:col-span-2 p-8 rounded-3xl bg-gradient-ocean text-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-3xl -ml-12 -mb-12" />
+
+                    <div className="relative z-10">
+                      <div className="flex items-start justify-between mb-6">
+                        <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-sm">
+                          <Plus className="w-8 h-8" />
+                        </div>
+                        <div className="p-2 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <ChevronRight className="w-5 h-5" />
+                        </div>
+                      </div>
+                      <h3 className="text-2xl font-bold mb-2">Create a Session</h3>
+                      <p className="text-white/90 text-base max-w-md">
+                        Be the first to host a game. Set the time, place, and let others join you.
+                      </p>
+                    </div>
+                  </Link>
+
+                  {/* Explore Card */}
+                  <Link
+                    href="/sessions"
+                    className="p-8 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
+                  >
+                    <div className="p-3 rounded-2xl bg-primary-50 w-fit mb-6 group-hover:bg-primary-100 transition-colors">
+                      <MapPin className="w-8 h-8 text-primary-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Explore Venues</h3>
+                    <p className="text-slate-500">
+                      Discover sport centers near you
+                    </p>
+                  </Link>
+
+                  {/* Status Card */}
+                  <div className="md:col-span-3 p-8 rounded-3xl bg-slate-50 border border-slate-100 text-center">
+                    <div className="inline-flex p-4 rounded-full bg-white shadow-sm mb-4">
+                      <Filter className="w-6 h-6 text-slate-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-1">No matches found</h3>
+                    <p className="text-slate-500">
+                      {searchQuery
+                        ? `No results for "${searchQuery}"`
+                        : activeFilter !== 'all'
+                          ? `No ${activeFilter} sessions available right now`
+                          : 'Check back soon for new games'
+                      }
+                    </p>
+                    {(searchQuery || activeFilter !== 'all') && (
+                      <button
+                        onClick={clearFilters}
+                        className="mt-4 text-primary-600 font-medium hover:underline"
+                      >
+                        Clear filters
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </section>
       </main>

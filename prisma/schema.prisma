@@ -69,14 +69,17 @@ model SportCenter {
 }
 
 // Session model
+// DATABASE CONSTRAINTS:
+// - Session_duration_positive: CHECK (duration_minutes > 0)
+// - Session_max_participants_min: CHECK (max_participants IS NULL OR max_participants >= 2)
 model Session {
   id                    String        @id @default(uuid())
   sport_center_id       String
   sport_type            String        // badminton, basketball, etc.
   skill_level           String        // beginner, intermediate, advanced
   date_time             DateTime
-  duration_minutes      Int
-  max_participants      Int?
+  duration_minutes      Int           // Must be > 0 (enforced by DB constraint)
+  max_participants      Int?          // Must be >= 2 if set (enforced by DB constraint)
   description_en        String?       @db.Text
   description_ja        String?       @db.Text
   created_by            String
@@ -185,11 +188,13 @@ model Favorite {
 }
 
 // Review model (session feedback)
+// DATABASE CONSTRAINT: Review_rating_check CHECK (rating >= 1 AND rating <= 5)
+// This ensures ratings are always valid at the database level
 model Review {
   id          String   @id @default(uuid())
   user_id     String
   session_id  String
-  rating      Int      // 1-5 stars
+  rating      Int      // 1-5 stars (enforced by DB constraint: CHECK rating >= 1 AND rating <= 5)
   comment     String?  @db.Text
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
@@ -198,7 +203,7 @@ model Review {
   user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   session     Session  @relation(fields: [session_id], references: [id], onDelete: Cascade)
 
-  @@unique([user_id, session_id])
+  @@unique([user_id, session_id])  // One review per user per session
   @@index([user_id])
   @@index([session_id])
   @@index([rating])
@@ -221,4 +226,6 @@ model Notification {
   @@index([user_id])
   @@index([read])
   @@index([created_at])
+  // Composite index for efficient user notification queries
+  // See migration: Notification_user_read_idx
 }
