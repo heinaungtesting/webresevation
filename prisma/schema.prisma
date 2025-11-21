@@ -11,6 +11,13 @@ datasource db {
   // directUrl = env("DIRECT_URL")
 }
 
+// Enum for attendance status
+enum AttendanceStatus {
+  REGISTERED  // User signed up but hasn't attended yet
+  ATTENDED    // User attended the session
+  NO_SHOW     // User didn't show up
+}
+
 // User model
 model User {
   id                   String         @id @default(uuid())
@@ -29,6 +36,9 @@ model User {
   phone_number         String?        @unique
   phone_verified       Boolean        @default(false)
   is_admin             Boolean        @default(false)
+  // Reliability tracking
+  no_show_count        Int            @default(0)    // Number of times user didn't show up
+  reliability_score    Int            @default(100)  // 0-100 score (starts at 100%)
   created_at           DateTime       @default(now())
   updated_at           DateTime       @updatedAt
 
@@ -44,6 +54,7 @@ model User {
   @@index([email])
   @@index([phone_number])
   @@index([username])
+  @@index([reliability_score])
 }
 
 // Sport Center model
@@ -83,6 +94,7 @@ model Session {
   description_en        String?       @db.Text
   description_ja        String?       @db.Text
   created_by            String
+  attendance_marked     Boolean       @default(false) // Whether host has marked attendance
   created_at            DateTime      @default(now())
   updated_at            DateTime      @updatedAt
 
@@ -102,11 +114,14 @@ model Session {
 }
 
 // UserSession model (attendance tracking)
+// Tracks user registration for sessions and their attendance status
 model UserSession {
-  id          String    @id @default(uuid())
+  id          String            @id @default(uuid())
   user_id     String
   session_id  String
-  marked_at   DateTime  @default(now())
+  status      AttendanceStatus  @default(REGISTERED)  // REGISTERED -> ATTENDED or NO_SHOW
+  marked_at   DateTime          @default(now())       // When user registered
+  attended_at DateTime?                               // When attendance was marked
 
   // Relations
   user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -115,6 +130,7 @@ model UserSession {
   @@unique([user_id, session_id])
   @@index([user_id])
   @@index([session_id])
+  @@index([status])
 }
 
 // Conversation model

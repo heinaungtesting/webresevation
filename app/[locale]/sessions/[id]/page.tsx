@@ -11,6 +11,7 @@ import { formatDate } from '@/lib/utils';
 import { MapPin, Clock, Users, Info, ArrowLeft, Loader2 } from 'lucide-react';
 import ReviewSection from '@/app/components/sessions/ReviewSection';
 import FavoriteButton from '@/app/components/sessions/FavoriteButton';
+import AttendanceTracker from '@/app/components/sessions/AttendanceTracker';
 
 export default function SessionDetailPage() {
   const params = useParams();
@@ -263,6 +264,13 @@ export default function SessionDetailPage() {
               sessionId={session.id}
               sessionDate={session.date_time}
               hasAttended={isAttending}
+            />
+
+            {/* Attendance Tracker - Only visible to host after session ends */}
+            <AttendanceTracker
+              sessionId={session.id}
+              isHost={user?.id === session.created_by}
+              isPast={new Date(session.date_time) < new Date()}
             />
           </div>
 
