@@ -9,9 +9,7 @@ export const dynamic = 'force-dynamic';
 const CreateSessionSchema = z.object({
   sport_center_id: z.string().uuid('Invalid sport center ID'),
   sport_type: z.string().min(1, 'Sport type is required'),
-  skill_level: z.enum(['beginner', 'intermediate', 'advanced'], {
-    errorMap: () => ({ message: 'Skill level must be beginner, intermediate, or advanced' }),
-  }),
+  skill_level: z.enum(['beginner', 'intermediate', 'advanced'] as const),
   date_time: z.string().refine(
     (val) => !isNaN(Date.parse(val)),
     'Invalid date/time format'
@@ -127,7 +125,7 @@ export async function POST(request: Request) {
     // Validate input with Zod schema
     const validationResult = CreateSessionSchema.safeParse(body);
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(e => e.message).join(', ');
+      const errors = (validationResult.error as any).errors.map((e: any) => e.message).join(', ');
       return NextResponse.json(
         { error: errors },
         { status: 400 }

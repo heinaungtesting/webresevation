@@ -4,12 +4,13 @@ import { cn } from '@/lib/utils';
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'elevated' | 'outlined' | 'glass' | 'gradient';
   padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
+  elevation?: 'flat' | 'sm' | 'md' | 'lg' | 'floating';
   hoverable?: boolean;
   glow?: boolean;
 }
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = 'default', padding = 'md', hoverable = false, glow = false, children, ...props }, ref) => {
+  ({ className, variant = 'default', padding = 'md', elevation = 'sm', hoverable = false, glow = false, children, ...props }, ref) => {
     const baseStyles = cn(
       'rounded-2xl',
       'transition-all duration-300 ease-out'
@@ -43,6 +44,14 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       ),
     };
 
+    const elevations = {
+      flat: 'shadow-none',
+      sm: 'shadow-soft',
+      md: 'shadow-medium',
+      lg: 'shadow-large',
+      floating: 'shadow-elevated hover:shadow-2xl',
+    };
+
     const paddings = {
       none: '',
       sm: 'p-4',
@@ -57,6 +66,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
         className={cn(
           baseStyles,
           variants[variant],
+          elevations[elevation],
           paddings[padding],
           hoverable && 'cursor-pointer',
           glow && 'hover-glow',

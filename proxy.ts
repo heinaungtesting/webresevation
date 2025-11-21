@@ -11,20 +11,24 @@ const intlMiddleware = createMiddleware({
 });
 
 export async function proxy(request: NextRequest) {
-  // First, handle i18n routing
-  const response = intlMiddleware(request);
-
-  // Then handle Supabase auth session
+  // First, check for auth session updates and redirects
   const authResponse = await updateSession(request);
 
-  // Merge cookies from auth response into i18n response
-  if (authResponse) {
-    authResponse.cookies.getAll().forEach((cookie) => {
-      response.cookies.set(cookie);
-    });
+  // If updateSession returns a redirect (e.g. to login), we must return it immediately
+  if (authResponse.status === 307 || authResponse.status === 302) {
+    return authResponse;
   }
 
-  return response;
+  // If no redirect, run the intl middleware
+  const intlResponse = intlMiddleware(request);
+
+  // Merge cookies from auth response (which might have refreshed the session)
+  // into the intl response so they are persisted
+  authResponse.cookies.getAll().forEach((cookie) => {
+    intlResponse.cookies.set(cookie.name, cookie.value, cookie);
+  });
+
+  return intlResponse;
 }
 
 export const config = {

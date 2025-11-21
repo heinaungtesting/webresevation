@@ -33,7 +33,7 @@ export default function LanguageSwitcher() {
         className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
         aria-label="Change language"
       >
-        <Globe className="w-4 h-4" />
+        <Globe className="w-4 h-4" suppressHydrationWarning />
         <span className="text-sm font-medium">
           {languageNames[locale]?.short || locale.toUpperCase()}
         </span>
@@ -53,9 +53,8 @@ export default function LanguageSwitcher() {
               <button
                 key={loc}
                 onClick={() => switchLocale(loc)}
-                className={`w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${
-                  loc === locale ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700'
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100 transition-colors ${loc === locale ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700'
+                  }`}
               >
                 <span className="text-lg">{loc === 'en' ? '🇬🇧' : '🇯🇵'}</span>
                 <span>{languageNames[loc]?.full}</span>

@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     // Validate input with Zod
     const validationResult = AttendanceSchema.safeParse(body);
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(e => e.message).join(', ');
+      const errors = (validationResult.error as any).errors.map((e: any) => e.message).join(', ');
       return NextResponse.json({ error: errors }, { status: 400 });
     }
 
@@ -140,7 +140,7 @@ export async function DELETE(request: Request) {
     // Validate input with Zod
     const validationResult = AttendanceSchema.safeParse(body);
     if (!validationResult.success) {
-      const errors = validationResult.error.errors.map(e => e.message).join(', ');
+      const errors = (validationResult.error as any).errors.map((e: any) => e.message).join(', ');
       return NextResponse.json({ error: errors }, { status: 400 });
     }
 

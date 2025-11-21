@@ -7,7 +7,7 @@ import { useAuth } from '@/app/contexts/AuthContext';
 
 interface NavItem {
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<any>;
   label: string;
   requiresAuth?: boolean;
 }
@@ -42,7 +42,7 @@ export default function BottomNav() {
       {/* Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
         {/* Glass background with safe area padding */}
-        <div className="glass-strong border-t border-white/10 pb-[env(safe-area-inset-bottom)]">
+        <div className="bg-white/90 backdrop-blur-lg border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)]">
           <div className="h-[72px] flex items-center justify-around px-2">
             {navItems.map((item) => {
               // Skip auth-required items if not logged in
@@ -59,35 +59,36 @@ export default function BottomNav() {
                   href={getHref(item.href)}
                   className={`
                     relative flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl
-                    transition-all duration-200 min-w-[64px] min-h-[48px]
+                    transition-all duration-300 min-w-[64px] min-h-[48px] group
                     ${active
                       ? 'text-primary-600'
-                      : 'text-slate-400 hover:text-slate-600 active:scale-95'
+                      : 'text-slate-400 hover:text-slate-600'
                     }
                   `}
                 >
-                  {/* Active indicator dot */}
+                  {/* Active indicator background */}
                   {active && (
-                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary-600 animate-scaleIn" />
+                    <div className="absolute inset-0 bg-primary-50 rounded-2xl -z-10 animate-scaleIn" />
                   )}
 
                   <div className={`
-                    relative transition-all duration-200
-                    ${active ? 'scale-110' : ''}
+                    relative transition-all duration-300
+                    ${active ? 'scale-110 -translate-y-0.5' : 'group-hover:scale-110 group-active:scale-95'}
                   `}>
                     <Icon
                       className={`
-                        w-6 h-6 transition-all duration-200
+                        w-6 h-6 transition-all duration-300
                         ${active
-                          ? 'text-primary-600 drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]'
-                          : ''
+                          ? 'fill-primary-600 text-primary-600'
+                          : 'fill-transparent'
                         }
                       `}
+                      suppressHydrationWarning
                     />
                   </div>
                   <span className={`
-                    text-[10px] font-semibold transition-all duration-200
-                    ${active ? 'text-primary-600' : ''}
+                    text-[10px] font-semibold transition-all duration-300
+                    ${active ? 'text-primary-600 translate-y-0.5' : 'group-hover:text-slate-600'}
                   `}>
                     {item.label}
                   </span>
@@ -100,11 +101,13 @@ export default function BottomNav() {
               <Link
                 href={getHref('/login')}
                 className="relative flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl
-                  transition-all duration-200 min-w-[64px] min-h-[48px]
-                  text-slate-400 hover:text-slate-600 active:scale-95"
+                  transition-all duration-300 min-w-[64px] min-h-[48px] group
+                  text-slate-400 hover:text-slate-600"
               >
-                <User className="w-6 h-6" />
-                <span className="text-[10px] font-semibold">Login</span>
+                <div className="group-hover:scale-110 group-active:scale-95 transition-transform duration-300">
+                  <User className="w-6 h-6" suppressHydrationWarning />
+                </div>
+                <span className="text-[10px] font-semibold group-hover:text-slate-600 transition-colors">Login</span>
               </Link>
             )}
           </div>
@@ -126,7 +129,7 @@ export default function BottomNav() {
           "
           aria-label="Create Session"
         >
-          <Plus className="w-6 h-6 text-white" />
+          <Plus className="w-6 h-6 text-white" suppressHydrationWarning />
         </Link>
       )}
 

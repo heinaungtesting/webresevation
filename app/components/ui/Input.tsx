@@ -10,9 +10,9 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, error, fullWidth = false, type = 'text', ...props }, ref) => {
     return (
-      <div className={cn('flex flex-col gap-1', fullWidth && 'w-full')}>
+      <div className={cn('flex flex-col gap-1.5', fullWidth && 'w-full')}>
         {label && (
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-semibold text-slate-700">
             {label}
           </label>
         )}
@@ -20,20 +20,21 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           type={type}
           className={cn(
-            'px-4 py-3 border border-gray-300 rounded-lg text-base',
-            'bg-white text-gray-900 placeholder:text-gray-400',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            'disabled:bg-gray-100 disabled:cursor-not-allowed',
+            'px-4 py-3 border-2 border-slate-200 rounded-xl text-base',
+            'bg-white text-slate-900 placeholder:text-slate-400',
+            'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
+            'hover:border-slate-300',
+            'disabled:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-500',
             'transition-all duration-200',
             'min-h-[44px]', // Minimum touch target size for mobile
-            error && 'border-red-500 focus:ring-red-500',
+            error && 'border-red-500 focus:ring-red-500 focus:border-red-500',
             fullWidth && 'w-full',
             className
           )}
           {...props}
         />
         {error && (
-          <span className="text-sm text-red-600">{error}</span>
+          <span className="text-sm text-red-600 font-medium">{error}</span>
         )}
       </div>
     );

@@ -5,6 +5,7 @@ import Button from './ui/Button';
 import FavoriteButton from './sessions/FavoriteButton';
 import { formatDate, formatTime } from '@/lib/utils';
 import { Users, Clock, MapPin, ArrowRight } from 'lucide-react';
+import { AvatarGroup } from './ui/Avatar';
 
 interface SessionCardProps {
   session: Session;
@@ -113,19 +114,36 @@ export default function SessionCard({ session }: SessionCardProps) {
               {session.max_participants && (
                 <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      isFull
-                        ? 'bg-red-500'
-                        : participationPercent >= 75
-                          ? 'bg-amber-500'
-                          : 'bg-emerald-500'
-                    }`}
+                    className={`h-full rounded-full transition-all duration-500 ${isFull
+                      ? 'bg-red-500'
+                      : participationPercent >= 75
+                        ? 'bg-amber-500'
+                        : 'bg-emerald-500'
+                      }`}
                     style={{ width: `${Math.min(participationPercent, 100)}%` }}
                   />
                 </div>
               )}
             </div>
           </div>
+
+          {/* Participant Avatars Preview */}
+          {session.current_participants > 0 && (
+            <div className="flex items-center gap-2 mt-2">
+              <AvatarGroup
+                avatars={Array.from({ length: Math.min(session.current_participants, 5) }, (_, i) => ({
+                  initials: String.fromCharCode(65 + i),
+                }))}
+                max={4}
+                size="sm"
+              />
+              {session.current_participants > 4 && (
+                <span className="text-xs text-slate-500 ml-1">
+                  and {session.current_participants - 4} more
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Action buttons */}

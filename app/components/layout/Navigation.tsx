@@ -51,11 +51,10 @@ export default function Navigation() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'glass-strong shadow-soft py-2'
-          : 'bg-transparent py-3 md:py-4'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${scrolled
+        ? 'bg-white border-slate-200 shadow-md py-2'
+        : 'bg-white border-slate-100 shadow-sm py-3 md:py-4'
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
@@ -132,7 +131,7 @@ export default function Navigation() {
                       <span className="text-sm font-medium text-slate-700 max-w-[120px] truncate hidden lg:block">
                         {displayName}
                       </span>
-                      <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} suppressHydrationWarning />
                     </button>
 
                     {/* User dropdown menu */}
@@ -149,7 +148,7 @@ export default function Navigation() {
                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                           >
-                            <UserCircle className="w-4 h-4 text-slate-400" />
+                            <UserCircle className="w-4 h-4 text-slate-400" suppressHydrationWarning />
                             {t('profile')}
                           </Link>
                           <Link
@@ -157,7 +156,7 @@ export default function Navigation() {
                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                           >
-                            <Heart className="w-4 h-4 text-slate-400" />
+                            <Heart className="w-4 h-4 text-slate-400" suppressHydrationWarning />
                             Favorites
                           </Link>
                           <Link
@@ -165,7 +164,7 @@ export default function Navigation() {
                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                           >
-                            <Settings className="w-4 h-4 text-slate-400" />
+                            <Settings className="w-4 h-4 text-slate-400" suppressHydrationWarning />
                             {t('settings')}
                           </Link>
                           <Link
@@ -173,7 +172,7 @@ export default function Navigation() {
                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                           >
-                            <Shield className="w-4 h-4 text-slate-400" />
+                            <Shield className="w-4 h-4 text-slate-400" suppressHydrationWarning />
                             Admin
                           </Link>
                         </div>
@@ -183,7 +182,7 @@ export default function Navigation() {
                             onClick={handleSignOut}
                             className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                           >
-                            <LogOut className="w-4 h-4" />
+                            <LogOut className="w-4 h-4" suppressHydrationWarning />
                             {t('signOut')}
                           </button>
                         </div>
@@ -243,7 +242,7 @@ export default function Navigation() {
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                         onClick={() => setShowUserMenu(false)}
                       >
-                        <UserCircle className="w-4 h-4 text-slate-400" />
+                        <UserCircle className="w-4 h-4 text-slate-400" suppressHydrationWarning />
                         {t('profile')}
                       </Link>
                       <Link
@@ -251,7 +250,7 @@ export default function Navigation() {
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                         onClick={() => setShowUserMenu(false)}
                       >
-                        <Heart className="w-4 h-4 text-slate-400" />
+                        <Heart className="w-4 h-4 text-slate-400" suppressHydrationWarning />
                         Favorites
                       </Link>
                       <Link
@@ -259,7 +258,7 @@ export default function Navigation() {
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                         onClick={() => setShowUserMenu(false)}
                       >
-                        <Settings className="w-4 h-4 text-slate-400" />
+                        <Settings className="w-4 h-4 text-slate-400" suppressHydrationWarning />
                         {t('settings')}
                       </Link>
                     </div>
@@ -273,7 +272,7 @@ export default function Navigation() {
                         onClick={handleSignOut}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
-                        <LogOut className="w-4 h-4" />
+                        <LogOut className="w-4 h-4" suppressHydrationWarning />
                         {t('signOut')}
                       </button>
                     </div>

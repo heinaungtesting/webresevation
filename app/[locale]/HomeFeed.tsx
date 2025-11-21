@@ -6,8 +6,10 @@ import { Session } from '@/types';
 import SessionCard from '@/app/components/SessionCard';
 import CompactSessionCard from '@/app/components/CompactSessionCard';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { Bell, Plus, ChevronRight, Sparkles, Calendar, MapPin, Zap, Map, List } from 'lucide-react';
+import { Bell, Plus, ChevronRight, Sparkles, Calendar, MapPin, Zap, Map, List, Search, Filter } from 'lucide-react';
 import Button from '@/app/components/ui/Button';
+import Input from '@/app/components/ui/Input';
+import { cn } from '@/lib/utils';
 
 interface HomeFeedProps {
   sessions: Session[];
@@ -61,6 +63,7 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
   const { user, profile } = useAuth();
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const displayName = profile?.display_name || profile?.username || user?.email?.split('@')[0] || 'there';
   const greeting = getGreeting();
@@ -68,6 +71,11 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
   const filteredSessions = useMemo(() => {
     return sessions.filter((session) => {
       const sessionDate = new Date(session.date_time);
+      const matchesSearch = searchQuery === '' ||
+        session.sport_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        session.sport_center?.name_en?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      if (!matchesSearch) return false;
 
       switch (activeFilter) {
         case 'badminton':
@@ -83,60 +91,74 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
           return true;
       }
     });
-  }, [sessions, activeFilter]);
+  }, [sessions, activeFilter, searchQuery]);
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
+    <div className="min-h-screen bg-slate-50 pb-24 md:pb-10">
       {/* Sticky Header */}
-      <header className="sticky top-0 z-40 glass-strong border-b border-white/10">
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200 transition-all duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
-                {greeting}, {displayName.split(' ')[0]}
-              </h1>
-              <p className="text-sm text-slate-500">Find your next game</p>
-            </div>
-            <div className="flex items-center gap-3">
-              {user && (
-                <Link
-                  href="/notifications"
-                  className="relative p-2 rounded-xl hover:bg-slate-100 transition-colors"
-                >
-                  <Bell className="w-5 h-5 text-slate-600" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-accent-rose rounded-full" />
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight" suppressHydrationWarning>
+                  {greeting}, <span className="text-primary-600">{displayName.split(' ')[0]}</span>
+                </h1>
+                <p className="text-sm text-slate-500 font-medium">Ready for your next game?</p>
+              </div>
+              <div className="flex items-center gap-3">
+                {user && (
+                  <Link
+                    href="/notifications"
+                    className="relative p-2.5 rounded-xl hover:bg-slate-100 transition-colors group"
+                  >
+                    <Bell className="w-5 h-5 text-slate-600 group-hover:text-primary-600 transition-colors" />
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
+                  </Link>
+                )}
+                {/* Desktop Create Button */}
+                <Link href="/sessions/create" className="hidden md:block">
+                  <Button variant="gradient" size="sm" className="shadow-md hover:shadow-lg">
+                    <Plus className="w-4 h-4 mr-1.5" />
+                    Create Session
+                  </Button>
                 </Link>
-              )}
-              {/* Desktop Create Button */}
-              <Link href="/sessions/create" className="hidden md:block">
-                <Button variant="gradient" size="sm">
-                  <Plus className="w-4 h-4 mr-1" />
-                  Create
-                </Button>
-              </Link>
+              </div>
+            </div>
+
+            {/* Search Bar (Mobile/Desktop) */}
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-slate-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search sports, venues..."
+                className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 sm:text-sm"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
           </div>
         </div>
       </header>
 
-      {/* Sticky Quick Filters with Glass Effect */}
-      <div className="sticky top-[73px] z-30 glass-strong border-b border-white/10">
+      {/* Sticky Quick Filters */}
+      <div className="sticky top-[130px] md:top-[130px] z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto">
-          <div className="flex gap-2 px-4 py-3 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 px-4 py-3 overflow-x-auto scrollbar-hide mask-linear-fade">
             {sportFilters.map((filter) => (
               <button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`
-                  flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium
-                  whitespace-nowrap transition-all duration-200
-                  ${activeFilter === filter.id
-                    ? 'bg-slate-900 text-white shadow-lg'
-                    : 'bg-white text-slate-600 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] hover:text-slate-900'
-                  }
-                `}
+                className={cn(
+                  "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 border",
+                  activeFilter === filter.id
+                    ? "bg-slate-900 text-white border-slate-900 shadow-md scale-105"
+                    : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                )}
               >
-                {filter.icon && <span>{filter.icon}</span>}
+                {filter.icon && <span className="text-base">{filter.icon}</span>}
                 {filter.label}
               </button>
             ))}
@@ -147,32 +169,28 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
         {/* Happening Now Section */}
         {happeningNow.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-4">
+          <section className="animate-fadeIn">
+            <div className="flex items-center justify-between mb-4 px-1">
               <div className="flex items-center gap-2">
-                {/* Pulse animation indicator */}
                 <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-rose opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent-rose"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
                 </span>
-                <h2 className="text-lg font-semibold text-slate-900">Happening Now</h2>
-                <span className="px-2 py-0.5 rounded-full bg-accent-rose/10 text-accent-rose text-xs font-medium">
-                  Live
-                </span>
+                <h2 className="text-lg font-bold text-slate-900">Happening Now</h2>
               </div>
               <Link
                 href="/sessions?filter=now"
-                className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+                className="text-sm text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1 group"
               >
                 See all
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
-            {/* Horizontal scroll with snap for iOS-like feel */}
-            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide px-4 snap-x snap-mandatory -mx-4">
+            {/* Horizontal scroll with snap */}
+            <div className="flex gap-4 overflow-x-auto pb-6 pt-2 scrollbar-hide px-1 snap-x snap-mandatory -mx-1">
               {happeningNow.map((session) => (
                 <div key={session.id} className="flex-shrink-0 w-[85vw] sm:w-80 snap-center">
-                  <CompactSessionCard session={session} variant="horizontal" />
+                  <CompactSessionCard session={session} variant="horizontal" className="h-full" />
                 </div>
               ))}
             </div>
@@ -180,33 +198,38 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
         )}
 
         {/* For You Feed */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
+        <section className="animate-fadeIn" style={{ animationDelay: '100ms' }}>
+          <div className="flex items-center justify-between mb-4 px-1">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-primary-100">
-                <Sparkles className="w-4 h-4 text-primary-600" />
+              <div className="p-1.5 rounded-lg bg-primary-100 text-primary-600">
+                <Sparkles className="w-4 h-4" />
               </div>
-              <h2 className="text-lg font-semibold text-slate-900">For You</h2>
+              <h2 className="text-lg font-bold text-slate-900">For You</h2>
             </div>
             <Link
               href="/sessions"
-              className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+              className="text-sm text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1 group"
             >
               View all
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
 
           {viewMode === 'map' ? (
             /* Map View Placeholder */
-            <div className="h-[60vh] w-full rounded-3xl bg-slate-200 flex items-center justify-center animate-fadeIn">
-              <div className="text-center p-6">
-                <MapPin className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                <h3 className="text-lg font-bold text-slate-700 mb-1">Map View</h3>
-                <p className="text-slate-500 text-sm">
-                  See sessions near you visually.
+            <div className="h-[60vh] w-full rounded-3xl bg-slate-100 border-2 border-dashed border-slate-200 flex items-center justify-center animate-fadeIn relative overflow-hidden group">
+              <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-5" />
+              <div className="text-center p-6 relative z-10">
+                <div className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <MapPin className="w-8 h-8 text-primary-500" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Map View</h3>
+                <p className="text-slate-500 text-sm max-w-xs mx-auto">
+                  Visualize sessions near you on an interactive map.
                   <br />
-                  <span className="text-xs text-slate-400">(Coming in Phase 3)</span>
+                  <span className="inline-block mt-2 px-3 py-1 rounded-full bg-slate-200 text-slate-600 text-xs font-medium">
+                    Coming Soon
+                  </span>
                 </p>
               </div>
             </div>
@@ -224,65 +247,70 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
             </div>
           ) : (
             /* Empty State - Bento Grid */
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fadeIn">
               {/* Create Session Card */}
               <Link
                 href="/sessions/create"
-                className="col-span-2 md:col-span-2 p-6 rounded-2xl bg-gradient-ocean text-white hover:shadow-glow transition-all duration-300 group"
+                className="col-span-1 md:col-span-2 p-8 rounded-3xl bg-gradient-ocean text-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 rounded-xl bg-white/20">
-                    <Plus className="w-6 h-6" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-3xl -ml-12 -mb-12" />
+
+                <div className="relative z-10">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-sm">
+                      <Plus className="w-8 h-8" />
+                    </div>
+                    <div className="p-2 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ChevronRight className="w-5 h-5" />
+                    </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  <h3 className="text-2xl font-bold mb-2">Create a Session</h3>
+                  <p className="text-white/90 text-base max-w-md">
+                    Be the first to host a game. Set the time, place, and let others join you.
+                  </p>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">Create a Session</h3>
-                <p className="text-white/80 text-sm">
-                  Be the first to host a game. Set the time, place, and let others join you.
-                </p>
               </Link>
 
               {/* Explore Card */}
               <Link
                 href="/sessions"
-                className="p-6 rounded-2xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 group"
+                className="p-8 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 group"
               >
-                <div className="p-3 rounded-xl bg-slate-100 w-fit mb-4 group-hover:bg-primary-100 transition-colors">
-                  <MapPin className="w-5 h-5 text-slate-600 group-hover:text-primary-600 transition-colors" />
+                <div className="p-3 rounded-2xl bg-primary-50 w-fit mb-6 group-hover:bg-primary-100 transition-colors">
+                  <MapPin className="w-8 h-8 text-primary-600" />
                 </div>
-                <h3 className="font-semibold text-slate-900 mb-1">Explore Venues</h3>
-                <p className="text-slate-500 text-sm">
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Explore Venues</h3>
+                <p className="text-slate-500">
                   Discover sport centers near you
                 </p>
               </Link>
 
-              {/* Calendar Card */}
-              <div className="p-6 rounded-2xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-                <div className="p-3 rounded-xl bg-slate-100 w-fit mb-4">
-                  <Calendar className="w-5 h-5 text-slate-600" />
+              {/* Status Card */}
+              <div className="md:col-span-3 p-8 rounded-3xl bg-slate-50 border border-slate-100 text-center">
+                <div className="inline-flex p-4 rounded-full bg-white shadow-sm mb-4">
+                  <Filter className="w-6 h-6 text-slate-400" />
                 </div>
-                <h3 className="font-semibold text-slate-900 mb-1">No Sessions Yet</h3>
-                <p className="text-slate-500 text-sm">
-                  {activeFilter !== 'all'
-                    ? `No ${activeFilter} sessions available`
-                    : 'Check back soon for new games'
+                <h3 className="text-lg font-semibold text-slate-900 mb-1">No matches found</h3>
+                <p className="text-slate-500">
+                  {searchQuery
+                    ? `No results for "${searchQuery}"`
+                    : activeFilter !== 'all'
+                      ? `No ${activeFilter} sessions available right now`
+                      : 'Check back soon for new games'
                   }
                 </p>
-              </div>
-
-              {/* Quick Tip Card */}
-              <div className="col-span-2 md:col-span-1 p-6 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-amber-100">
-                    <Sparkles className="w-4 h-4 text-amber-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-amber-900 mb-1">Pro Tip</h3>
-                    <p className="text-amber-700 text-sm">
-                      Sessions fill up fast! Turn on notifications to never miss a game.
-                    </p>
-                  </div>
-                </div>
+                {(searchQuery || activeFilter !== 'all') && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setActiveFilter('all');
+                    }}
+                    className="mt-4 text-primary-600 font-medium hover:underline"
+                  >
+                    Clear filters
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -293,23 +321,23 @@ export default function HomeFeed({ sessions, happeningNow }: HomeFeedProps) {
       <button
         onClick={() => setViewMode(viewMode === 'list' ? 'map' : 'list')}
         className="
-          fixed bottom-28 left-1/2 -translate-x-1/2 z-40 md:hidden
-          flex items-center gap-2 px-5 py-3 rounded-full
+          fixed bottom-24 left-1/2 -translate-x-1/2 z-40 md:hidden
+          flex items-center gap-2 px-6 py-3.5 rounded-full
           bg-slate-900 text-white
-          shadow-[0_8px_30px_rgb(0,0,0,0.3)]
+          shadow-lg shadow-slate-900/20
           hover:bg-slate-800 active:scale-95
           transition-all duration-200
         "
       >
         {viewMode === 'list' ? (
           <>
-            <Map className="w-4 h-4" />
-            <span className="text-sm font-medium">Map</span>
+            <Map className="w-5 h-5" />
+            <span className="text-sm font-semibold">Map View</span>
           </>
         ) : (
           <>
-            <List className="w-4 h-4" />
-            <span className="text-sm font-medium">List</span>
+            <List className="w-5 h-5" />
+            <span className="text-sm font-semibold">List View</span>
           </>
         )}
       </button>
