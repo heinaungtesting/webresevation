@@ -5,6 +5,9 @@ import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 
+// Valid session vibes
+const VALID_VIBES = ['COMPETITIVE', 'CASUAL', 'ACADEMY', 'LANGUAGE_EXCHANGE'] as const;
+
 // Zod schema for session creation validation
 const CreateSessionSchema = z.object({
   sport_center_id: z.string().uuid('Invalid sport center ID'),
@@ -32,6 +35,10 @@ const CreateSessionSchema = z.object({
     .pipe(z.number().min(2, 'Must allow at least 2 participants').nullable()),
   description_en: z.string().max(1000, 'Description too long').optional(),
   description_ja: z.string().max(1000, 'Description too long').optional(),
+  // Language exchange & vibe fields
+  primary_language: z.string().length(2, 'Language code must be 2 characters').default('ja'),
+  allow_english: z.boolean().default(false),
+  vibe: z.enum(VALID_VIBES).default('CASUAL'),
 });
 
 /**
@@ -90,6 +97,9 @@ export async function GET(request: Request) {
     const startDate = searchParams.get('start_date');
     const endDate = searchParams.get('end_date');
     const dateFilter = searchParams.get('date'); // 'today', 'weekend', or null
+    // Language exchange & vibe filters
+    const vibe = searchParams.get('vibe'); // 'COMPETITIVE', 'CASUAL', 'ACADEMY', 'LANGUAGE_EXCHANGE'
+    const allowEnglish = searchParams.get('allow_english'); // 'true' or 'false'
 
     // Build date filter based on date parameter
     let dateRange: { gte: Date; lte?: Date } = {
@@ -136,6 +146,16 @@ export async function GET(request: Request) {
 
     if (skillLevel && skillLevel !== 'all') {
       where.skill_level = skillLevel;
+    }
+
+    // Vibe filter
+    if (vibe && VALID_VIBES.includes(vibe as any)) {
+      where.vibe = vibe;
+    }
+
+    // English-friendly filter
+    if (allowEnglish === 'true') {
+      where.allow_english = true;
     }
 
     if (search) {
@@ -209,6 +229,9 @@ export async function POST(request: Request) {
       max_participants,
       description_en,
       description_ja,
+      primary_language,
+      allow_english,
+      vibe,
     } = validationResult.data;
 
     // Use transaction to create session and auto-join creator
@@ -223,6 +246,10 @@ export async function POST(request: Request) {
           max_participants,
           description_en,
           description_ja,
+          // Language exchange & vibe fields
+          primary_language,
+          allow_english,
+          vibe,
           created_by: user.id,
         },
       });

@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { ArrowLeft, Calendar, Clock, Users, MapPin } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Users, MapPin, Flame, Coffee, GraduationCap, Languages } from 'lucide-react';
 import Button from '@/app/components/ui/Button';
 import Input from '@/app/components/ui/Input';
 import Select from '@/app/components/ui/Select';
 import Card from '@/app/components/ui/Card';
 import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
+import { getLanguageOptions } from '@/app/components/ui/LanguageFlag';
 
 export default function CreateSessionPage() {
   const router = useRouter();
@@ -29,6 +30,10 @@ export default function CreateSessionPage() {
     max_participants: '8',
     description_en: '',
     description_ja: '',
+    // Language exchange & vibe fields
+    primary_language: 'ja',
+    allow_english: false,
+    vibe: 'CASUAL',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -57,6 +62,18 @@ export default function CreateSessionPage() {
     { value: '180', label: '3 hours' },
   ];
 
+  const vibes = [
+    { value: 'COMPETITIVE', label: 'Competitive - Serious, skill-focused play' },
+    { value: 'CASUAL', label: 'Casual - Relaxed, social games' },
+    { value: 'ACADEMY', label: 'Academy - Learning/teaching focused' },
+    { value: 'LANGUAGE_EXCHANGE', label: 'Language Exchange - Practice language while playing' },
+  ];
+
+  const languages = getLanguageOptions().map((l) => ({
+    value: l.value,
+    label: `${l.flag} ${l.label}`,
+  }));
+
   useEffect(() => {
     if (user) {
       fetchSportCenters();
@@ -81,8 +98,9 @@ export default function CreateSessionPage() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    const newValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    setFormData((prev) => ({ ...prev, [name]: newValue }));
     // Clear error for this field
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
@@ -141,6 +159,10 @@ export default function CreateSessionPage() {
           max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
           description_en: formData.description_en || null,
           description_ja: formData.description_ja || null,
+          // Language exchange & vibe fields
+          primary_language: formData.primary_language,
+          allow_english: formData.allow_english,
+          vibe: formData.vibe,
         }),
       });
 
@@ -256,6 +278,51 @@ export default function CreateSessionPage() {
               fullWidth
               options={skillLevels}
             />
+
+            {/* Session Vibe */}
+            <Select
+              label="Session Vibe"
+              name="vibe"
+              value={formData.vibe}
+              onChange={handleChange}
+              required
+              fullWidth
+              options={vibes}
+            />
+
+            {/* Language Settings */}
+            <div className="space-y-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+              <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                <Languages className="w-4 h-4" />
+                Language Settings
+              </h3>
+
+              <Select
+                label="Primary Language"
+                name="primary_language"
+                value={formData.primary_language}
+                onChange={handleChange}
+                required
+                fullWidth
+                options={languages}
+              />
+
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="allow_english"
+                  checked={formData.allow_english}
+                  onChange={handleChange}
+                  className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <span className="text-sm font-medium text-gray-700">English Friendly</span>
+                  <p className="text-xs text-gray-500">
+                    Check this if English speakers are welcome even if the primary language is different
+                  </p>
+                </div>
+              </label>
+            </div>
 
             {/* Date and Time */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

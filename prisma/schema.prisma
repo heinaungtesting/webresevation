@@ -18,6 +18,22 @@ enum AttendanceStatus {
   NO_SHOW     // User didn't show up
 }
 
+// Enum for user language proficiency level
+enum LanguageLevel {
+  BEGINNER      // Just started learning
+  INTERMEDIATE  // Can hold basic conversations
+  ADVANCED      // Fluent but not native
+  NATIVE        // Native speaker
+}
+
+// Enum for session vibe/atmosphere
+enum SessionVibe {
+  COMPETITIVE       // Serious, skill-focused play
+  CASUAL            // Relaxed, social games
+  ACADEMY           // Learning/teaching focused
+  LANGUAGE_EXCHANGE // Practice language while playing
+}
+
 // User model
 model User {
   id                   String         @id @default(uuid())
@@ -32,6 +48,10 @@ model User {
   notification_email   Boolean        @default(true)
   notification_push    Boolean        @default(true)
   language_preference  String         @default("en") // 'en' or 'ja'
+  // Language exchange fields
+  native_language      String?        // ISO 639-1 code (e.g., 'en', 'ja', 'ko')
+  target_language      String?        // Language user wants to practice
+  language_level       LanguageLevel? // Proficiency in target language
   email_verified       Boolean        @default(false)
   phone_number         String?        @unique
   phone_verified       Boolean        @default(false)
@@ -93,6 +113,10 @@ model Session {
   max_participants      Int?          // Must be >= 2 if set (enforced by DB constraint)
   description_en        String?       @db.Text
   description_ja        String?       @db.Text
+  // Language exchange & vibe fields
+  primary_language      String        @default("ja")    // Main language spoken (ISO 639-1)
+  allow_english         Boolean       @default(false)   // English-friendly session
+  vibe                  SessionVibe   @default(CASUAL)  // Session atmosphere
   created_by            String
   attendance_marked     Boolean       @default(false) // Whether host has marked attendance
   created_at            DateTime      @default(now())
@@ -111,6 +135,9 @@ model Session {
   @@index([date_time])
   @@index([sport_center_id])
   @@index([created_by])
+  @@index([vibe])
+  @@index([primary_language])
+  @@index([allow_english])
 }
 
 // UserSession model (attendance tracking)

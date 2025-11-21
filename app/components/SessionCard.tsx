@@ -3,6 +3,8 @@ import { Session, SportType, SkillLevel } from '@/types';
 import Badge from './ui/Badge';
 import Button from './ui/Button';
 import FavoriteButton from './sessions/FavoriteButton';
+import VibeBadge, { SessionVibe } from './ui/VibeBadge';
+import LanguageFlag from './ui/LanguageFlag';
 import { formatDate, formatTime } from '@/lib/utils';
 import { Users, Clock, MapPin, ArrowRight } from 'lucide-react';
 import { AvatarGroup } from './ui/Avatar';
@@ -57,9 +59,14 @@ export default function SessionCard({ session }: SessionCardProps) {
               <h3 className="font-semibold text-base text-slate-900 capitalize">
                 {session.sport_type.replace('-', ' ')}
               </h3>
-              <Badge variant={skill.color} size="sm">
-                {skill.label}
-              </Badge>
+              <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                <Badge variant={skill.color} size="sm">
+                  {skill.label}
+                </Badge>
+                {session.vibe && (
+                  <VibeBadge vibe={session.vibe as SessionVibe} size="sm" showLabel={false} />
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -82,9 +89,22 @@ export default function SessionCard({ session }: SessionCardProps) {
             <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100">
               <MapPin className="w-3.5 h-3.5 text-slate-500" />
             </div>
-            <span className="line-clamp-1 font-medium text-sm">
-              {session.sport_center?.name_en || 'Sport Center'}
-            </span>
+            <div className="flex items-center justify-between flex-1">
+              <span className="line-clamp-1 font-medium text-sm">
+                {session.sport_center?.name_en || 'Sport Center'}
+              </span>
+              {/* Language indicators */}
+              <div className="flex items-center gap-1">
+                {session.primary_language && (
+                  <LanguageFlag code={session.primary_language} size="sm" />
+                )}
+                {session.allow_english && session.primary_language !== 'en' && (
+                  <span className="text-xs px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded-full">
+                    EN OK
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center gap-2.5 text-sm text-slate-600">

@@ -12,6 +12,10 @@ export type SkillLevel = 'beginner' | 'intermediate' | 'advanced';
 
 export type Language = 'en' | 'ja';
 
+export type SessionVibe = 'COMPETITIVE' | 'CASUAL' | 'ACADEMY' | 'LANGUAGE_EXCHANGE';
+
+export type LanguageLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'NATIVE';
+
 export interface User {
   id: string;
   email: string;
@@ -19,6 +23,10 @@ export interface User {
   display_name?: string;
   avatar_url?: string;
   language_preference: Language;
+  // Language exchange fields
+  native_language?: string;
+  target_language?: string;
+  language_level?: LanguageLevel;
   email_verified: boolean;
   phone_verified: boolean;
   created_at: string;
@@ -56,6 +64,10 @@ export interface Session {
   current_participants: number;
   description_en?: string;
   description_ja?: string;
+  // Language exchange & vibe fields
+  primary_language?: string;
+  allow_english?: boolean;
+  vibe?: SessionVibe;
   created_by: string;
   created_at: string;
   sport_center?: SportCenter;

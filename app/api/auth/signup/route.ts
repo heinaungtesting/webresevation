@@ -25,12 +25,29 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { email, password, language = 'en' } = await request.json();
+    const {
+      email,
+      password,
+      language = 'en',
+      // Language exchange fields (optional)
+      native_language,
+      target_language,
+      language_level,
+    } = await request.json();
 
     // Validate input
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate language_level if provided
+    const validLanguageLevels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'NATIVE'];
+    if (language_level && !validLanguageLevels.includes(language_level)) {
+      return NextResponse.json(
+        { error: 'Invalid language level. Must be one of: BEGINNER, INTERMEDIATE, ADVANCED, NATIVE' },
         { status: 400 }
       );
     }
@@ -63,6 +80,10 @@ export async function POST(request: Request) {
             email: data.user.email!,
             language_preference: language,
             email_verified: false,
+            // Language exchange fields
+            native_language: native_language || null,
+            target_language: target_language || null,
+            language_level: language_level || null,
           },
         });
 
