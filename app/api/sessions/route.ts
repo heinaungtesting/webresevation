@@ -10,10 +10,15 @@ const CreateSessionSchema = z.object({
   sport_center_id: z.string().uuid('Invalid sport center ID'),
   sport_type: z.string().min(1, 'Sport type is required'),
   skill_level: z.enum(['beginner', 'intermediate', 'advanced'] as const),
-  date_time: z.string().refine(
-    (val) => !isNaN(Date.parse(val)),
-    'Invalid date/time format'
-  ),
+  date_time: z.string()
+    .refine(
+      (val) => !isNaN(Date.parse(val)),
+      'Invalid date/time format'
+    )
+    .refine(
+      (val) => new Date(val) > new Date(),
+      'Session date must be in the future'
+    ),
   duration_minutes: z.union([z.number(), z.string()])
     .transform((val) => typeof val === 'string' ? parseInt(val, 10) : val)
     .pipe(z.number().min(1, 'Duration must be at least 1 minute').max(480, 'Duration cannot exceed 8 hours')),

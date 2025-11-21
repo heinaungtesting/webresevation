@@ -50,6 +50,11 @@ export async function POST(request: Request) {
         throw new Error('SESSION_NOT_FOUND');
       }
 
+      // Check if session is in the past (cannot join past sessions)
+      if (new Date(session.date_time) < new Date()) {
+        throw new Error('SESSION_PAST');
+      }
+
       // Check if session is full
       if (
         session.max_participants &&
@@ -97,6 +102,12 @@ export async function POST(request: Request) {
     // Handle specific transaction errors
     if (error.message === 'SESSION_NOT_FOUND') {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+    }
+    if (error.message === 'SESSION_PAST') {
+      return NextResponse.json(
+        { error: 'Cannot join past sessions' },
+        { status: 400 }
+      );
     }
     if (error.message === 'SESSION_FULL') {
       return NextResponse.json({ error: 'Session is full' }, { status: 400 });
