@@ -34,6 +34,30 @@ enum SessionVibe {
   LANGUAGE_EXCHANGE // Practice language while playing
 }
 
+// Enum for report status
+enum ReportStatus {
+  PENDING   // Report submitted, awaiting review
+  REVIEWED  // Report has been reviewed
+  RESOLVED  // Action taken, report closed
+  DISMISSED // Report dismissed (false positive)
+}
+
+// Enum for report reason
+enum ReportReason {
+  HARASSMENT      // Harassing or bullying behavior
+  NO_SHOW         // Repeatedly not showing up
+  SPAM            // Spam or promotional content
+  CREEPY_BEHAVIOR // Inappropriate or creepy behavior
+  FAKE_PROFILE    // Fake or misleading profile
+  OTHER           // Other reason (specify in description)
+}
+
+// Enum for report entity type
+enum ReportEntityType {
+  USER    // Reporting a user
+  SESSION // Reporting a session
+}
+
 // User model
 model User {
   id                   String         @id @default(uuid())
@@ -56,6 +80,11 @@ model User {
   phone_number         String?        @unique
   phone_verified       Boolean        @default(false)
   is_admin             Boolean        @default(false)
+  // Trust & verification
+  is_verified_student  Boolean        @default(false) // University student verification
+  is_banned            Boolean        @default(false) // User has been banned
+  banned_at            DateTime?                      // When user was banned
+  banned_reason        String?                        // Reason for ban
   // Reliability tracking
   no_show_count        Int            @default(0)    // Number of times user didn't show up
   reliability_score    Int            @default(100)  // 0-100 score (starts at 100%)
@@ -70,11 +99,14 @@ model User {
   favorites            Favorite[]
   reviews              Review[]
   notifications        Notification[]
+  reports_submitted    Report[]       @relation("ReportReporter")
+  reports_received     Report[]       @relation("ReportedUser")
 
   @@index([email])
   @@index([phone_number])
   @@index([username])
   @@index([reliability_score])
+  @@index([is_banned])
 }
 
 // Sport Center model
@@ -129,6 +161,7 @@ model Session {
   conversation          Conversation? @relation("SessionConversation")
   favorites             Favorite[]
   reviews               Review[]
+  reports               Report[]      @relation("ReportedSession")
 
   @@index([sport_type])
   @@index([skill_level])
@@ -271,4 +304,33 @@ model Notification {
   @@index([created_at])
   // Composite index for efficient user notification queries
   // See migration: Notification_user_read_idx
+}
+
+// Report model (user reports for trust & safety)
+model Report {
+  id               String           @id @default(uuid())
+  reporter_id      String                              // User who submitted the report
+  entity_type      ReportEntityType                    // USER or SESSION
+  reported_user_id String?                             // If reporting a user
+  session_id       String?                             // If reporting a session
+  reason           ReportReason                        // Reason for report
+  description      String?          @db.Text           // Additional details
+  status           ReportStatus     @default(PENDING)  // Current status
+  admin_notes      String?          @db.Text           // Notes from admin review
+  resolved_by      String?                             // Admin who resolved
+  resolved_at      DateTime?                           // When resolved
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+
+  // Relations
+  reporter         User             @relation("ReportReporter", fields: [reporter_id], references: [id], onDelete: Cascade)
+  reported_user    User?            @relation("ReportedUser", fields: [reported_user_id], references: [id], onDelete: SetNull)
+  session          Session?         @relation("ReportedSession", fields: [session_id], references: [id], onDelete: SetNull)
+
+  @@index([reporter_id])
+  @@index([reported_user_id])
+  @@index([session_id])
+  @@index([status])
+  @@index([created_at])
+  @@index([entity_type])
 }

@@ -8,10 +8,12 @@ import Card from '@/app/components/ui/Card';
 import Badge from '@/app/components/ui/Badge';
 import { Session } from '@/types';
 import { formatDate } from '@/lib/utils';
-import { MapPin, Clock, Users, Info, ArrowLeft, Loader2 } from 'lucide-react';
+import { MapPin, Clock, Users, Info, ArrowLeft, Loader2, Flag, MoreVertical } from 'lucide-react';
 import ReviewSection from '@/app/components/sessions/ReviewSection';
 import FavoriteButton from '@/app/components/sessions/FavoriteButton';
 import AttendanceTracker from '@/app/components/sessions/AttendanceTracker';
+import ReportModal from '@/app/components/ReportModal';
+import StudentBadge from '@/app/components/ui/StudentBadge';
 
 export default function SessionDetailPage() {
   const params = useParams();
@@ -22,6 +24,9 @@ export default function SessionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState('');
+  // Report modal state
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportTarget, setReportTarget] = useState<{ type: 'USER' | 'SESSION'; id: string; name?: string } | null>(null);
 
   useEffect(() => {
     fetchSession();
@@ -136,6 +141,12 @@ export default function SessionDetailPage() {
   const isFull = session.max_participants && session.current_participants >= session.max_participants;
   const spotsLeft = session.max_participants ? session.max_participants - session.current_participants : null;
 
+  // Handler for opening report modal
+  const openReportModal = (type: 'USER' | 'SESSION', id: string, name?: string) => {
+    setReportTarget({ type, id, name });
+    setReportModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -167,7 +178,18 @@ export default function SessionDetailPage() {
                     {isFull && <Badge variant="danger">Full</Badge>}
                   </div>
                 </div>
-                <FavoriteButton sessionId={session.id} size="lg" />
+                <div className="flex items-center gap-2">
+                  <FavoriteButton sessionId={session.id} size="lg" />
+                  {user && user.id !== session.created_by && (
+                    <button
+                      onClick={() => openReportModal('SESSION', session.id, `${session.sport_type} session`)}
+                      className="p-2 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
+                      title="Report this session"
+                    >
+                      <Flag className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -229,21 +251,40 @@ export default function SessionDetailPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {session.participants && session.participants.length > 0 ? (
                   session.participants.map((participant: any) => (
-                    <div key={participant.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                      {participant.avatar_url ? (
-                        <img
-                          src={participant.avatar_url}
-                          alt={participant.display_name || participant.username || 'Player'}
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-semibold">
-                          {(participant.display_name || participant.username || 'P').charAt(0).toUpperCase()}
+                    <div key={participant.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg group">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {participant.avatar_url ? (
+                          <img
+                            src={participant.avatar_url}
+                            alt={participant.display_name || participant.username || 'Player'}
+                            className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-semibold flex-shrink-0">
+                            {(participant.display_name || participant.username || 'P').charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm truncate font-medium">
+                              {participant.display_name || participant.username || 'Player'}
+                            </span>
+                            {participant.is_verified_student && <StudentBadge size="sm" />}
+                          </div>
+                          {participant.reliability_score !== undefined && participant.reliability_score < 80 && (
+                            <span className="text-xs text-amber-600">Reliability: {participant.reliability_score}%</span>
+                          )}
                         </div>
+                      </div>
+                      {user && user.id !== participant.id && (
+                        <button
+                          onClick={() => openReportModal('USER', participant.id, participant.display_name || participant.username)}
+                          className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all"
+                          title="Report user"
+                        >
+                          <Flag className="w-4 h-4" />
+                        </button>
                       )}
-                      <span className="text-sm truncate">
-                        {participant.display_name || participant.username || 'Player'}
-                      </span>
                     </div>
                   ))
                 ) : (
@@ -345,6 +386,20 @@ export default function SessionDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Report Modal */}
+      {reportTarget && (
+        <ReportModal
+          isOpen={reportModalOpen}
+          onClose={() => {
+            setReportModalOpen(false);
+            setReportTarget(null);
+          }}
+          entityType={reportTarget.type}
+          entityId={reportTarget.id}
+          entityName={reportTarget.name}
+        />
+      )}
     </div>
   );
 }
