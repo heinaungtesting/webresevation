@@ -6,7 +6,7 @@ import FavoriteButton from './sessions/FavoriteButton';
 import VibeBadge, { SessionVibe } from './ui/VibeBadge';
 import LanguageFlag from './ui/LanguageFlag';
 import { formatDate, formatTime } from '@/lib/utils';
-import { Users, Clock, MapPin, ArrowRight } from 'lucide-react';
+import { Users, Clock, MapPin, ArrowRight, Bell } from 'lucide-react';
 import { AvatarGroup } from './ui/Avatar';
 
 interface SessionCardProps {
@@ -174,14 +174,27 @@ export default function SessionCard({ session }: SessionCardProps) {
               <ArrowRight className="w-3.5 h-3.5 ml-1 opacity-0 -translate-x-2 group-hover/btn:opacity-100 group-hover/btn:translate-x-0 transition-all" />
             </Button>
           </Link>
-          <Button
-            variant={isFull ? 'ghost' : 'gradient'}
-            size="sm"
-            disabled={isFull}
-            className="flex-1 min-h-[44px]"
-          >
-            {isFull ? 'Full' : "Join"}
-          </Button>
+          {isFull ? (
+            <Link href={`/sessions/${session.id}?waitlist=true`} className="flex-1">
+              <Button
+                variant="outline"
+                size="sm"
+                fullWidth
+                className="min-h-[44px] border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:border-amber-400"
+              >
+                <Bell className="w-3.5 h-3.5 mr-1.5" />
+                Waitlist
+              </Button>
+            </Link>
+          ) : (
+            <Button
+              variant="gradient"
+              size="sm"
+              className="flex-1 min-h-[44px]"
+            >
+              Join
+            </Button>
+          )}
         </div>
       </div>
 

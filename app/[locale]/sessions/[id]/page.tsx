@@ -8,7 +8,7 @@ import Card from '@/app/components/ui/Card';
 import Badge from '@/app/components/ui/Badge';
 import { Session } from '@/types';
 import { formatDate } from '@/lib/utils';
-import { MapPin, Clock, Users, Info, ArrowLeft, Loader2, Flag, MoreVertical } from 'lucide-react';
+import { MapPin, Clock, Users, Info, ArrowLeft, Loader2, Flag, MoreVertical, Bell, BellOff } from 'lucide-react';
 import ReviewSection from '@/app/components/sessions/ReviewSection';
 import FavoriteButton from '@/app/components/sessions/FavoriteButton';
 import AttendanceTracker from '@/app/components/sessions/AttendanceTracker';
@@ -24,13 +24,20 @@ export default function SessionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState('');
+  // Waitlist state
+  const [isOnWaitlist, setIsOnWaitlist] = useState(false);
+  const [waitlistPosition, setWaitlistPosition] = useState<number | null>(null);
+  const [waitlistCount, setWaitlistCount] = useState(0);
   // Report modal state
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportTarget, setReportTarget] = useState<{ type: 'USER' | 'SESSION'; id: string; name?: string } | null>(null);
 
   useEffect(() => {
     fetchSession();
-  }, [params.id]);
+    if (user) {
+      fetchWaitlistStatus();
+    }
+  }, [params.id, user]);
 
   const fetchSession = async () => {
     try {
@@ -54,6 +61,72 @@ export default function SessionDetailPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWaitlistStatus = async () => {
+    try {
+      const response = await fetch(`/api/sessions/${params.id}/waitlist`);
+      if (response.ok) {
+        const data = await response.json();
+        setWaitlistCount(data.count);
+        setWaitlistPosition(data.userPosition);
+        setIsOnWaitlist(data.userPosition !== null);
+      }
+    } catch (err) {
+      console.error('Error fetching waitlist:', err);
+    }
+  };
+
+  const handleJoinWaitlist = async () => {
+    if (!user) {
+      router.push(`/login?redirectTo=/sessions/${params.id}`);
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const response = await fetch(`/api/sessions/${params.id}/waitlist`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to join waitlist');
+      }
+
+      setIsOnWaitlist(true);
+      setWaitlistPosition(data.position);
+      setWaitlistCount((prev) => prev + 1);
+    } catch (err: any) {
+      alert(err.message || 'Failed to join waitlist');
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleLeaveWaitlist = async () => {
+    setActionLoading(true);
+    try {
+      const response = await fetch(`/api/sessions/${params.id}/waitlist`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to leave waitlist');
+      }
+
+      setIsOnWaitlist(false);
+      setWaitlistPosition(null);
+      setWaitlistCount((prev) => Math.max(0, prev - 1));
+    } catch (err: any) {
+      alert(err.message || 'Failed to leave waitlist');
+      console.error(err);
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -363,10 +436,75 @@ export default function SessionDetailPage() {
                         Free to join • No payment required
                       </p>
                     </>
+                  ) : isOnWaitlist ? (
+                    /* User is on waitlist */
+                    <div className="space-y-3">
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Bell className="w-4 h-4 text-amber-600" />
+                          <p className="text-amber-800 text-sm font-medium">
+                            You're #{waitlistPosition} on the waitlist
+                          </p>
+                        </div>
+                        <p className="text-amber-700 text-xs">
+                          We'll notify you when a spot opens up!
+                        </p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        fullWidth
+                        onClick={handleLeaveWaitlist}
+                        disabled={actionLoading}
+                        className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                      >
+                        {actionLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Leaving...
+                          </>
+                        ) : (
+                          <>
+                            <BellOff className="w-4 h-4 mr-2" />
+                            Leave Waitlist
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   ) : (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-red-800 text-sm font-medium">
-                        This session is full
+                    /* Session is full, show waitlist option */
+                    <div className="space-y-3">
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-red-800 text-sm font-medium">
+                          This session is full
+                        </p>
+                        {waitlistCount > 0 && (
+                          <p className="text-red-600 text-xs mt-1">
+                            {waitlistCount} {waitlistCount === 1 ? 'person' : 'people'} on waitlist
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        fullWidth
+                        onClick={handleJoinWaitlist}
+                        disabled={actionLoading}
+                        className="border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
+                      >
+                        {actionLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Joining...
+                          </>
+                        ) : (
+                          <>
+                            <Bell className="w-4 h-4 mr-2" />
+                            Join Waitlist
+                          </>
+                        )}
+                      </Button>
+                      <p className="text-xs text-gray-500 text-center">
+                        Get notified when a spot opens up
                       </p>
                     </div>
                   )}

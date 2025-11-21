@@ -101,6 +101,7 @@ model User {
   notifications        Notification[]
   reports_submitted    Report[]       @relation("ReportReporter")
   reports_received     Report[]       @relation("ReportedUser")
+  waitlist_entries     Waitlist[]
 
   @@index([email])
   @@index([phone_number])
@@ -162,6 +163,7 @@ model Session {
   favorites             Favorite[]
   reviews               Review[]
   reports               Report[]      @relation("ReportedSession")
+  waitlist              Waitlist[]
 
   @@index([sport_type])
   @@index([skill_level])
@@ -333,4 +335,25 @@ model Report {
   @@index([status])
   @@index([created_at])
   @@index([entity_type])
+}
+
+// Waitlist model (for full sessions)
+// When a session reaches max_participants, users can join the waitlist
+model Waitlist {
+  id          String   @id @default(uuid())
+  session_id  String
+  user_id     String
+  position    Int?     // Optional: explicit position in waitlist
+  notified    Boolean  @default(false) // Whether user was notified of spot opening
+  notified_at DateTime?                // When notification was sent
+  created_at  DateTime @default(now())
+
+  // Relations
+  session     Session  @relation(fields: [session_id], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([session_id, user_id]) // User can only be on waitlist once per session
+  @@index([session_id])
+  @@index([user_id])
+  @@index([created_at])           // For ordering waitlist by join time
 }
