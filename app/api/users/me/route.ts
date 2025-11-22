@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { rateLimit } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,6 +97,10 @@ export async function GET() {
 
 // PATCH /api/users/me - Update current user profile
 export async function PATCH(request: Request) {
+  // Rate limit: 10 profile updates per minute
+  const rateLimitResponse = rateLimit(request, { limit: 10, windowMs: 60 * 1000 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = await createClient();
     const {

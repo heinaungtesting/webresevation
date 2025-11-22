@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { rateLimit } from '@/lib/rate-limit';
 
 // GET /api/sessions/[id]/reviews - Get all reviews for a session
 export async function GET(
@@ -48,6 +49,10 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Rate limit: 10 review creations per minute
+  const rateLimitResponse = rateLimit(request, { limit: 10, windowMs: 60 * 1000 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const { id } = await params;
     const supabase = await createClient();

@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { rateLimit } from '@/lib/rate-limit';
 
 // POST /api/sessions/[id]/favorite - Add session to favorites
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Rate limit: 30 favorite operations per minute
+  const rateLimitResponse = rateLimit(request, { limit: 30, windowMs: 60 * 1000 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const { id } = await params;
     const supabase = await createClient();

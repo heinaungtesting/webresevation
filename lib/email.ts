@@ -3,6 +3,21 @@ import { Resend } from 'resend';
 // Lazy initialization of Resend to avoid errors during build
 let resend: Resend | null = null;
 
+/**
+ * Escape HTML entities to prevent XSS attacks in email templates
+ * This is critical for any user-supplied content rendered in emails
+ */
+function escapeHtml(text: string): string {
+  const htmlEntities: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, (char) => htmlEntities[char]);
+}
+
 function getResendClient() {
   if (!resend) {
     const apiKey = process.env.RESEND_API_KEY;
@@ -72,7 +87,7 @@ export async function sendWelcomeEmail(to: string, userName: string) {
             <h1>Welcome to SportsMatch Tokyo!</h1>
           </div>
           <div class="content">
-            <p>Hi ${userName},</p>
+            <p>Hi ${escapeHtml(userName)},</p>
 
             <p>Thank you for joining SportsMatch Tokyo! We're excited to have you as part of our sports community.</p>
 
@@ -95,7 +110,7 @@ export async function sendWelcomeEmail(to: string, userName: string) {
           </div>
           <div class="footer">
             <p>SportsMatch Tokyo - Find Your Sports Partner in Tokyo</p>
-            <p>This email was sent to ${to}</p>
+            <p>This email was sent to ${escapeHtml(to)}</p>
           </div>
         </div>
       </body>
@@ -143,27 +158,27 @@ export async function sendSessionReminderEmail(
             <h1>Session Reminder</h1>
           </div>
           <div class="content">
-            <p>Hi ${userName},</p>
+            <p>Hi ${escapeHtml(userName)},</p>
 
-            <p>This is a friendly reminder that you have a ${sessionDetails.sportType} session coming up tomorrow!</p>
+            <p>This is a friendly reminder that you have a ${escapeHtml(sessionDetails.sportType)} session coming up tomorrow!</p>
 
             <div class="session-info">
               <h3>Session Details</h3>
               <div class="info-row">
                 <span class="info-label">Sport:</span>
-                <span>${sessionDetails.sportType}</span>
+                <span>${escapeHtml(sessionDetails.sportType)}</span>
               </div>
               <div class="info-row">
                 <span class="info-label">Location:</span>
-                <span>${sessionDetails.sportCenter}</span>
+                <span>${escapeHtml(sessionDetails.sportCenter)}</span>
               </div>
               <div class="info-row">
                 <span class="info-label">Address:</span>
-                <span>${sessionDetails.address}</span>
+                <span>${escapeHtml(sessionDetails.address)}</span>
               </div>
               <div class="info-row">
                 <span class="info-label">Date & Time:</span>
-                <span>${sessionDetails.dateTime}</span>
+                <span>${escapeHtml(sessionDetails.dateTime)}</span>
               </div>
             </div>
 
@@ -180,7 +195,7 @@ export async function sendSessionReminderEmail(
           </div>
           <div class="footer">
             <p>SportsMatch Tokyo - Find Your Sports Partner in Tokyo</p>
-            <p>This email was sent to ${to}</p>
+            <p>This email was sent to ${escapeHtml(to)}</p>
           </div>
         </div>
       </body>
@@ -202,7 +217,7 @@ export async function sendMessageNotificationEmail(
     conversationId: string;
   }
 ) {
-  const subject = `New message from ${messageDetails.senderName}`;
+  const subject = `New message from ${escapeHtml(messageDetails.senderName)}`;
   const html = `
     <!DOCTYPE html>
     <html>
@@ -224,12 +239,12 @@ export async function sendMessageNotificationEmail(
             <h1>New Message</h1>
           </div>
           <div class="content">
-            <p>Hi ${userName},</p>
+            <p>Hi ${escapeHtml(userName)},</p>
 
-            <p>You have a new message from <strong>${messageDetails.senderName}</strong>:</p>
+            <p>You have a new message from <strong>${escapeHtml(messageDetails.senderName)}</strong>:</p>
 
             <div class="message-preview">
-              ${messageDetails.messagePreview}
+              ${escapeHtml(messageDetails.messagePreview)}
             </div>
 
             <p style="text-align: center;">
@@ -240,7 +255,7 @@ export async function sendMessageNotificationEmail(
           </div>
           <div class="footer">
             <p>SportsMatch Tokyo - Find Your Sports Partner in Tokyo</p>
-            <p>This email was sent to ${to}</p>
+            <p>This email was sent to ${escapeHtml(to)}</p>
             <p><a href="#">Unsubscribe from message notifications</a></p>
           </div>
         </div>
@@ -265,9 +280,10 @@ export async function sendSessionUpdateEmail(
   }
 ) {
   const isCancelled = updateDetails.updateType === 'cancelled';
+  const escapedSportType = escapeHtml(updateDetails.sportType);
   const subject = isCancelled
-    ? `Session Cancelled: ${updateDetails.sportType}`
-    : `Session Updated: ${updateDetails.sportType}`;
+    ? `Session Cancelled: ${escapedSportType}`
+    : `Session Updated: ${escapedSportType}`;
 
   const html = `
     <!DOCTYPE html>
@@ -290,19 +306,19 @@ export async function sendSessionUpdateEmail(
             <h1>${isCancelled ? 'Session Cancelled' : 'Session Updated'}</h1>
           </div>
           <div class="content">
-            <p>Hi ${userName},</p>
+            <p>Hi ${escapeHtml(userName)},</p>
 
             <div class="alert">
               <p><strong>${isCancelled ? 'Important:' : 'Update:'}</strong> ${
                 isCancelled
-                  ? `The ${updateDetails.sportType} session you were planning to attend has been cancelled.`
-                  : `The ${updateDetails.sportType} session has been updated with new details.`
+                  ? `The ${escapedSportType} session you were planning to attend has been cancelled.`
+                  : `The ${escapedSportType} session has been updated with new details.`
               }</p>
             </div>
 
             ${!isCancelled && updateDetails.newDateTime ? `
-              <p><strong>New Date & Time:</strong> ${updateDetails.newDateTime}</p>
-              ${updateDetails.sportCenter ? `<p><strong>Location:</strong> ${updateDetails.sportCenter}</p>` : ''}
+              <p><strong>New Date & Time:</strong> ${escapeHtml(updateDetails.newDateTime)}</p>
+              ${updateDetails.sportCenter ? `<p><strong>Location:</strong> ${escapeHtml(updateDetails.sportCenter)}</p>` : ''}
             ` : ''}
 
             <p>${isCancelled ? 'We apologize for any inconvenience. Please check out other available sessions.' : 'Please make note of these changes.'}</p>
@@ -315,7 +331,7 @@ export async function sendSessionUpdateEmail(
           </div>
           <div class="footer">
             <p>SportsMatch Tokyo - Find Your Sports Partner in Tokyo</p>
-            <p>This email was sent to ${to}</p>
+            <p>This email was sent to ${escapeHtml(to)}</p>
           </div>
         </div>
       </body>

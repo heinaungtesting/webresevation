@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { sendMessageNotificationEmail } from '@/lib/email';
+import { rateLimit } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -88,6 +89,10 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Rate limit: 30 messages per minute
+  const rateLimitResponse = rateLimit(request, { limit: 30, windowMs: 60 * 1000 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = await createClient();
     const {

@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 interface AvatarProps {
     src?: string;
@@ -18,6 +19,16 @@ const sizeClasses = {
     '2xl': 'w-20 h-20 text-2xl',
 };
 
+// Pixel sizes for next/image (must match sizeClasses)
+const sizePixels = {
+    xs: 24,
+    sm: 32,
+    md: 40,
+    lg: 48,
+    xl: 64,
+    '2xl': 80,
+};
+
 const statusColors = {
     online: 'bg-green-500',
     offline: 'bg-gray-400',
@@ -34,18 +45,23 @@ export default function Avatar({
     className,
 }: AvatarProps) {
     const sizeClass = sizeClasses[size];
+    const pixelSize = sizePixels[size];
     const statusSize = size === 'xs' || size === 'sm' ? 'w-2 h-2' : 'w-3 h-3';
 
     return (
         <div className={cn('relative inline-block', className)}>
             {src ? (
-                <img
+                <Image
                     src={src}
                     alt={alt}
+                    width={pixelSize}
+                    height={pixelSize}
                     className={cn(
                         'rounded-full object-cover ring-2 ring-white',
                         sizeClass
                     )}
+                    loading="lazy"
+                    unoptimized={src.startsWith('data:') || src.includes('dicebear')}
                 />
             ) : (
                 <div

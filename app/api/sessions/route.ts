@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { rateLimit, apiRateLimiter, createRateLimitHeaders } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -198,6 +199,10 @@ export async function GET(request: Request) {
 
 // POST /api/sessions - Create a new session
 export async function POST(request: Request) {
+  // Rate limit: 20 session creations per minute
+  const rateLimitResponse = rateLimit(request, { limit: 20, windowMs: 60 * 1000 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = await createClient();
     const {

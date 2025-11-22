@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import Button from '../ui/Button';
@@ -118,10 +119,13 @@ export default function Navigation() {
                       className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100 transition-all duration-200 group"
                     >
                       {profile?.avatar_url ? (
-                        <img
+                        <Image
                           src={profile.avatar_url}
                           alt={displayName}
+                          width={32}
+                          height={32}
                           className="w-8 h-8 rounded-full object-cover"
+                          unoptimized={profile.avatar_url.includes('dicebear')}
                         />
                       ) : (
                         <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center text-white text-sm font-medium">
@@ -216,10 +220,13 @@ export default function Navigation() {
                   className="flex items-center p-1 rounded-xl hover:bg-slate-100 transition-all duration-200"
                 >
                   {profile?.avatar_url ? (
-                    <img
+                    <Image
                       src={profile.avatar_url}
                       alt={displayName}
+                      width={32}
+                      height={32}
                       className="w-8 h-8 rounded-full object-cover"
+                      unoptimized={profile.avatar_url.includes('dicebear')}
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center text-white text-sm font-medium">

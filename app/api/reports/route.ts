@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { rateLimit } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,6 +39,10 @@ const CreateReportSchema = z.object({
 
 // POST /api/reports - Create a new report
 export async function POST(request: Request) {
+  // Rate limit: 5 reports per minute (strict to prevent abuse)
+  const rateLimitResponse = rateLimit(request, { limit: 5, windowMs: 60 * 1000 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = await createClient();
     const {

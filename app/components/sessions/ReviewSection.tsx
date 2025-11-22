@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
@@ -210,10 +211,13 @@ export default function ReviewSection({
             <div key={review.id} className="border-b border-gray-200 pb-4 last:border-0">
               <div className="flex items-start gap-3">
                 {review.user.avatar_url ? (
-                  <img
+                  <Image
                     src={review.user.avatar_url}
                     alt={getUserName(review.user)}
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full object-cover"
+                    unoptimized={review.user.avatar_url.includes('dicebear')}
                   />
                 ) : (
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
