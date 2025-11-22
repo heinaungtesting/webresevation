@@ -1,43 +1,47 @@
+'use client';
+
 import { ButtonHTMLAttributes, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import { motion, HTMLMotionProps } from 'framer-motion';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onAnimationStart' | 'onDrag' | 'onDragEnd' | 'onDragStart'> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'gradient' | 'glass' | 'glow';
   size?: 'xs' | 'sm' | 'md' | 'lg' | '2xl';
   fullWidth?: boolean;
   loading?: boolean;
+  animated?: boolean;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', fullWidth = false, loading = false, children, disabled, ...props }, ref) => {
+  ({ className, variant = 'primary', size = 'md', fullWidth = false, loading = false, animated = true, children, disabled, ...props }, ref) => {
     const baseStyles = cn(
       'inline-flex items-center justify-center font-medium rounded-xl',
       'transition-all duration-300 ease-out',
       'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
       'disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none',
-      'active:scale-[0.98] touch-manipulation',
+      'touch-manipulation',
       'relative overflow-hidden'
     );
 
     const variants = {
       primary: cn(
         'bg-primary-600 text-white',
-        'hover:bg-primary-700 hover:shadow-medium hover:-translate-y-0.5',
+        'hover:bg-primary-700 hover:shadow-medium',
         'active:bg-primary-800',
         'focus-visible:ring-primary-500',
         'shadow-soft'
       ),
       secondary: cn(
         'bg-slate-800 text-white',
-        'hover:bg-slate-900 hover:shadow-medium hover:-translate-y-0.5',
+        'hover:bg-slate-900 hover:shadow-medium',
         'active:bg-slate-950',
         'focus-visible:ring-slate-500',
         'shadow-soft'
       ),
       outline: cn(
         'border-2 border-primary-500 text-primary-600 bg-transparent',
-        'hover:bg-primary-50 hover:border-primary-600 hover:-translate-y-0.5',
+        'hover:bg-primary-50 hover:border-primary-600',
         'active:bg-primary-100',
         'focus-visible:ring-primary-500'
       ),
@@ -49,14 +53,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ),
       danger: cn(
         'bg-red-600 text-white',
-        'hover:bg-red-700 hover:shadow-medium hover:-translate-y-0.5',
+        'hover:bg-red-700 hover:shadow-medium',
         'active:bg-red-800',
         'focus-visible:ring-red-500',
         'shadow-soft'
       ),
       gradient: cn(
         'bg-gradient-ocean text-white',
-        'hover:shadow-glow hover:-translate-y-0.5',
+        'hover:shadow-glow',
         'active:shadow-glow-sm',
         'focus-visible:ring-primary-500',
         'shadow-colored',
@@ -67,14 +71,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ),
       glass: cn(
         'glass-light text-slate-800',
-        'hover:bg-white/70 hover:-translate-y-0.5 hover:shadow-soft',
+        'hover:bg-white/70 hover:shadow-soft',
         'active:bg-white/80',
         'focus-visible:ring-white/50',
         'border border-white/30'
       ),
       glow: cn(
         'bg-primary-600 text-white',
-        'hover:shadow-glow-lg hover:-translate-y-0.5',
+        'hover:shadow-glow-lg',
         'active:shadow-glow',
         'focus-visible:ring-primary-500',
         'shadow-glow animate-pulse-glow'
@@ -89,17 +93,41 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       '2xl': 'px-8 py-4 text-xl min-h-[60px] gap-3',
     };
 
+    const buttonClasses = cn(
+      baseStyles,
+      variants[variant],
+      sizes[size],
+      fullWidth && 'w-full',
+      className
+    );
+
+    const isDisabled = disabled || loading;
+
+    // Use motion.button for animated version
+    if (animated && !isDisabled) {
+      return (
+        <motion.button
+          ref={ref as any}
+          className={buttonClasses}
+          disabled={isDisabled}
+          whileHover={{ scale: 1.02, y: -2 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+          {...(props as any)}
+        >
+          {loading && (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          )}
+          {children}
+        </motion.button>
+      );
+    }
+
     return (
       <button
         ref={ref}
-        className={cn(
-          baseStyles,
-          variants[variant],
-          sizes[size],
-          fullWidth && 'w-full',
-          className
-        )}
-        disabled={disabled || loading}
+        className={buttonClasses}
+        disabled={isDisabled}
         {...props}
       >
         {loading && (

@@ -151,8 +151,9 @@
   --tracking-wide: 0.025em;
 }
 
-/* Dark Mode */
-@media (prefers-color-scheme: dark) {
+/* Dark Mode - Currently disabled via color-scheme: light on html element.
+   These variables are preserved for future dark mode support. */
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --background-secondary: #171717;
@@ -164,7 +165,7 @@
     --glass-border: rgba(255, 255, 255, 0.1);
     --gradient-card: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
   }
-}
+} */
 
 /* ===========================================
    BASE STYLES
@@ -180,11 +181,14 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  /* Force light mode regardless of system preference */
+  color-scheme: light;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  /* Explicit fallback to dark text color for readability */
+  color: var(--foreground, #0f172a);
+  background: var(--background, #fafbfc);
   font-family: var(--font-sans);
   overscroll-behavior-y: none;
   line-height: 1.6;

@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import Button from '../ui/Button';
 import MessageBubble from './MessageBubble';
 import Loading from '../ui/Loading';
 import ErrorMessage from '../ui/ErrorMessage';
 import EmptyState from '../ui/EmptyState';
+import { createClient } from '@/lib/supabase/client';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface Message {
   id: string;
@@ -33,23 +35,13 @@ export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps)
   const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  useEffect(() => {
-    fetchMessages();
-    // Poll for new messages every 3 seconds
-    const interval = setInterval(fetchMessages, 3000);
-    return () => clearInterval(interval);
-  }, [conversationId]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
       const response = await fetch(`/api/conversations/${conversationId}/messages`);
       if (!response.ok) throw new Error('Failed to fetch messages');
@@ -67,7 +59,88 @@ export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps)
     } finally {
       setLoading(false);
     }
-  };
+  }, [conversationId]);
+
+  // Initial fetch and Supabase Realtime subscription
+  useEffect(() => {
+    fetchMessages();
+
+    // Setup Supabase Realtime subscription for new messages
+    const supabase = createClient();
+
+    // Subscribe to INSERT events on the Message table for this conversation
+    const channel = supabase
+      .channel(`messages:${conversationId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'Message',
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        async (payload) => {
+          // Fetch the complete message with sender info since realtime only gives us the raw row
+          const newMsg = payload.new as any;
+
+          // Only process if it's not our own message (we add those optimistically)
+          if (newMsg.sender_id !== currentUserId) {
+            try {
+              // Fetch sender details
+              const response = await fetch(`/api/users/${newMsg.sender_id}`);
+              let sender = { id: newMsg.sender_id, email: 'Unknown', username: null };
+
+              if (response.ok) {
+                const userData = await response.json();
+                sender = {
+                  id: userData.id,
+                  email: userData.email,
+                  username: userData.username,
+                };
+              }
+
+              const messageWithSender: Message = {
+                id: newMsg.id,
+                content: newMsg.content,
+                sender_id: newMsg.sender_id,
+                created_at: newMsg.created_at,
+                sender,
+              };
+
+              setMessages((prev) => {
+                // Avoid duplicates
+                if (prev.some((m) => m.id === messageWithSender.id)) {
+                  return prev;
+                }
+                return [...prev, messageWithSender];
+              });
+            } catch (err) {
+              console.error('Error processing realtime message:', err);
+              // Fallback: refetch all messages
+              fetchMessages();
+            }
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log(`Subscribed to messages for conversation ${conversationId}`);
+        }
+      });
+
+    channelRef.current = channel;
+
+    // Cleanup subscription on unmount or conversation change
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+      }
+    };
+  }, [conversationId, currentUserId, fetchMessages]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,7 +162,16 @@ export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps)
       if (!response.ok) throw new Error('Failed to send message');
 
       const sentMessage = await response.json();
-      setMessages([...messages, sentMessage]);
+
+      // Add the sent message to the list (optimistic update)
+      setMessages((prev) => {
+        // Avoid duplicates in case realtime already added it
+        if (prev.some((m) => m.id === sentMessage.id)) {
+          return prev;
+        }
+        return [...prev, sentMessage];
+      });
+
       setError('');
       inputRef.current?.focus();
     } catch (err) {

@@ -79,6 +79,14 @@ export async function POST(
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
+    // Prevent session creators from reviewing their own sessions
+    if (session.created_by === user.id) {
+      return NextResponse.json(
+        { error: 'You cannot review your own session' },
+        { status: 400 }
+      );
+    }
+
     // Check if session is in the past
     if (new Date(session.date_time) > new Date()) {
       return NextResponse.json(

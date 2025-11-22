@@ -1,4 +1,4 @@
-import { Calendar, Trophy, Users, Star } from 'lucide-react';
+import { Calendar, Trophy, Users, Star, Shield, AlertTriangle } from 'lucide-react';
 import Card from '../ui/Card';
 
 interface UserStatsProps {
@@ -9,10 +9,53 @@ interface UserStatsProps {
     created_sessions: number;
     sport_breakdown?: Record<string, number>;
     member_since?: string;
+    // Reliability stats
+    reliability_score?: number;
+    no_show_count?: number;
+  };
+}
+
+/**
+ * Get color classes based on reliability score
+ */
+function getReliabilityColors(score: number) {
+  if (score >= 80) {
+    return {
+      text: 'text-green-600',
+      bg: 'bg-green-100',
+      fill: 'bg-green-500',
+      label: 'Excellent',
+    };
+  }
+  if (score >= 60) {
+    return {
+      text: 'text-yellow-600',
+      bg: 'bg-yellow-100',
+      fill: 'bg-yellow-500',
+      label: 'Good',
+    };
+  }
+  if (score >= 40) {
+    return {
+      text: 'text-orange-600',
+      bg: 'bg-orange-100',
+      fill: 'bg-orange-500',
+      label: 'Fair',
+    };
+  }
+  return {
+    text: 'text-red-600',
+    bg: 'bg-red-100',
+    fill: 'bg-red-500',
+    label: 'Needs Improvement',
   };
 }
 
 export default function UserStats({ stats }: UserStatsProps) {
+  const reliabilityScore = stats.reliability_score ?? 100;
+  const noShowCount = stats.no_show_count ?? 0;
+  const reliabilityColors = getReliabilityColors(reliabilityScore);
+
   const statItems = [
     {
       label: 'Total Sessions',
@@ -46,6 +89,66 @@ export default function UserStats({ stats }: UserStatsProps) {
 
   return (
     <div className="space-y-6">
+      {/* Reliability Score Card */}
+      <Card padding="lg" className="relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary-100 to-primary-50 rounded-full -mr-16 -mt-16 opacity-50" />
+
+        <div className="relative">
+          <div className="flex items-center gap-3 mb-4">
+            <div className={`p-3 rounded-xl ${reliabilityColors.bg}`}>
+              <Shield className={`w-6 h-6 ${reliabilityColors.text}`} />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Reliability Score</h3>
+              <p className="text-sm text-gray-500">Based on your attendance history</p>
+            </div>
+          </div>
+
+          <div className="flex items-end gap-4">
+            <div className="flex-1">
+              {/* Score Display */}
+              <div className="flex items-baseline gap-2 mb-2">
+                <span className={`text-4xl font-bold ${reliabilityColors.text}`}>
+                  {reliabilityScore}%
+                </span>
+                <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${reliabilityColors.bg} ${reliabilityColors.text}`}>
+                  {reliabilityColors.label}
+                </span>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${reliabilityColors.fill}`}
+                  style={{ width: `${reliabilityScore}%` }}
+                />
+              </div>
+
+              {/* No-show warning if any */}
+              {noShowCount > 0 && (
+                <div className="flex items-center gap-2 mt-3 text-sm text-amber-600">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>
+                    {noShowCount} no-show{noShowCount !== 1 ? 's' : ''} recorded
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Reliability Tips */}
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <p className="text-xs text-gray-500">
+              {reliabilityScore >= 80
+                ? 'Great job! Your excellent attendance makes you a trusted player.'
+                : reliabilityScore >= 60
+                  ? 'Good attendance record. Keep showing up to maintain your score!'
+                  : 'Tip: Always attend sessions you sign up for to improve your score.'}
+            </p>
+          </div>
+        </div>
+      </Card>
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {statItems.map((stat) => (

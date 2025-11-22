@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
     // Use a transaction to prevent race conditions
     // This ensures atomicity between checking capacity and creating the record
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Check if session exists and get current participant count
       const session = await tx.session.findUnique({
         where: { id: session_id },
@@ -48,6 +48,11 @@ export async function POST(request: Request) {
 
       if (!session) {
         throw new Error('SESSION_NOT_FOUND');
+      }
+
+      // Check if session is in the past (cannot join past sessions)
+      if (new Date(session.date_time) < new Date()) {
+        throw new Error('SESSION_PAST');
       }
 
       // Check if session is full
@@ -98,6 +103,12 @@ export async function POST(request: Request) {
     if (error.message === 'SESSION_NOT_FOUND') {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
+    if (error.message === 'SESSION_PAST') {
+      return NextResponse.json(
+        { error: 'Cannot join past sessions' },
+        { status: 400 }
+      );
+    }
     if (error.message === 'SESSION_FULL') {
       return NextResponse.json({ error: 'Session is full' }, { status: 400 });
     }
@@ -146,19 +157,97 @@ export async function DELETE(request: Request) {
 
     const { session_id } = validationResult.data;
 
-    // Delete attendance record
-    await prisma.userSession.delete({
-      where: {
-        user_id_session_id: {
-          user_id: user.id,
-          session_id,
+    // Use transaction to delete attendance and notify waitlist
+    const result = await prisma.$transaction(async (tx: any) => {
+      // Get session info first
+      const session = await tx.session.findUnique({
+        where: { id: session_id },
+        select: {
+          id: true,
+          sport_type: true,
+          date_time: true,
+          max_participants: true,
         },
-      },
+      });
+
+      if (!session) {
+        throw new Error('SESSION_NOT_FOUND');
+      }
+
+      // Delete attendance record
+      await tx.userSession.delete({
+        where: {
+          user_id_session_id: {
+            user_id: user.id,
+            session_id,
+          },
+        },
+      });
+
+      // Check if session is still in the future
+      if (new Date(session.date_time) < new Date()) {
+        return { notified: false };
+      }
+
+      // Find the first person on the waitlist who hasn't been notified recently
+      const nextInLine = await tx.waitlist.findFirst({
+        where: {
+          session_id,
+          notified: false,
+        },
+        orderBy: { created_at: 'asc' },
+        include: {
+          user: {
+            select: {
+              id: true,
+              display_name: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      if (nextInLine) {
+        // Mark as notified
+        await tx.waitlist.update({
+          where: { id: nextInLine.id },
+          data: {
+            notified: true,
+            notified_at: new Date(),
+          },
+        });
+
+        // Create notification for the waitlisted user
+        await tx.notification.create({
+          data: {
+            user_id: nextInLine.user_id,
+            type: 'waitlist_spot_available',
+            title: 'Spot Available! 🎉',
+            message: `A spot just opened up for ${session.sport_type}! Join now before it's taken.`,
+            link: `/sessions/${session_id}`,
+          },
+        });
+
+        return {
+          notified: true,
+          notifiedUser: nextInLine.user.display_name || nextInLine.user.email,
+        };
+      }
+
+      return { notified: false };
     });
 
-    return NextResponse.json({ message: 'Attendance cancelled successfully' });
+    return NextResponse.json({
+      message: 'Attendance cancelled successfully',
+      waitlistNotified: result.notified,
+    });
   } catch (error: any) {
     console.error('Error cancelling attendance:', error);
+
+    // Handle specific errors
+    if (error.message === 'SESSION_NOT_FOUND') {
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+    }
 
     // Handle case where attendance record doesn't exist
     if (error.code === 'P2025') {

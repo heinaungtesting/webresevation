@@ -5,6 +5,7 @@ import { locales } from '@/i18n';
 import Navigation from '@/app/components/layout/Navigation';
 import BottomNav from '@/app/components/layout/BottomNav';
 import { AuthProvider } from '@/app/contexts/AuthContext';
+import QueryProvider from '@/app/providers/QueryProvider';
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -30,11 +31,13 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <AuthProvider>
-        <Navigation />
-        <main className="pt-14 md:pt-16">{children}</main>
-        <BottomNav />
-      </AuthProvider>
+      <QueryProvider>
+        <AuthProvider>
+          <Navigation />
+          <main className="pt-14 md:pt-16">{children}</main>
+          <BottomNav />
+        </AuthProvider>
+      </QueryProvider>
     </NextIntlClientProvider>
   );
 }

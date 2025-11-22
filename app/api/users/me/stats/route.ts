@@ -71,16 +71,25 @@ export async function GET() {
       return acc;
     }, {});
 
+    // Get user reliability data
+    const userData = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        created_at: true,
+        reliability_score: true,
+        no_show_count: true,
+      },
+    });
+
     const stats = {
       total_sessions: totalSessions,
       upcoming_sessions: upcomingSessions,
       past_sessions: pastSessions,
       created_sessions: createdSessions,
       sport_breakdown: sportBreakdown,
-      member_since: (await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { created_at: true },
-      }))?.created_at,
+      member_since: userData?.created_at,
+      reliability_score: userData?.reliability_score ?? 100,
+      no_show_count: userData?.no_show_count ?? 0,
     };
 
     return NextResponse.json(stats);

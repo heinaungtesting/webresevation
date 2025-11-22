@@ -1,9 +1,26 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { authRateLimiter, createRateLimitHeaders } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  // Apply rate limiting: 10 requests per 10 seconds per IP
+  const rateLimitResult = authRateLimiter.check(request);
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      {
+        error: 'Too Many Requests',
+        message: 'Too many login attempts. Please try again later.',
+        retryAfter: rateLimitResult.reset - Math.floor(Date.now() / 1000),
+      },
+      {
+        status: 429,
+        headers: createRateLimitHeaders(rateLimitResult),
+      }
+    );
+  }
+
   try {
     const { email, password } = await request.json();
 
@@ -33,7 +50,10 @@ export async function POST(request: Request) {
         message: 'Login successful!',
         user: data.user,
       },
-      { status: 200 }
+      {
+        status: 200,
+        headers: createRateLimitHeaders(rateLimitResult),
+      }
     );
   } catch (error) {
     console.error('Login error:', error);

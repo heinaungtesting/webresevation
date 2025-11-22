@@ -11,6 +11,53 @@ datasource db {
   // directUrl = env("DIRECT_URL")
 }
 
+// Enum for attendance status
+enum AttendanceStatus {
+  REGISTERED  // User signed up but hasn't attended yet
+  ATTENDED    // User attended the session
+  NO_SHOW     // User didn't show up
+}
+
+// Enum for user language proficiency level
+enum LanguageLevel {
+  BEGINNER      // Just started learning
+  INTERMEDIATE  // Can hold basic conversations
+  ADVANCED      // Fluent but not native
+  NATIVE        // Native speaker
+}
+
+// Enum for session vibe/atmosphere
+enum SessionVibe {
+  COMPETITIVE       // Serious, skill-focused play
+  CASUAL            // Relaxed, social games
+  ACADEMY           // Learning/teaching focused
+  LANGUAGE_EXCHANGE // Practice language while playing
+}
+
+// Enum for report status
+enum ReportStatus {
+  PENDING   // Report submitted, awaiting review
+  REVIEWED  // Report has been reviewed
+  RESOLVED  // Action taken, report closed
+  DISMISSED // Report dismissed (false positive)
+}
+
+// Enum for report reason
+enum ReportReason {
+  HARASSMENT      // Harassing or bullying behavior
+  NO_SHOW         // Repeatedly not showing up
+  SPAM            // Spam or promotional content
+  CREEPY_BEHAVIOR // Inappropriate or creepy behavior
+  FAKE_PROFILE    // Fake or misleading profile
+  OTHER           // Other reason (specify in description)
+}
+
+// Enum for report entity type
+enum ReportEntityType {
+  USER    // Reporting a user
+  SESSION // Reporting a session
+}
+
 // User model
 model User {
   id                   String         @id @default(uuid())
@@ -25,10 +72,22 @@ model User {
   notification_email   Boolean        @default(true)
   notification_push    Boolean        @default(true)
   language_preference  String         @default("en") // 'en' or 'ja'
+  // Language exchange fields
+  native_language      String?        // ISO 639-1 code (e.g., 'en', 'ja', 'ko')
+  target_language      String?        // Language user wants to practice
+  language_level       LanguageLevel? // Proficiency in target language
   email_verified       Boolean        @default(false)
   phone_number         String?        @unique
   phone_verified       Boolean        @default(false)
   is_admin             Boolean        @default(false)
+  // Trust & verification
+  is_verified_student  Boolean        @default(false) // University student verification
+  is_banned            Boolean        @default(false) // User has been banned
+  banned_at            DateTime?                      // When user was banned
+  banned_reason        String?                        // Reason for ban
+  // Reliability tracking
+  no_show_count        Int            @default(0)    // Number of times user didn't show up
+  reliability_score    Int            @default(100)  // 0-100 score (starts at 100%)
   created_at           DateTime       @default(now())
   updated_at           DateTime       @updatedAt
 
@@ -40,10 +99,15 @@ model User {
   favorites            Favorite[]
   reviews              Review[]
   notifications        Notification[]
+  reports_submitted    Report[]       @relation("ReportReporter")
+  reports_received     Report[]       @relation("ReportedUser")
+  waitlist_entries     Waitlist[]
 
   @@index([email])
   @@index([phone_number])
   @@index([username])
+  @@index([reliability_score])
+  @@index([is_banned])
 }
 
 // Sport Center model
@@ -69,17 +133,25 @@ model SportCenter {
 }
 
 // Session model
+// DATABASE CONSTRAINTS:
+// - Session_duration_positive: CHECK (duration_minutes > 0)
+// - Session_max_participants_min: CHECK (max_participants IS NULL OR max_participants >= 2)
 model Session {
   id                    String        @id @default(uuid())
   sport_center_id       String
   sport_type            String        // badminton, basketball, etc.
   skill_level           String        // beginner, intermediate, advanced
   date_time             DateTime
-  duration_minutes      Int
-  max_participants      Int?
+  duration_minutes      Int           // Must be > 0 (enforced by DB constraint)
+  max_participants      Int?          // Must be >= 2 if set (enforced by DB constraint)
   description_en        String?       @db.Text
   description_ja        String?       @db.Text
+  // Language exchange & vibe fields
+  primary_language      String        @default("ja")    // Main language spoken (ISO 639-1)
+  allow_english         Boolean       @default(false)   // English-friendly session
+  vibe                  SessionVibe   @default(CASUAL)  // Session atmosphere
   created_by            String
+  attendance_marked     Boolean       @default(false) // Whether host has marked attendance
   created_at            DateTime      @default(now())
   updated_at            DateTime      @updatedAt
 
@@ -90,20 +162,28 @@ model Session {
   conversation          Conversation? @relation("SessionConversation")
   favorites             Favorite[]
   reviews               Review[]
+  reports               Report[]      @relation("ReportedSession")
+  waitlist              Waitlist[]
 
   @@index([sport_type])
   @@index([skill_level])
   @@index([date_time])
   @@index([sport_center_id])
   @@index([created_by])
+  @@index([vibe])
+  @@index([primary_language])
+  @@index([allow_english])
 }
 
 // UserSession model (attendance tracking)
+// Tracks user registration for sessions and their attendance status
 model UserSession {
-  id          String    @id @default(uuid())
+  id          String            @id @default(uuid())
   user_id     String
   session_id  String
-  marked_at   DateTime  @default(now())
+  status      AttendanceStatus  @default(REGISTERED)  // REGISTERED -> ATTENDED or NO_SHOW
+  marked_at   DateTime          @default(now())       // When user registered
+  attended_at DateTime?                               // When attendance was marked
 
   // Relations
   user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -112,6 +192,7 @@ model UserSession {
   @@unique([user_id, session_id])
   @@index([user_id])
   @@index([session_id])
+  @@index([status])
 }
 
 // Conversation model
@@ -185,11 +266,13 @@ model Favorite {
 }
 
 // Review model (session feedback)
+// DATABASE CONSTRAINT: Review_rating_check CHECK (rating >= 1 AND rating <= 5)
+// This ensures ratings are always valid at the database level
 model Review {
   id          String   @id @default(uuid())
   user_id     String
   session_id  String
-  rating      Int      // 1-5 stars
+  rating      Int      // 1-5 stars (enforced by DB constraint: CHECK rating >= 1 AND rating <= 5)
   comment     String?  @db.Text
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
@@ -198,7 +281,7 @@ model Review {
   user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   session     Session  @relation(fields: [session_id], references: [id], onDelete: Cascade)
 
-  @@unique([user_id, session_id])
+  @@unique([user_id, session_id])  // One review per user per session
   @@index([user_id])
   @@index([session_id])
   @@index([rating])
@@ -221,4 +304,56 @@ model Notification {
   @@index([user_id])
   @@index([read])
   @@index([created_at])
+  // Composite index for efficient user notification queries
+  // See migration: Notification_user_read_idx
+}
+
+// Report model (user reports for trust & safety)
+model Report {
+  id               String           @id @default(uuid())
+  reporter_id      String                              // User who submitted the report
+  entity_type      ReportEntityType                    // USER or SESSION
+  reported_user_id String?                             // If reporting a user
+  session_id       String?                             // If reporting a session
+  reason           ReportReason                        // Reason for report
+  description      String?          @db.Text           // Additional details
+  status           ReportStatus     @default(PENDING)  // Current status
+  admin_notes      String?          @db.Text           // Notes from admin review
+  resolved_by      String?                             // Admin who resolved
+  resolved_at      DateTime?                           // When resolved
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+
+  // Relations
+  reporter         User             @relation("ReportReporter", fields: [reporter_id], references: [id], onDelete: Cascade)
+  reported_user    User?            @relation("ReportedUser", fields: [reported_user_id], references: [id], onDelete: SetNull)
+  session          Session?         @relation("ReportedSession", fields: [session_id], references: [id], onDelete: SetNull)
+
+  @@index([reporter_id])
+  @@index([reported_user_id])
+  @@index([session_id])
+  @@index([status])
+  @@index([created_at])
+  @@index([entity_type])
+}
+
+// Waitlist model (for full sessions)
+// When a session reaches max_participants, users can join the waitlist
+model Waitlist {
+  id          String   @id @default(uuid())
+  session_id  String
+  user_id     String
+  position    Int?     // Optional: explicit position in waitlist
+  notified    Boolean  @default(false) // Whether user was notified of spot opening
+  notified_at DateTime?                // When notification was sent
+  created_at  DateTime @default(now())
+
+  // Relations
+  session     Session  @relation(fields: [session_id], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([session_id, user_id]) // User can only be on waitlist once per session
+  @@index([session_id])
+  @@index([user_id])
+  @@index([created_at])           // For ordering waitlist by join time
 }

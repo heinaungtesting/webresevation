@@ -8,9 +8,12 @@ import Card from '@/app/components/ui/Card';
 import Badge from '@/app/components/ui/Badge';
 import { Session } from '@/types';
 import { formatDate } from '@/lib/utils';
-import { MapPin, Clock, Users, Info, ArrowLeft, Loader2 } from 'lucide-react';
+import { MapPin, Clock, Users, Info, ArrowLeft, Loader2, Flag, MoreVertical, Bell, BellOff } from 'lucide-react';
 import ReviewSection from '@/app/components/sessions/ReviewSection';
 import FavoriteButton from '@/app/components/sessions/FavoriteButton';
+import AttendanceTracker from '@/app/components/sessions/AttendanceTracker';
+import ReportModal from '@/app/components/ReportModal';
+import StudentBadge from '@/app/components/ui/StudentBadge';
 
 export default function SessionDetailPage() {
   const params = useParams();
@@ -21,10 +24,20 @@ export default function SessionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState('');
+  // Waitlist state
+  const [isOnWaitlist, setIsOnWaitlist] = useState(false);
+  const [waitlistPosition, setWaitlistPosition] = useState<number | null>(null);
+  const [waitlistCount, setWaitlistCount] = useState(0);
+  // Report modal state
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportTarget, setReportTarget] = useState<{ type: 'USER' | 'SESSION'; id: string; name?: string } | null>(null);
 
   useEffect(() => {
     fetchSession();
-  }, [params.id]);
+    if (user) {
+      fetchWaitlistStatus();
+    }
+  }, [params.id, user]);
 
   const fetchSession = async () => {
     try {
@@ -48,6 +61,72 @@ export default function SessionDetailPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWaitlistStatus = async () => {
+    try {
+      const response = await fetch(`/api/sessions/${params.id}/waitlist`);
+      if (response.ok) {
+        const data = await response.json();
+        setWaitlistCount(data.count);
+        setWaitlistPosition(data.userPosition);
+        setIsOnWaitlist(data.userPosition !== null);
+      }
+    } catch (err) {
+      console.error('Error fetching waitlist:', err);
+    }
+  };
+
+  const handleJoinWaitlist = async () => {
+    if (!user) {
+      router.push(`/login?redirectTo=/sessions/${params.id}`);
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const response = await fetch(`/api/sessions/${params.id}/waitlist`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to join waitlist');
+      }
+
+      setIsOnWaitlist(true);
+      setWaitlistPosition(data.position);
+      setWaitlistCount((prev) => prev + 1);
+    } catch (err: any) {
+      alert(err.message || 'Failed to join waitlist');
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleLeaveWaitlist = async () => {
+    setActionLoading(true);
+    try {
+      const response = await fetch(`/api/sessions/${params.id}/waitlist`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to leave waitlist');
+      }
+
+      setIsOnWaitlist(false);
+      setWaitlistPosition(null);
+      setWaitlistCount((prev) => Math.max(0, prev - 1));
+    } catch (err: any) {
+      alert(err.message || 'Failed to leave waitlist');
+      console.error(err);
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -135,6 +214,12 @@ export default function SessionDetailPage() {
   const isFull = session.max_participants && session.current_participants >= session.max_participants;
   const spotsLeft = session.max_participants ? session.max_participants - session.current_participants : null;
 
+  // Handler for opening report modal
+  const openReportModal = (type: 'USER' | 'SESSION', id: string, name?: string) => {
+    setReportTarget({ type, id, name });
+    setReportModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -166,7 +251,18 @@ export default function SessionDetailPage() {
                     {isFull && <Badge variant="danger">Full</Badge>}
                   </div>
                 </div>
-                <FavoriteButton sessionId={session.id} size="lg" />
+                <div className="flex items-center gap-2">
+                  <FavoriteButton sessionId={session.id} size="lg" />
+                  {user && user.id !== session.created_by && (
+                    <button
+                      onClick={() => openReportModal('SESSION', session.id, `${session.sport_type} session`)}
+                      className="p-2 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
+                      title="Report this session"
+                    >
+                      <Flag className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -228,21 +324,40 @@ export default function SessionDetailPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {session.participants && session.participants.length > 0 ? (
                   session.participants.map((participant: any) => (
-                    <div key={participant.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                      {participant.avatar_url ? (
-                        <img
-                          src={participant.avatar_url}
-                          alt={participant.display_name || participant.username || 'Player'}
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-semibold">
-                          {(participant.display_name || participant.username || 'P').charAt(0).toUpperCase()}
+                    <div key={participant.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg group">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {participant.avatar_url ? (
+                          <img
+                            src={participant.avatar_url}
+                            alt={participant.display_name || participant.username || 'Player'}
+                            className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-semibold flex-shrink-0">
+                            {(participant.display_name || participant.username || 'P').charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm truncate font-medium">
+                              {participant.display_name || participant.username || 'Player'}
+                            </span>
+                            {participant.is_verified_student && <StudentBadge size="sm" />}
+                          </div>
+                          {participant.reliability_score !== undefined && participant.reliability_score < 80 && (
+                            <span className="text-xs text-amber-600">Reliability: {participant.reliability_score}%</span>
+                          )}
                         </div>
+                      </div>
+                      {user && user.id !== participant.id && (
+                        <button
+                          onClick={() => openReportModal('USER', participant.id, participant.display_name || participant.username)}
+                          className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all"
+                          title="Report user"
+                        >
+                          <Flag className="w-4 h-4" />
+                        </button>
                       )}
-                      <span className="text-sm truncate">
-                        {participant.display_name || participant.username || 'Player'}
-                      </span>
                     </div>
                   ))
                 ) : (
@@ -263,6 +378,13 @@ export default function SessionDetailPage() {
               sessionId={session.id}
               sessionDate={session.date_time}
               hasAttended={isAttending}
+            />
+
+            {/* Attendance Tracker - Only visible to host after session ends */}
+            <AttendanceTracker
+              sessionId={session.id}
+              isHost={user?.id === session.created_by}
+              isPast={new Date(session.date_time) < new Date()}
             />
           </div>
 
@@ -318,10 +440,75 @@ export default function SessionDetailPage() {
                         Free to join • No payment required
                       </p>
                     </>
+                  ) : isOnWaitlist ? (
+                    /* User is on waitlist */
+                    <div className="space-y-3">
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Bell className="w-4 h-4 text-amber-600" />
+                          <p className="text-amber-800 text-sm font-medium">
+                            You're #{waitlistPosition} on the waitlist
+                          </p>
+                        </div>
+                        <p className="text-amber-700 text-xs">
+                          We'll notify you when a spot opens up!
+                        </p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        fullWidth
+                        onClick={handleLeaveWaitlist}
+                        disabled={actionLoading}
+                        className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                      >
+                        {actionLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Leaving...
+                          </>
+                        ) : (
+                          <>
+                            <BellOff className="w-4 h-4 mr-2" />
+                            Leave Waitlist
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   ) : (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-red-800 text-sm font-medium">
-                        This session is full
+                    /* Session is full, show waitlist option */
+                    <div className="space-y-3">
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-red-800 text-sm font-medium">
+                          This session is full
+                        </p>
+                        {waitlistCount > 0 && (
+                          <p className="text-red-600 text-xs mt-1">
+                            {waitlistCount} {waitlistCount === 1 ? 'person' : 'people'} on waitlist
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        fullWidth
+                        onClick={handleJoinWaitlist}
+                        disabled={actionLoading}
+                        className="border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
+                      >
+                        {actionLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Joining...
+                          </>
+                        ) : (
+                          <>
+                            <Bell className="w-4 h-4 mr-2" />
+                            Join Waitlist
+                          </>
+                        )}
+                      </Button>
+                      <p className="text-xs text-gray-500 text-center">
+                        Get notified when a spot opens up
                       </p>
                     </div>
                   )}
@@ -341,6 +528,20 @@ export default function SessionDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Report Modal */}
+      {reportTarget && (
+        <ReportModal
+          isOpen={reportModalOpen}
+          onClose={() => {
+            setReportModalOpen(false);
+            setReportTarget(null);
+          }}
+          entityType={reportTarget.type}
+          entityId={reportTarget.id}
+          entityName={reportTarget.name}
+        />
+      )}
     </div>
   );
 }

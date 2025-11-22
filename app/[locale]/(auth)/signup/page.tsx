@@ -15,18 +15,21 @@ export default function SignupPage() {
     password: '',
     confirmPassword: '',
     language: 'en',
+    agreeToTerms: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const newValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: newValue,
     });
     // Clear error for this field
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: '' });
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: '' });
     }
   };
 
@@ -47,6 +50,10 @@ export default function SignupPage() {
 
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    if (!formData.agreeToTerms) {
+      newErrors.agreeToTerms = 'You must agree to the Terms and Privacy Policy';
     }
 
     setErrors(newErrors);
@@ -290,6 +297,43 @@ export default function SignupPage() {
                 ]}
                 fullWidth
               />
+
+              {/* Terms and Privacy Agreement */}
+              <div className="space-y-2">
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    name="agreeToTerms"
+                    checked={formData.agreeToTerms}
+                    onChange={handleChange}
+                    className="mt-1 w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
+                  />
+                  <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
+                    I agree to the{' '}
+                    <Link
+                      href="/terms"
+                      className="text-primary-600 hover:text-primary-700 font-medium underline"
+                      target="_blank"
+                    >
+                      Terms of Service
+                    </Link>
+                    {' '}and{' '}
+                    <Link
+                      href="/privacy"
+                      className="text-primary-600 hover:text-primary-700 font-medium underline"
+                      target="_blank"
+                    >
+                      Privacy Policy
+                    </Link>
+                  </span>
+                </label>
+                {errors.agreeToTerms && (
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.agreeToTerms}
+                  </p>
+                )}
+              </div>
 
               <Button
                 type="submit"
