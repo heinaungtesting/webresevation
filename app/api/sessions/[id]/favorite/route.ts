@@ -9,7 +9,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   // Rate limit: 30 favorite operations per minute
-  const rateLimitResponse = rateLimit(request, { limit: 30, windowMs: 60 * 1000 });
+  const rateLimitResponse = await rateLimit(request, { limit: 30, windowMs: 60 * 1000 });
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

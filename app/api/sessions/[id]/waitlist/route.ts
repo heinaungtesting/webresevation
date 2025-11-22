@@ -12,7 +12,7 @@ interface RouteContext {
 // POST /api/sessions/[id]/waitlist - Join the waitlist
 export async function POST(request: Request, context: RouteContext) {
   // Rate limit: 10 waitlist operations per minute
-  const rateLimitResponse = rateLimit(request, { limit: 10, windowMs: 60 * 1000 });
+  const rateLimitResponse = await rateLimit(request, { limit: 10, windowMs: 60 * 1000 });
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

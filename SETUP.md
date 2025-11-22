@@ -67,6 +67,11 @@ DIRECT_URL=postgresql://postgres:[YOUR-PASSWORD]@db.xxxxx.supabase.co:5432/postg
 
 # App Configuration
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Upstash Redis (for distributed rate limiting - required for production)
+# Get these from https://console.upstash.com/redis
+UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-redis-token
 ```
 
 ### 2.2 Verify Configuration

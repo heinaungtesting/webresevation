@@ -200,7 +200,7 @@ export async function GET(request: Request) {
 // POST /api/sessions - Create a new session
 export async function POST(request: Request) {
   // Rate limit: 20 session creations per minute
-  const rateLimitResponse = rateLimit(request, { limit: 20, windowMs: 60 * 1000 });
+  const rateLimitResponse = await rateLimit(request, { limit: 20, windowMs: 60 * 1000 });
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

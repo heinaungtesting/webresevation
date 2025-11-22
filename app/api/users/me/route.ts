@@ -102,7 +102,7 @@ export async function GET() {
 // PATCH /api/users/me - Update current user profile
 export async function PATCH(request: Request) {
   // Rate limit: 10 profile updates per minute
-  const rateLimitResponse = rateLimit(request, { limit: 10, windowMs: 60 * 1000 });
+  const rateLimitResponse = await rateLimit(request, { limit: 10, windowMs: 60 * 1000 });
   if (rateLimitResponse) return rateLimitResponse;
 
   try {

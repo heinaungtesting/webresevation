@@ -21,7 +21,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   // Apply rate limiting: 10 requests per 10 seconds per IP
-  const rateLimitResult = authRateLimiter.check(request);
+  const rateLimitResult = await authRateLimiter.check(request);
   if (!rateLimitResult.success) {
     return NextResponse.json(
       {

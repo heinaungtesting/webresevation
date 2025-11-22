@@ -40,7 +40,7 @@ const CreateReportSchema = z.object({
 // POST /api/reports - Create a new report
 export async function POST(request: Request) {
   // Rate limit: 5 reports per minute (strict to prevent abuse)
-  const rateLimitResponse = rateLimit(request, { limit: 5, windowMs: 60 * 1000 });
+  const rateLimitResponse = await rateLimit(request, { limit: 5, windowMs: 60 * 1000 });
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
