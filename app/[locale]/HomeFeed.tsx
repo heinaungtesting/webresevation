@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Session } from '@/types';
 import SessionCard from '@/app/components/SessionCard';
 import CompactSessionCard from '@/app/components/CompactSessionCard';
+import SessionMap from '@/app/components/SessionMap';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { Bell, Plus, ChevronRight, Sparkles, MapPin, Map, List, Search, Filter, Loader2, RefreshCw } from 'lucide-react';
 import Button from '@/app/components/ui/Button';
@@ -375,22 +376,9 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
           {!isLoading && !isError && (
             <>
               {viewMode === 'map' ? (
-                /* Map View Placeholder */
-                <div className="h-[60vh] w-full rounded-3xl bg-slate-100 border-2 border-dashed border-slate-200 flex items-center justify-center animate-fadeIn relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-5" />
-                  <div className="text-center p-6 relative z-10">
-                    <div className="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                      <MapPin className="w-8 h-8 text-primary-500" />
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">Map View</h3>
-                    <p className="text-slate-500 text-sm max-w-xs mx-auto">
-                      Visualize sessions near you on an interactive map.
-                      <br />
-                      <span className="inline-block mt-2 px-3 py-1 rounded-full bg-slate-200 text-slate-600 text-xs font-medium">
-                        Coming Soon
-                      </span>
-                    </p>
-                  </div>
+                /* Interactive Session Map */
+                <div className="relative animate-fadeIn">
+                  <SessionMap sessions={sessionsToDisplay} />
                 </div>
               ) : sessionsToDisplay.length > 0 ? (
                 <motion.div
