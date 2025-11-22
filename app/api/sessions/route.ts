@@ -33,8 +33,8 @@ const CreateSessionSchema = z.object({
       return isNaN(num) ? null : num;
     })
     .pipe(z.number().min(2, 'Must allow at least 2 participants').nullable()),
-  description_en: z.string().max(1000, 'Description too long').optional(),
-  description_ja: z.string().max(1000, 'Description too long').optional(),
+  description_en: z.string().max(5000, 'Description too long').optional(),
+  description_ja: z.string().max(5000, 'Description too long').optional(),
   // Language exchange & vibe fields
   primary_language: z.string().length(2, 'Language code must be 2 characters').default('ja'),
   allow_english: z.boolean().default(false),
@@ -213,7 +213,7 @@ export async function POST(request: Request) {
     // Validate input with Zod schema
     const validationResult = CreateSessionSchema.safeParse(body);
     if (!validationResult.success) {
-      const errors = (validationResult.error as any).errors.map((e: any) => e.message).join(', ');
+      const errors = validationResult.error.issues.map((e) => e.message).join(', ');
       return NextResponse.json(
         { error: errors },
         { status: 400 }

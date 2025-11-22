@@ -99,7 +99,10 @@ export async function GET() {
         activeSessions,
       },
       charts: {
-        usersByMonth,
+        usersByMonth: (usersByMonth as any[]).map((item) => ({
+          ...item,
+          count: Number(item.count),
+        })),
         sessionsBySport: sessionsBySport.map((item: any) => ({
           sport: item.sport_type,
           count: item._count.sport_type,

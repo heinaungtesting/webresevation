@@ -339,7 +339,7 @@ export default function CreateSessionPage() {
                     onChange={handleChange}
                     min={today}
                     required
-                    className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[44px]"
+                    className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[44px]"
                   />
                 </div>
                 {errors.date && (
@@ -359,7 +359,7 @@ export default function CreateSessionPage() {
                     value={formData.time}
                     onChange={handleChange}
                     required
-                    className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[44px]"
+                    className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[44px]"
                   />
                 </div>
                 {errors.time && (
@@ -403,7 +403,7 @@ export default function CreateSessionPage() {
                 onChange={handleChange}
                 placeholder="Describe your session in English..."
                 rows={3}
-                className="px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-full"
+                className="px-4 py-3 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-full"
               />
             </div>
 
@@ -418,7 +418,7 @@ export default function CreateSessionPage() {
                 onChange={handleChange}
                 placeholder="日本語でセッションを説明してください..."
                 rows={3}
-                className="px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-full"
+                className="px-4 py-3 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-full"
               />
             </div>
 
