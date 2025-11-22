@@ -15,16 +15,15 @@ export default function QueryProvider({ children }: QueryProviderProps) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            // With SSR, we usually want to set some default staleTime
-            // above 0 to avoid refetching immediately on the client
-            staleTime: 60 * 1000, // 1 minute
-            // Retry failed requests up to 3 times with exponential backoff
-            retry: 3,
-            retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-            // Don't refetch on window focus by default (can be overridden per-query)
+            // Increase stale time to reduce unnecessary refetches
+            staleTime: 5 * 60 * 1000, // 5 minutes (was 1 minute)
+            // Reduce retry attempts to fail faster
+            retry: 2, // (was 3)
+            retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+            // Don't refetch on window focus by default
             refetchOnWindowFocus: false,
-            // Cache data for 5 minutes
-            gcTime: 5 * 60 * 1000,
+            // Increase cache time for better performance
+            gcTime: 10 * 60 * 1000, // 10 minutes (was 5 minutes)
           },
           mutations: {
             // Retry mutations once on failure

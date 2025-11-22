@@ -10,8 +10,30 @@ async function getUpcomingSessions() {
           gte: new Date(),
         },
       },
-      include: {
-        sport_center: true,
+      select: {
+        id: true,
+        sport_type: true,
+        skill_level: true,
+        date_time: true,
+        duration_minutes: true,
+        max_participants: true,
+        description_en: true,
+        description_ja: true,
+        primary_language: true,
+        allow_english: true,
+        vibe: true,
+        created_by: true,
+        sport_center: {
+          select: {
+            id: true,
+            name_en: true,
+            name_ja: true,
+            address_en: true,
+            address_ja: true,
+            station_en: true,
+            station_ja: true,
+          },
+        },
         _count: {
           select: { user_sessions: true },
         },
@@ -19,7 +41,7 @@ async function getUpcomingSessions() {
       orderBy: {
         date_time: 'asc',
       },
-      take: 20, // Fetch more sessions for feed
+      take: 20, // Limit initial load
     });
 
     // Map to include current_participants
@@ -47,8 +69,25 @@ async function getHappeningNowSessions() {
           lte: threeHoursLater,
         },
       },
-      include: {
-        sport_center: true,
+      select: {
+        id: true,
+        sport_type: true,
+        skill_level: true,
+        date_time: true,
+        duration_minutes: true,
+        max_participants: true,
+        description_en: true,
+        primary_language: true,
+        allow_english: true,
+        vibe: true,
+        sport_center: {
+          select: {
+            id: true,
+            name_en: true,
+            name_ja: true,
+            station_en: true,
+          },
+        },
         _count: {
           select: { user_sessions: true },
         },

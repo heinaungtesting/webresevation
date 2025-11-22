@@ -432,9 +432,9 @@ export default function SessionDetailPage() {
                         size="lg"
                         fullWidth
                         onClick={handleAttendance}
-                        disabled={loading}
+                        disabled={actionLoading}
                       >
-                        {loading ? 'Joining...' : "I'm Going!"}
+                        {actionLoading ? 'Joining...' : "I'm Going!"}
                       </Button>
                       <p className="text-xs text-gray-500 text-center">
                         Free to join • No payment required

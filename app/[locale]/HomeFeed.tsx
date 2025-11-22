@@ -228,6 +228,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
                 className="block w-full pl-10 pr-10 py-2.5 border border-slate-200 rounded-xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 sm:text-sm"
                 value={searchQuery}
                 onChange={handleSearchInputChange}
+                suppressHydrationWarning
               />
               {/* Loading indicator in search bar */}
               {isFetching && (

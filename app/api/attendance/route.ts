@@ -90,6 +90,8 @@ export async function POST(request: Request) {
       // Use serializable isolation for strongest consistency
       // This prevents phantom reads and ensures accurate count
       isolationLevel: 'Serializable',
+      maxWait: 10000, // Maximum time to wait for a transaction slot (10 seconds)
+      timeout: 10000, // Maximum time for the transaction to complete (10 seconds)
     });
 
     return NextResponse.json(
@@ -235,6 +237,9 @@ export async function DELETE(request: Request) {
       }
 
       return { notified: false };
+    }, {
+      maxWait: 10000, // Maximum time to wait for a transaction slot (10 seconds)
+      timeout: 10000, // Maximum time for the transaction to complete (10 seconds)
     });
 
     return NextResponse.json({
