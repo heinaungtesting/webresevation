@@ -72,6 +72,14 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 # Get these from https://console.upstash.com/redis
 UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
 UPSTASH_REDIS_REST_TOKEN=your-redis-token
+
+# Sentry Error Monitoring (required for production)
+# Get these from https://sentry.io
+NEXT_PUBLIC_SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
+SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
+SENTRY_ORG=your-org
+SENTRY_PROJECT=your-project
+SENTRY_AUTH_TOKEN=your-auth-token
 ```
 
 ### 2.2 Verify Configuration
