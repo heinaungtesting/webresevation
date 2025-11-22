@@ -4,6 +4,18 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { sendWelcomeEmail } from '@/lib/email';
 import { authRateLimiter, createRateLimitHeaders } from '@/lib/rate-limit';
+import { z } from 'zod';
+
+// Password validation schema - enforces security requirements
+const PasswordSchema = z
+  .string()
+  .min(8, 'Password must be at least 8 characters')
+  .max(128, 'Password must be less than 128 characters')
+  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[0-9]/, 'Password must contain at least one number');
+
+const EmailSchema = z.string().email('Invalid email address');
 
 export const dynamic = 'force-dynamic';
 
@@ -35,10 +47,28 @@ export async function POST(request: Request) {
       language_level,
     } = await request.json();
 
-    // Validate input
+    // Validate input - basic presence check
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format
+    const emailValidation = EmailSchema.safeParse(email);
+    if (!emailValidation.success) {
+      return NextResponse.json(
+        { error: emailValidation.error.issues[0].message },
+        { status: 400 }
+      );
+    }
+
+    // Validate password strength (server-side validation to prevent bypassing client)
+    const passwordValidation = PasswordSchema.safeParse(password);
+    if (!passwordValidation.success) {
+      return NextResponse.json(
+        { error: passwordValidation.error.issues[0].message },
         { status: 400 }
       );
     }
