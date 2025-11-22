@@ -293,7 +293,11 @@ export default function SessionDetailPage() {
                       'Cancel Attendance'
                     )}
                   </Button>
-                  <Button variant="primary" fullWidth>
+                  <Button
+                    variant="primary"
+                    fullWidth
+                    onClick={() => router.push(`/chat/${session.id}`)}
+                  >
                     Open Chat Room
                   </Button>
                 </div>

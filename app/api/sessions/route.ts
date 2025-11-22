@@ -25,8 +25,8 @@ const CreateSessionSchema = z.object({
       return isNaN(num) ? null : num;
     })
     .pipe(z.number().min(2, 'Must allow at least 2 participants').nullable()),
-  description_en: z.string().max(1000, 'Description too long').optional(),
-  description_ja: z.string().max(1000, 'Description too long').optional(),
+  description_en: z.string().max(5000, 'Description too long').optional(),
+  description_ja: z.string().max(5000, 'Description too long').optional(),
 });
 
 // GET /api/sessions - List all sessions with filters
@@ -125,7 +125,7 @@ export async function POST(request: Request) {
     // Validate input with Zod schema
     const validationResult = CreateSessionSchema.safeParse(body);
     if (!validationResult.success) {
-      const errors = (validationResult.error as any).errors.map((e: any) => e.message).join(', ');
+      const errors = validationResult.error.issues.map((e) => e.message).join(', ');
       return NextResponse.json(
         { error: errors },
         { status: 400 }
