@@ -9,7 +9,7 @@ const MotionDiv = dynamic(
     () => import('framer-motion').then((mod) => mod.motion.div),
     {
         ssr: false, // Disable SSR for animations
-        loading: () => <div />, / / Fallback while loading
+        loading: () => <div />, // Fallback while loading
     }
 );
 
