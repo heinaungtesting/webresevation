@@ -274,3 +274,11 @@ export const apiRateLimiter = createRateLimiter({
   limit: 100,
   windowMs: 60 * 1000, // 100 requests per minute (general API)
 });
+
+// Test helper - only use in tests
+export function __clearRateLimitStore() {
+  if (process.env.NODE_ENV === 'test') {
+    rateLimitStore.clear();
+    lastCleanup = Date.now();
+  }
+}
