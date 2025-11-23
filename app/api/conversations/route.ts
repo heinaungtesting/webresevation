@@ -16,6 +16,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Get conversations with all related data in a single query
     const conversations = await prisma.conversation.findMany({
       where: {
         participants: {
@@ -32,6 +33,8 @@ export async function GET() {
                 id: true,
                 email: true,
                 username: true,
+                display_name: true,
+                avatar_url: true,
               },
             },
           },
@@ -64,26 +67,43 @@ export async function GET() {
       },
     });
 
-    // Calculate unread count for each conversation
-    const conversationsWithUnread = await Promise.all(
-      conversations.map(async (conv: any) => {
-        const participant = conv.participants.find((p: any) => p.user_id === user.id);
-        const unreadCount = await prisma.message.count({
-          where: {
-            conversation_id: conv.id,
-            sender_id: { not: user.id },
-            created_at: {
-              gt: participant?.last_read_at || new Date(0),
-            },
-          },
-        });
+    // If no conversations, return empty array early
+    if (conversations.length === 0) {
+      return NextResponse.json([]);
+    }
 
-        return {
-          ...conv,
-          unread_count: unreadCount,
-        };
-      })
-    );
+    // Get unread counts for ALL conversations in a SINGLE query (fixes N+1)
+    // Using raw SQL for optimal performance
+    const conversationIds = conversations.map((c: any) => c.id);
+
+    // Build the unread counts map using a single aggregated query
+    // Using PostgreSQL's ANY() operator with array parameter (cleaner than IN clause)
+    const unreadCounts = await prisma.$queryRaw<Array<{ conversation_id: string; unread_count: bigint }>>`
+      SELECT
+        m.conversation_id,
+        COUNT(m.id) as unread_count
+      FROM "Message" m
+      INNER JOIN "ConversationParticipant" cp
+        ON cp.conversation_id = m.conversation_id
+        AND cp.user_id = ${user.id}::uuid
+      WHERE
+        m.conversation_id = ANY(${conversationIds}::uuid[])
+        AND m.sender_id != ${user.id}::uuid
+        AND m.created_at > COALESCE(cp.last_read_at, '1970-01-01'::timestamp)
+      GROUP BY m.conversation_id
+    `;
+
+    // Create a map for O(1) lookup
+    const unreadCountMap = new Map<string, number>();
+    unreadCounts.forEach((row: { conversation_id: string; unread_count: bigint }) => {
+      unreadCountMap.set(row.conversation_id, Number(row.unread_count));
+    });
+
+    // Merge unread counts with conversations
+    const conversationsWithUnread = conversations.map((conv: any) => ({
+      ...conv,
+      unread_count: unreadCountMap.get(conv.id) || 0,
+    }));
 
     return NextResponse.json(conversationsWithUnread);
   } catch (error) {
