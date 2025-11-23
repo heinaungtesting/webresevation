@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import Button from '../ui/Button';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { LogOut, Settings, UserCircle, Shield, ChevronDown, Heart } from 'lucide-react';
+import { LogOut, Settings, UserCircle, Shield, ChevronDown, Heart, Building2, Calendar } from 'lucide-react';
 import LanguageSwitcher from '../LanguageSwitcher';
 import NotificationBell from '../notifications/NotificationBell';
 
@@ -91,6 +91,12 @@ export default function Navigation() {
             >
               {t('sessions')}
             </Link>
+            <Link
+              href="/venues"
+              className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 rounded-lg hover:bg-primary-50 transition-all duration-200"
+            >
+              Venues
+            </Link>
             {user && (
               <>
                 <Link
@@ -158,6 +164,14 @@ export default function Navigation() {
                           >
                             <Heart className="w-4 h-4 text-slate-400" suppressHydrationWarning />
                             Favorites
+                          </Link>
+                          <Link
+                            href="/bookings"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <Calendar className="w-4 h-4 text-slate-400" suppressHydrationWarning />
+                            My Bookings
                           </Link>
                           <Link
                             href="/settings"
@@ -252,6 +266,14 @@ export default function Navigation() {
                       >
                         <Heart className="w-4 h-4 text-slate-400" suppressHydrationWarning />
                         Favorites
+                      </Link>
+                      <Link
+                        href="/bookings"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <Calendar className="w-4 h-4 text-slate-400" suppressHydrationWarning />
+                        My Bookings
                       </Link>
                       <Link
                         href="/settings"

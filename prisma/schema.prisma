@@ -102,6 +102,8 @@ model User {
   reports_submitted    Report[]       @relation("ReportReporter")
   reports_received     Report[]       @relation("ReportedUser")
   waitlist_entries     Waitlist[]
+  // Venue booking relations
+  court_bookings       CourtBooking[]
 
   @@index([email])
   @@index([phone_number])
@@ -122,14 +124,29 @@ model SportCenter {
   latitude    Float?
   longitude   Float?
   image_url   String?
+  // Venue booking fields
+  description_en String?  @db.Text
+  description_ja String?  @db.Text
+  phone       String?
+  email       String?
+  website     String?
+  is_bookable Boolean   @default(false) // Whether venue supports online booking
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
 
   // Relations
   sessions    Session[]
+  // Venue booking relations
+  venue_partner     VenuePartner?
+  courts            Court[]
+  operating_hours   VenueOperatingHours[]
+  amenities         VenueAmenity[]
+  closures          VenueClosure[]
+  commission_transactions CommissionTransaction[]
 
   @@index([name_en])
   @@index([name_ja])
+  @@index([is_bookable])
 }
 
 // Session model
@@ -164,6 +181,8 @@ model Session {
   reviews               Review[]
   reports               Report[]      @relation("ReportedSession")
   waitlist              Waitlist[]
+  // Venue booking relation
+  court_booking         CourtBooking?
 
   @@index([sport_type])
   @@index([skill_level])
@@ -362,4 +381,249 @@ model Waitlist {
   @@index([session_id])
   @@index([user_id])
   @@index([created_at])           // For ordering waitlist by join time
+}
+
+// ==========================================
+// VENUE BOOKING SYSTEM
+// ==========================================
+
+// Enum for booking status
+enum BookingStatus {
+  PENDING      // Awaiting confirmation
+  CONFIRMED    // Booking confirmed
+  CANCELLED    // Cancelled by user or venue
+  COMPLETED    // Booking completed
+  NO_SHOW      // User didn't show up
+}
+
+// Enum for payment status
+enum PaymentStatus {
+  PENDING      // Payment not yet received
+  PAID         // Payment completed
+  REFUNDED     // Payment refunded
+  FAILED       // Payment failed
+}
+
+// Enum for venue partner status
+enum VenuePartnerStatus {
+  PENDING      // Application pending review
+  APPROVED     // Approved partner
+  SUSPENDED    // Temporarily suspended
+  REJECTED     // Application rejected
+}
+
+// Venue Partner model (extends SportCenter for booking capabilities)
+model VenuePartner {
+  id                String              @id @default(uuid())
+  sport_center_id   String              @unique
+  // Business details
+  business_name     String
+  business_email    String
+  business_phone    String
+  contact_person    String
+  // Partner status
+  status            VenuePartnerStatus  @default(PENDING)
+  commission_rate   Float               @default(0.10) // 10% default commission
+  // Bank/payment details (for payouts)
+  bank_name         String?
+  bank_account      String?
+  bank_branch       String?
+  // Terms acceptance
+  terms_accepted    Boolean             @default(false)
+  terms_accepted_at DateTime?
+  // Timestamps
+  approved_at       DateTime?
+  created_at        DateTime            @default(now())
+  updated_at        DateTime            @updatedAt
+
+  // Relations
+  sport_center      SportCenter         @relation(fields: [sport_center_id], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([business_email])
+}
+
+// Court model (individual bookable units within a venue)
+model Court {
+  id              String       @id @default(uuid())
+  sport_center_id String
+  name_en         String       // "Court 1", "Field A", etc.
+  name_ja         String
+  sport_type      String       // badminton, basketball, tennis, etc.
+  description_en  String?      @db.Text
+  description_ja  String?      @db.Text
+  // Pricing
+  price_per_hour  Int          // Price in JPY
+  price_per_30min Int?         // Optional 30-min pricing
+  // Capacity
+  max_players     Int          @default(4)
+  min_players     Int          @default(2)
+  // Features
+  indoor          Boolean      @default(true)
+  has_lighting    Boolean      @default(true)
+  has_equipment   Boolean      @default(false) // Equipment rental available
+  // Status
+  is_active       Boolean      @default(true)
+  // Timestamps
+  created_at      DateTime     @default(now())
+  updated_at      DateTime     @updatedAt
+
+  // Relations
+  sport_center    SportCenter  @relation(fields: [sport_center_id], references: [id], onDelete: Cascade)
+  time_slots      CourtTimeSlot[]
+  bookings        CourtBooking[]
+
+  @@index([sport_center_id])
+  @@index([sport_type])
+  @@index([is_active])
+  @@index([price_per_hour])
+}
+
+// Court Time Slot model (available booking slots)
+model CourtTimeSlot {
+  id          String   @id @default(uuid())
+  court_id    String
+  day_of_week Int      // 0 = Sunday, 6 = Saturday
+  start_time  String   // "09:00" format
+  end_time    String   // "10:00" format
+  is_active   Boolean  @default(true)
+  // Special pricing for this slot (overrides court price)
+  price_override Int?
+
+  // Relations
+  court       Court    @relation(fields: [court_id], references: [id], onDelete: Cascade)
+
+  @@unique([court_id, day_of_week, start_time])
+  @@index([court_id])
+  @@index([day_of_week])
+  @@index([is_active])
+}
+
+// Court Booking model (actual bookings)
+model CourtBooking {
+  id              String        @id @default(uuid())
+  court_id        String
+  user_id         String
+  session_id      String?       // Optional: link to sports session
+  // Booking details
+  booking_date    DateTime      @db.Date
+  start_time      String        // "09:00" format
+  end_time        String        // "10:00" format
+  duration_minutes Int
+  // Pricing
+  subtotal        Int           // Base price in JPY
+  commission      Int           // Platform commission in JPY
+  total_amount    Int           // Total charged to user
+  venue_payout    Int           // Amount to pay venue (total - commission)
+  // Status
+  status          BookingStatus @default(PENDING)
+  payment_status  PaymentStatus @default(PENDING)
+  // Payment details
+  payment_intent_id String?     // Stripe payment intent ID
+  paid_at           DateTime?
+  // Cancellation
+  cancelled_at      DateTime?
+  cancellation_reason String?
+  refund_amount     Int?
+  // Notes
+  user_notes        String?     @db.Text
+  venue_notes       String?     @db.Text
+  // Timestamps
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+
+  // Relations
+  court           Court         @relation(fields: [court_id], references: [id], onDelete: Cascade)
+  user            User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  session         Session?      @relation(fields: [session_id], references: [id], onDelete: SetNull)
+  commission      CommissionTransaction?
+
+  @@index([court_id])
+  @@index([user_id])
+  @@index([session_id])
+  @@index([booking_date])
+  @@index([status])
+  @@index([payment_status])
+  @@index([created_at])
+  // Composite indexes
+  @@index([court_id, booking_date, start_time])
+  @@index([user_id, status])
+}
+
+// Venue Operating Hours model
+model VenueOperatingHours {
+  id              String      @id @default(uuid())
+  sport_center_id String
+  day_of_week     Int         // 0 = Sunday, 6 = Saturday
+  open_time       String      // "09:00" format
+  close_time      String      // "22:00" format
+  is_closed       Boolean     @default(false) // Closed on this day
+
+  // Relations
+  sport_center    SportCenter @relation(fields: [sport_center_id], references: [id], onDelete: Cascade)
+
+  @@unique([sport_center_id, day_of_week])
+  @@index([sport_center_id])
+}
+
+// Venue Amenity model
+model VenueAmenity {
+  id              String      @id @default(uuid())
+  sport_center_id String
+  name_en         String      // "Parking", "Locker Room", etc.
+  name_ja         String
+  icon            String?     // Icon identifier
+  is_free         Boolean     @default(true)
+  price           Int?        // Price if not free
+
+  // Relations
+  sport_center    SportCenter @relation(fields: [sport_center_id], references: [id], onDelete: Cascade)
+
+  @@index([sport_center_id])
+}
+
+// Venue Holiday/Closure model
+model VenueClosure {
+  id              String      @id @default(uuid())
+  sport_center_id String
+  date            DateTime    @db.Date
+  reason_en       String?
+  reason_ja       String?
+  is_full_day     Boolean     @default(true)
+  start_time      String?     // If partial closure
+  end_time        String?
+
+  // Relations
+  sport_center    SportCenter @relation(fields: [sport_center_id], references: [id], onDelete: Cascade)
+
+  @@unique([sport_center_id, date])
+  @@index([sport_center_id])
+  @@index([date])
+}
+
+// Commission Transaction model (for tracking payouts)
+model CommissionTransaction {
+  id              String      @id @default(uuid())
+  booking_id      String      @unique
+  sport_center_id String
+  // Amounts
+  booking_amount  Int         // Total booking amount
+  commission_rate Float       // Rate at time of booking
+  commission_amount Int       // Platform commission
+  venue_amount    Int         // Amount owed to venue
+  // Payout status
+  payout_status   PaymentStatus @default(PENDING)
+  payout_date     DateTime?
+  payout_reference String?    // Bank transfer reference
+  // Timestamps
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+
+  // Relations
+  booking         CourtBooking @relation(fields: [booking_id], references: [id], onDelete: Cascade)
+  sport_center    SportCenter  @relation(fields: [sport_center_id], references: [id], onDelete: Cascade)
+
+  @@index([sport_center_id])
+  @@index([payout_status])
+  @@index([created_at])
 }
