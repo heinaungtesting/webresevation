@@ -1,202 +1,324 @@
-# SportsMatch Tokyo - Setup Guide
+# SportsMatch Tokyo - Complete Setup Guide
 
-This guide will help you set up the full application with database and authentication.
+A comprehensive guide to set up, develop, test, and deploy SportsMatch Tokyo.
 
-## Phase 2 Complete! 🎉
+## Table of Contents
 
-The backend integration is complete. To run the app, you need to:
-
-1. **Create a Supabase Project**
-2. **Configure Environment Variables**
-3. **Run Database Migrations**
-4. **Start the Development Server**
-
----
-
-## Step 1: Create Supabase Project
-
-### 1.1 Sign up for Supabase
-
-1. Go to [https://supabase.com](https://supabase.com)
-2. Click "Start your project"
-3. Sign up with GitHub or email
-
-### 1.2 Create New Project
-
-1. Click "New Project"
-2. Fill in:
-   - **Project Name**: `sportsmatch-tokyo`
-   - **Database Password**: Create a strong password (save this!)
-   - **Region**: Choose closest to Tokyo (e.g., Northeast Asia)
-3. Click "Create new project"
-4. Wait 2-3 minutes for setup to complete
-
-### 1.3 Get Your Credentials
-
-Once your project is ready:
-
-1. Go to **Project Settings** (gear icon) → **API**
-2. Copy these values:
-   - **Project URL** (looks like: `https://xxxxx.supabase.co`)
-   - **anon public key** (long string starting with `eyJ...`)
-
-3. Go to **Project Settings** → **Database**
-4. Scroll down to **Connection string** → **URI**
-5. Copy the connection string
-6. Click "Show" to reveal the password placeholder
-7. Replace `[YOUR-PASSWORD]` with your database password
+1. [Prerequisites](#prerequisites)
+2. [Quick Start](#quick-start)
+3. [Environment Setup](#environment-setup)
+4. [Database Setup](#database-setup)
+5. [Authentication Setup](#authentication-setup)
+6. [Development](#development)
+7. [Testing](#testing)
+8. [Deployment](#deployment)
+9. [Troubleshooting](#troubleshooting)
 
 ---
 
-## Step 2: Configure Environment Variables
+## Prerequisites
 
-### 2.1 Update .env.local
+- **Node.js**: v20.x or higher
+- **npm**: v10.x or higher
+- **Supabase Account**: [supabase.com](https://supabase.com)
+- **Git**: For version control
 
-Open `.env.local` and replace the placeholder values:
+Optional:
+- **Redis**: For production rate limiting (Upstash recommended)
+- **Sentry**: For error monitoring
+
+---
+
+## Quick Start
 
 ```bash
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+# 1. Clone the repository
+git clone <repository-url>
+cd webresevation
 
-# Database URL (from Supabase → Settings → Database → Connection string)
-DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.xxxxx.supabase.co:5432/postgres
+# 2. Install dependencies
+npm install
 
-# Direct connection URL (same as above but with pgbouncer parameter)
-DIRECT_URL=postgresql://postgres:[YOUR-PASSWORD]@db.xxxxx.supabase.co:5432/postgres?pgbouncer=true
+# 3. Copy environment template
+cp .env.example .env.local
 
-# App Configuration
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+# 4. Configure environment variables (see Environment Setup)
 
-### 2.2 Verify Configuration
-
-Make sure:
-- ✅ All values are filled in
-- ✅ No placeholder text remains
-- ✅ Database password is correct
-- ✅ URLs match your Supabase project
-
----
-
-## Step 3: Run Database Migrations
-
-### 3.1 Generate Prisma Client
-
-```bash
+# 5. Generate Prisma client
 npm run db:generate
-```
 
-### 3.2 Push Database Schema
-
-```bash
+# 6. Push database schema
 npm run db:push
-```
 
-This will create all the tables in your Supabase database:
-- `User`
-- `SportCenter`
-- `Session`
-- `UserSession`
-
-### 3.3 Seed Database (Optional)
-
-```bash
+# 7. Seed database (optional)
 npm run db:seed
-```
 
-This will populate your database with 5 sport centers in Tokyo.
-
----
-
-## Step 4: Configure Supabase Auth
-
-### 4.1 Enable Email Auth
-
-1. Go to **Authentication** → **Providers** in your Supabase dashboard
-2. Make sure **Email** is enabled
-3. Scroll to **Email Templates**
-4. Customize the verification email (optional)
-
-### 4.2 Set Redirect URL
-
-1. Go to **Authentication** → **URL Configuration**
-2. Add to **Redirect URLs**:
-   ```
-   http://localhost:3000/auth/callback
-   ```
-
-### 4.3 Disable Email Confirmation (for testing)
-
-For easier testing, you can disable email confirmation:
-
-1. Go to **Authentication** → **Providers** → **Email**
-2. Toggle **Confirm email** to OFF
-3. Click "Save"
-
-**Note**: Re-enable this before production!
-
----
-
-## Step 5: Start Development Server
-
-```bash
+# 8. Start development server
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000)
-
 ---
 
-## Testing the Application
+## Environment Setup
 
-### 1. Sign Up
+### Required Environment Variables
 
-1. Go to `/signup`
-2. Enter email and password
-3. Choose language preference
-4. Click "Sign Up"
-5. If email confirmation is enabled, check your inbox
-6. Click verification link (or skip if disabled)
-
-### 2. Log In
-
-1. Go to `/login`
-2. Enter your credentials
-3. You should be redirected to home
-4. Your email should appear in the navigation bar
-
-### 3. Browse Sessions
-
-1. Go to `/sessions`
-2. Use search and filters
-3. Click on a session to view details
-
-### 4. Mark Attendance
-
-1. Log in first
-2. Go to any session detail page
-3. Click "I'm Going!"
-4. You should see attendance confirmation
-
----
-
-## Available Scripts
+Create `.env.local` with:
 
 ```bash
-# Development
-npm run dev              # Start dev server
+# ===========================================
+# SUPABASE CONFIGURATION
+# ===========================================
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# ===========================================
+# DATABASE
+# ===========================================
+# Connection string from Supabase Dashboard > Settings > Database
+DATABASE_URL=postgresql://postgres:[PASSWORD]@db.xxxx.supabase.co:5432/postgres
+DIRECT_URL=postgresql://postgres:[PASSWORD]@db.xxxx.supabase.co:5432/postgres
+
+# ===========================================
+# APPLICATION
+# ===========================================
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NODE_ENV=development
+
+# ===========================================
+# OPTIONAL: REDIS (for production rate limiting)
+# ===========================================
+UPSTASH_REDIS_REST_URL=https://your-redis.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-token
+
+# ===========================================
+# OPTIONAL: MONITORING
+# ===========================================
+SENTRY_DSN=https://xxx@sentry.io/xxx
+SENTRY_AUTH_TOKEN=your-sentry-auth-token
+```
+
+### Getting Supabase Credentials
+
+1. Create project at [supabase.com](https://supabase.com)
+2. Go to **Project Settings** > **API**
+   - Copy **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
+   - Copy **anon public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - Copy **service_role key** → `SUPABASE_SERVICE_ROLE_KEY`
+3. Go to **Project Settings** > **Database**
+   - Copy **Connection string (URI)** → `DATABASE_URL` and `DIRECT_URL`
+   - Replace `[YOUR-PASSWORD]` with your database password
+
+---
+
+## Database Setup
+
+### Schema Generation
+
+```bash
+# Generate Prisma client
+npm run db:generate
+
+# Push schema to database
+npm run db:push
+
+# Seed with sample data
+npm run db:seed
+
+# Open Prisma Studio (database GUI)
+npm run db:studio
+```
+
+### Key Tables
+
+| Table | Description |
+|-------|-------------|
+| `User` | User profiles, preferences, reliability scores |
+| `Session` | Sports sessions with location, time, skill level |
+| `SportCenter` | Venues with addresses in English/Japanese |
+| `UserSession` | Session attendance tracking |
+| `Conversation` | Chat threads (direct & session-based) |
+| `Message` | Chat messages |
+| `Notification` | User notifications |
+| `Report` | User reports for trust & safety |
+| `Waitlist` | Session waitlist entries |
+
+### Database Indexes
+
+The schema includes optimized indexes for:
+- Session discovery (sport_type, skill_level, date_time)
+- Message retrieval (conversation_id, created_at)
+- Notification queries (user_id, read, created_at)
+
+See `docs/DATABASE_INDEXES.md` for detailed analysis.
+
+---
+
+## Authentication Setup
+
+### Enable Email Auth
+
+1. Go to **Authentication** > **Providers** in Supabase
+2. Enable **Email** provider
+3. Configure redirect URLs:
+   - `http://localhost:3000/auth/callback` (development)
+   - `https://your-domain.com/auth/callback` (production)
+
+### Social Auth (Optional)
+
+To enable Google OAuth:
+1. Create credentials in Google Cloud Console
+2. Add to Supabase: **Authentication** > **Providers** > **Google**
+3. Configure redirect URLs
+
+---
+
+## Development
+
+### Available Scripts
+
+```bash
+# Development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm run start
+
+# Linting
+npm run lint
+
+# Unit tests
+npm test                    # Run all tests
+npm run test:watch          # Watch mode
+npm run test:coverage       # With coverage report
+npm run test:ui             # Visual UI mode
+
+# E2E tests (Playwright)
+npm run test:e2e            # Run E2E tests
+npm run test:e2e:ui         # Run with UI
+npm run test:e2e:headed     # Run in headed browser
+npm run test:e2e:debug      # Debug mode
+npm run test:e2e:report     # View test report
 
 # Database
-npm run db:generate      # Generate Prisma client
-npm run db:push          # Push schema to database
-npm run db:seed          # Seed database with sample data
-npm run db:studio        # Open Prisma Studio (database GUI)
-
-# Build
-npm run build            # Build for production
-npm run start            # Start production server
+npm run db:generate         # Generate Prisma client
+npm run db:push             # Push schema changes
+npm run db:seed             # Seed sample data
+npm run db:studio           # Open database GUI
 ```
+
+### Project Structure
+
+```
+├── app/
+│   ├── [locale]/           # Internationalized pages
+│   ├── api/                # API routes
+│   └── components/         # React components
+├── lib/                    # Shared utilities
+├── prisma/                 # Database schema
+├── tests/                  # Unit/integration tests
+├── e2e/                    # E2E tests (Playwright)
+├── public/                 # Static assets
+└── docs/                   # Documentation
+```
+
+### Code Style
+
+- ESLint 9 flat config (eslint.config.mjs)
+- TypeScript strict mode
+- React hooks rules enforced
+
+---
+
+## Testing
+
+### Unit & Integration Tests (Vitest)
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Watch mode for development
+npm run test:watch
+```
+
+**Test Structure:**
+- `tests/lib/` - Utility function tests
+- `tests/api/` - API route tests
+- `tests/hooks/` - React hook tests
+- `tests/components/` - Component tests
+- `tests/integration/` - Integration tests
+
+### E2E Tests (Playwright)
+
+```bash
+# Install browsers (first time)
+npx playwright install
+
+# Run E2E tests
+npm run test:e2e
+
+# Run with visual UI
+npm run test:e2e:ui
+
+# Debug mode
+npm run test:e2e:debug
+```
+
+**E2E Test Files:**
+- `e2e/home.spec.ts` - Home page tests
+- `e2e/auth.spec.ts` - Authentication flows
+- `e2e/sessions.spec.ts` - Session management
+- `e2e/api.spec.ts` - API endpoint tests
+
+---
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Push code to GitHub
+2. Import repository in [Vercel](https://vercel.com)
+3. Add environment variables
+4. Deploy
+
+### Environment Variables for Production
+
+Set these in Vercel dashboard:
+- All variables from `.env.local`
+- Update `NEXT_PUBLIC_APP_URL` to production domain
+- Update Supabase redirect URLs
+
+### CI/CD Pipeline
+
+The project includes GitHub Actions workflows:
+
+- `.github/workflows/ci.yml` - Continuous Integration
+  - Linting & type checking
+  - Unit tests
+  - Build verification
+  - E2E tests
+  - Security audit
+
+- `.github/workflows/deploy.yml` - Vercel deployment
+  - Preview deployments for PRs
+  - Production deployment on merge to main
+
+### Post-Deployment Checklist
+
+- [ ] Update Supabase redirect URLs
+- [ ] Enable email confirmation
+- [ ] Configure rate limiting (Redis)
+- [ ] Set up Sentry error tracking
+- [ ] Configure custom domain
+- [ ] Enable SSL
 
 ---
 
@@ -207,9 +329,10 @@ npm run start            # Start production server
 **Error**: `Error: P1001: Can't reach database server`
 
 **Solution**:
-- Check your `DATABASE_URL` in `.env.local`
-- Verify your database password is correct
-- Make sure your Supabase project is active
+1. Verify `DATABASE_URL` in `.env.local`
+2. Check database password is correct
+3. Ensure Supabase project is active
+4. Check if IP is allowlisted (if using VPN)
 
 ### Prisma Client Not Generated
 
@@ -220,89 +343,60 @@ npm run start            # Start production server
 npm run db:generate
 ```
 
-### Authentication Not Working
+### Authentication Issues
+
+**Problem**: Login/signup not working
 
 **Solutions**:
-1. Check `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-2. Verify redirect URL is configured in Supabase
-3. Clear browser cookies and try again
+1. Verify Supabase URL and keys
+2. Check redirect URLs in Supabase dashboard
+3. Clear browser cookies
+4. Check browser console for errors
 
 ### Build Errors
 
 **Solution**:
 ```bash
-# Clean and rebuild
-rm -rf .next
+rm -rf .next node_modules/.cache
 npm run db:generate
 npm run build
 ```
 
----
+### Rate Limiting in Development
 
-## What's Implemented (Phase 2)
+If you hit rate limits during development:
+1. Rate limiting falls back to in-memory store without Redis
+2. Clear the in-memory store by restarting the dev server
+3. Or configure Upstash Redis for persistent limits
 
-### ✅ Authentication System
-- Supabase Auth integration
-- Email/password signup and login
-- Email verification flow
-- Protected routes with middleware
-- User state management (AuthContext)
-- Logout functionality
+### Test Failures
 
-### ✅ Database Schema
-- Users table with email/phone verification
-- Sport Centers table
-- Sessions table with relationships
-- User Sessions (attendance tracking)
-- Full TypeScript types
+**Unit tests failing**:
+```bash
+# Clear cache and retry
+npm test -- --clearCache
+```
 
-### ✅ API Routes
-- `POST /api/auth/signup` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-- `GET /api/auth/callback` - Email verification callback
-- `GET /api/sessions` - List sessions with filters
-- `POST /api/sessions` - Create new session
-- `GET /api/sessions/[id]` - Get session details
-- `POST /api/attendance` - Mark attendance
-- `DELETE /api/attendance` - Cancel attendance
+**E2E tests failing**:
+```bash
+# Update Playwright browsers
+npx playwright install
 
-### ✅ UI Updates
-- Authentication pages connected to API
-- Navigation shows user state (logged in/out)
-- User dropdown menu with logout
-- Email verification page
-- Protected route redirects
+# Run in debug mode
+npm run test:e2e:debug
+```
 
 ---
 
-## What's Next (Phase 3)
+## Additional Resources
 
-### 🔜 Internationalization
-- Configure next-intl
-- Add English/Japanese translations
-- Language switcher in navigation
-
-### 🔜 Enhanced Features
-- Phone number verification
-- User profile page
-- My Sessions page (user's attended sessions)
-- Session creation form
-- Chat system (future)
-- Google Maps integration (future)
-
----
-
-## Deployment to Vercel
-
-When you're ready to deploy:
-
-1. Push code to GitHub
-2. Go to [vercel.com](https://vercel.com)
-3. Import your repository
-4. Add environment variables from `.env.local`
-5. Update Supabase redirect URL to your Vercel domain
-6. Deploy!
+- [Architecture Documentation](docs/ARCHITECTURE.md)
+- [Database Indexes Analysis](docs/DATABASE_INDEXES.md)
+- [API Documentation](/api/docs)
+- [Supabase Docs](https://supabase.com/docs)
+- [Prisma Docs](https://www.prisma.io/docs)
+- [Next.js Docs](https://nextjs.org/docs)
+- [Playwright Docs](https://playwright.dev/docs)
 
 ---
 
@@ -310,9 +404,9 @@ When you're ready to deploy:
 
 If you encounter issues:
 1. Check this guide's troubleshooting section
-2. Review the PRD in the repo
-3. Check Supabase documentation: https://supabase.com/docs
-4. Check Prisma documentation: https://www.prisma.io/docs
+2. Review the error message in browser console
+3. Check Supabase logs: Dashboard > Logs
+4. Create an issue on GitHub
 
 ---
 

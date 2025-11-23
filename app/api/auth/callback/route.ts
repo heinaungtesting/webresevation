@@ -4,10 +4,44 @@ import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Validates and sanitizes the redirect path to prevent open redirect attacks.
+ * Only allows relative paths that start with / and don't contain protocol schemes.
+ */
+function sanitizeRedirectPath(path: string | null): string {
+  if (!path) return '/';
+
+  // Remove any whitespace
+  const trimmed = path.trim();
+
+  // Must start with a single forward slash (not // which could be protocol-relative)
+  if (!trimmed.startsWith('/') || trimmed.startsWith('//')) {
+    return '/';
+  }
+
+  // Block any protocol schemes (e.g., javascript:, data:, http:, https:)
+  if (/^\/.*:/i.test(trimmed) || /[\\]/.test(trimmed)) {
+    return '/';
+  }
+
+  // Block encoded characters that could bypass validation
+  try {
+    const decoded = decodeURIComponent(trimmed);
+    if (decoded.startsWith('//') || /^\/.*:/i.test(decoded) || /[\\]/.test(decoded)) {
+      return '/';
+    }
+  } catch {
+    // If decoding fails, reject the path
+    return '/';
+  }
+
+  return trimmed;
+}
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/';
+  const next = sanitizeRedirectPath(searchParams.get('next'));
 
   if (code) {
     const supabase = await createClient();

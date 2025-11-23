@@ -9,6 +9,7 @@ vi.mock('@/lib/prisma', () => ({
       findMany: vi.fn(),
       create: vi.fn(),
       findUnique: vi.fn(),
+      count: vi.fn(),
     },
     userSession: {
       create: vi.fn(),
@@ -83,6 +84,7 @@ describe('Sessions API Routes', () => {
 
     beforeEach(() => {
       mockPrisma.session.findMany.mockResolvedValue(mockSessionsData);
+      mockPrisma.session.count.mockResolvedValue(2);
     });
 
     it('should return all sessions when no filters applied', async () => {
@@ -91,34 +93,24 @@ describe('Sessions API Routes', () => {
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(Array.isArray(data)).toBe(true);
-      expect(data).toHaveLength(2);
+      expect(data.data).toBeDefined();
+      expect(Array.isArray(data.data)).toBe(true);
+      expect(data.data).toHaveLength(2);
 
       // Verify session structure
-      expect(data[0]).toMatchObject({
+      expect(data.data[0]).toMatchObject({
         id: 'session-1',
         sport_type: 'basketball',
         current_participants: 5
       });
 
-      expect(data[0]).not.toHaveProperty('_count');
+      expect(data.data[0]).not.toHaveProperty('_count');
 
-      // Verify Prisma query was called with basic filters
-      expect(mockPrisma.session.findMany).toHaveBeenCalledWith({
-        where: {
-          date_time: {
-            gte: expect.any(Date)
-          }
-        },
-        include: {
-          sport_center: true,
-          _count: {
-            select: { user_sessions: true }
-          }
-        },
-        orderBy: {
-          date_time: 'asc'
-        }
+      // Verify pagination structure
+      expect(data.pagination).toBeDefined();
+      expect(data.pagination).toMatchObject({
+        page: 1,
+        totalCount: 2,
       });
     });
 
@@ -268,13 +260,15 @@ describe('Sessions API Routes', () => {
 
     it('should return empty array when no sessions found', async () => {
       mockPrisma.session.findMany.mockResolvedValue([]);
+      mockPrisma.session.count.mockResolvedValue(0);
 
       const request = new Request('http://localhost:3000/api/sessions');
       const response = await GET(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data).toEqual([]);
+      expect(data.data).toEqual([]);
+      expect(data.pagination.totalCount).toBe(0);
     });
   });
 

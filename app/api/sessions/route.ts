@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { apiRateLimiter } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,7 +88,11 @@ function getWeekendRange(): { start: Date; end: Date } {
   return { start: saturday, end: sunday };
 }
 
-// GET /api/sessions - List all sessions with filters
+// Pagination defaults
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 100;
+
+// GET /api/sessions - List all sessions with filters and pagination
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -100,6 +105,11 @@ export async function GET(request: Request) {
     // Language exchange & vibe filters
     const vibe = searchParams.get('vibe'); // 'COMPETITIVE', 'CASUAL', 'ACADEMY', 'LANGUAGE_EXCHANGE'
     const allowEnglish = searchParams.get('allow_english'); // 'true' or 'false'
+
+    // Pagination parameters
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+    const limit = Math.min(MAX_PAGE_SIZE, Math.max(1, parseInt(searchParams.get('limit') || String(DEFAULT_PAGE_SIZE), 10)));
+    const skip = (page - 1) * limit;
 
     // Build date filter based on date parameter
     let dateRange: { gte: Date; lte?: Date } = {
@@ -166,18 +176,24 @@ export async function GET(request: Request) {
       ];
     }
 
-    const sessions = await prisma.session.findMany({
-      where,
-      include: {
-        sport_center: true,
-        _count: {
-          select: { user_sessions: true },
+    // Execute count and data queries in parallel for efficiency
+    const [sessions, totalCount] = await Promise.all([
+      prisma.session.findMany({
+        where,
+        include: {
+          sport_center: true,
+          _count: {
+            select: { user_sessions: true },
+          },
         },
-      },
-      orderBy: {
-        date_time: 'asc',
-      },
-    });
+        orderBy: {
+          date_time: 'asc',
+        },
+        skip,
+        take: limit,
+      }),
+      prisma.session.count({ where }),
+    ]);
 
     // Map to include current_participants
     const sessionsWithCounts = sessions.map((session: any) => ({
@@ -186,7 +202,22 @@ export async function GET(request: Request) {
       _count: undefined,
     }));
 
-    return NextResponse.json(sessionsWithCounts);
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    return NextResponse.json({
+      data: sessionsWithCounts,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNextPage,
+        hasPrevPage,
+      },
+    });
   } catch (error) {
     console.error('Error fetching sessions:', error);
     return NextResponse.json(
@@ -198,6 +229,12 @@ export async function GET(request: Request) {
 
 // POST /api/sessions - Create a new session
 export async function POST(request: Request) {
+  // Apply rate limiting to prevent session creation abuse
+  const rateLimitResponse = apiRateLimiter.limit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const supabase = await createClient();
     const {

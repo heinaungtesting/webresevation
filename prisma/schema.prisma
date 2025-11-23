@@ -8,7 +8,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  // directUrl = env("DIRECT_URL")
+  directUrl = env("DIRECT_URL") // Direct connection for migrations (bypasses pooler)
 }
 
 // Enum for attendance status
@@ -173,6 +173,10 @@ model Session {
   @@index([vibe])
   @@index([primary_language])
   @@index([allow_english])
+  // Composite indexes for optimized query patterns
+  @@index([date_time, sport_type])
+  @@index([date_time, sport_center_id])
+  @@index([sport_type, skill_level, date_time])
 }
 
 // UserSession model (attendance tracking)
@@ -247,6 +251,8 @@ model Message {
   @@index([conversation_id])
   @@index([sender_id])
   @@index([created_at])
+  // Composite index for paginated message retrieval
+  @@index([conversation_id, created_at(sort: Desc)])
 }
 
 // Favorite model (bookmarked sessions)
@@ -305,7 +311,7 @@ model Notification {
   @@index([read])
   @@index([created_at])
   // Composite index for efficient user notification queries
-  // See migration: Notification_user_read_idx
+  @@index([user_id, read, created_at(sort: Desc)])
 }
 
 // Report model (user reports for trust & safety)

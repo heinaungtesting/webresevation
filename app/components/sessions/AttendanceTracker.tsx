@@ -46,52 +46,54 @@ export default function AttendanceTracker({
   const [success, setSuccess] = useState(false);
   const [attendance, setAttendance] = useState<Record<string, boolean>>({});
 
+  useEffect(() => {
+    const fetchAttendance = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/sessions/${sessionId}/attendance`);
+
+        if (!response.ok) {
+          if (response.status === 403) {
+            // Not authorized - hide component
+            setData(null);
+            return;
+          }
+          throw new Error('Failed to fetch attendance');
+        }
+
+        const attendanceData: AttendanceData = await response.json();
+        setData(attendanceData);
+
+        // Initialize attendance state from existing data
+        const initialAttendance: Record<string, boolean> = {};
+        attendanceData.participants.forEach((p) => {
+          if (p.status === 'ATTENDED') {
+            initialAttendance[p.user_id] = true;
+          } else if (p.status === 'NO_SHOW') {
+            initialAttendance[p.user_id] = false;
+          } else {
+            // Default to attended for new entries
+            initialAttendance[p.user_id] = true;
+          }
+        });
+        setAttendance(initialAttendance);
+      } catch (err) {
+        console.error('Error fetching attendance:', err);
+        setError('Failed to load attendance data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isHost && isPast) {
+      fetchAttendance();
+    }
+  }, [sessionId, isHost, isPast]);
+
   // Don't render if not host or session is not past
   if (!isHost || !isPast) {
     return null;
   }
-
-  useEffect(() => {
-    fetchAttendance();
-  }, [sessionId]);
-
-  const fetchAttendance = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/sessions/${sessionId}/attendance`);
-
-      if (!response.ok) {
-        if (response.status === 403) {
-          // Not authorized - hide component
-          setData(null);
-          return;
-        }
-        throw new Error('Failed to fetch attendance');
-      }
-
-      const attendanceData: AttendanceData = await response.json();
-      setData(attendanceData);
-
-      // Initialize attendance state from existing data
-      const initialAttendance: Record<string, boolean> = {};
-      attendanceData.participants.forEach((p) => {
-        if (p.status === 'ATTENDED') {
-          initialAttendance[p.user_id] = true;
-        } else if (p.status === 'NO_SHOW') {
-          initialAttendance[p.user_id] = false;
-        } else {
-          // Default to attended for new entries
-          initialAttendance[p.user_id] = true;
-        }
-      });
-      setAttendance(initialAttendance);
-    } catch (err) {
-      console.error('Error fetching attendance:', err);
-      setError('Failed to load attendance data');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleToggleAttendance = (userId: string) => {
     if (data?.attendance_marked) return; // Can't modify if already marked
@@ -126,8 +128,12 @@ export default function AttendanceTracker({
       }
 
       setSuccess(true);
-      // Refresh data
-      fetchAttendance();
+      // Refresh data by refetching
+      const refreshResponse = await fetch(`/api/sessions/${sessionId}/attendance`);
+      if (refreshResponse.ok) {
+        const refreshedData: AttendanceData = await refreshResponse.json();
+        setData(refreshedData);
+      }
     } catch (err: any) {
       console.error('Error marking attendance:', err);
       setError(err.message || 'Failed to submit attendance');

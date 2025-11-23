@@ -4,8 +4,12 @@ import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
-// GET /api/users/me/sessions - Get current user's sessions (attended)
-export async function GET() {
+// Pagination defaults
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 100;
+
+// GET /api/users/me/sessions - Get current user's sessions (attended) with pagination
+export async function GET(request: Request) {
   try {
     const supabase = await createClient();
     const {
@@ -16,32 +20,57 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get all sessions the user is attending
-    const userSessions = await prisma.userSession.findMany({
-      where: {
-        user_id: user.id,
-      },
-      include: {
-        session: {
-          include: {
-            sport_center: true,
-            _count: {
-              select: { user_sessions: true },
+    // Parse query parameters
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+    const limit = Math.min(MAX_PAGE_SIZE, Math.max(1, parseInt(searchParams.get('limit') || String(DEFAULT_PAGE_SIZE), 10)));
+    const type = searchParams.get('type'); // 'upcoming', 'past', or null for all
+    const skip = (page - 1) * limit;
+
+    const now = new Date();
+
+    // Build date filter based on type
+    const sessionDateFilter = type === 'upcoming'
+      ? { gte: now }
+      : type === 'past'
+        ? { lt: now }
+        : undefined;
+
+    const where: any = {
+      user_id: user.id,
+      ...(sessionDateFilter && { session: { date_time: sessionDateFilter } }),
+    };
+
+    // Execute count and data queries in parallel
+    const [userSessions, totalCount] = await Promise.all([
+      prisma.userSession.findMany({
+        where,
+        include: {
+          session: {
+            include: {
+              sport_center: true,
+              _count: {
+                select: { user_sessions: true },
+              },
             },
           },
         },
-      },
-      orderBy: {
-        session: {
-          date_time: 'asc',
+        orderBy: {
+          session: {
+            date_time: type === 'past' ? 'desc' : 'asc',
+          },
         },
-      },
-    });
+        skip,
+        take: limit,
+      }),
+      prisma.userSession.count({ where }),
+    ]);
 
     // Format response
     const sessions = userSessions.map((us: any) => ({
       attendance_id: us.id,
       marked_at: us.marked_at,
+      status: us.status,
       session: {
         ...us.session,
         current_participants: us.session._count.user_sessions,
@@ -49,17 +78,21 @@ export async function GET() {
       },
     }));
 
-    // Separate into upcoming and past
-    const now = new Date();
-    const upcoming = sessions.filter(
-      (s: any) => new Date(s.session.date_time) >= now
-    );
-    const past = sessions.filter((s: any) => new Date(s.session.date_time) < now);
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
 
     return NextResponse.json({
-      upcoming,
-      past,
-      total: sessions.length,
+      data: sessions,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages,
+        hasNextPage,
+        hasPrevPage,
+      },
     });
   } catch (error) {
     console.error('Error fetching user sessions:', error);

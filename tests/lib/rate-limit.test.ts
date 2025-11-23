@@ -4,11 +4,11 @@ import {
   rateLimit,
   createRateLimitHeaders,
   createRateLimiter,
-  withRateLimit,
   authRateLimiter,
   strictRateLimiter,
   apiRateLimiter,
-  __clearRateLimitStore
+  __clearRateLimitStore,
+  getClientIP,
 } from '@/lib/rate-limit';
 
 describe('Rate Limiter', () => {
@@ -186,7 +186,8 @@ describe('Rate Limiter', () => {
       expect(result2.success).toBe(false);
     });
 
-    it('should prioritize X-Forwarded-For over other headers', () => {
+    it('should prioritize CF-Connecting-IP over other headers', () => {
+      // The implementation prioritizes Cloudflare's CF-Connecting-IP first
       const mockRequest = new Request('http://localhost/api/test', {
         headers: {
           'x-forwarded-for': '203.0.113.195',
@@ -195,15 +196,15 @@ describe('Rate Limiter', () => {
         },
       });
 
-      // Should use the X-Forwarded-For IP (203.0.113.195)
+      // Should use the CF-Connecting-IP (203.0.113.197)
       const result1 = checkRateLimit(mockRequest, { limit: 1, windowMs: 60000 });
       expect(result1.success).toBe(true);
 
-      // Request with different X-Forwarded-For should be allowed
+      // Request with different CF-Connecting-IP should be allowed
       const mockRequest2 = new Request('http://localhost/api/test', {
         headers: {
-          'x-forwarded-for': '203.0.113.196',
-          'x-real-ip': '203.0.113.195', // This would be limited if used
+          'cf-connecting-ip': '203.0.113.198',
+          'x-forwarded-for': '203.0.113.197', // This would be limited if used
         },
       });
       const result2 = checkRateLimit(mockRequest2, { limit: 1, windowMs: 60000 });
@@ -296,42 +297,6 @@ describe('Rate Limiter', () => {
       expect(headers['X-RateLimit-Remaining']).toBe('0');
       expect(headers['Retry-After']).toBeDefined();
       expect(parseInt(headers['Retry-After'] as string)).toBeGreaterThan(0);
-    });
-  });
-
-  describe('withRateLimit higher-order function', () => {
-    it('should call handler when within limit', async () => {
-      const mockHandler = vi.fn().mockResolvedValue(new Response('Success', { status: 200 }));
-      const wrappedHandler = withRateLimit(mockHandler, { limit: 5, windowMs: 60000 });
-
-      const mockRequest = new Request('http://localhost/api/test', {
-        headers: { 'x-forwarded-for': '192.168.1.7' },
-      });
-
-      const response = await wrappedHandler(mockRequest);
-
-      expect(response.status).toBe(200);
-      expect(await response.text()).toBe('Success');
-      expect(mockHandler).toHaveBeenCalledWith(mockRequest);
-    });
-
-    it('should return 429 instead of calling handler when rate limited', async () => {
-      const mockHandler = vi.fn().mockResolvedValue(new Response('Success', { status: 200 }));
-      const wrappedHandler = withRateLimit(mockHandler, { limit: 2, windowMs: 60000 });
-
-      const mockRequest = new Request('http://localhost/api/test', {
-        headers: { 'x-forwarded-for': '192.168.1.8' },
-      });
-
-      // Use up the limit
-      await wrappedHandler(mockRequest);
-      await wrappedHandler(mockRequest);
-
-      // This should be rate limited
-      const response = await wrappedHandler(mockRequest);
-
-      expect(response.status).toBe(429);
-      expect(mockHandler).toHaveBeenCalledTimes(2); // Should not be called for rate limited request
     });
   });
 

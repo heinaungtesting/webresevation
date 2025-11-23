@@ -25,7 +25,7 @@ export async function GET(
                 username: true,
                 display_name: true,
                 avatar_url: true,
-                email: true,
+                // Note: email intentionally excluded to prevent data exposure
               },
             },
           },

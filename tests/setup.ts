@@ -140,3 +140,18 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 });
+
+// Mock Element.scrollIntoView (not available in jsdom)
+Element.prototype.scrollIntoView = vi.fn();
+
+// Mock Notification API
+global.Notification = vi.fn().mockImplementation(() => ({
+  onclick: null,
+  close: vi.fn(),
+})) as any;
+Object.defineProperty(global.Notification, 'permission', {
+  get: () => 'granted',
+});
+Object.defineProperty(global.Notification, 'requestPermission', {
+  value: vi.fn().mockResolvedValue('granted'),
+});
