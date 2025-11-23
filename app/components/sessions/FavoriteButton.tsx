@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
+import { csrfPost, csrfDelete } from '@/lib/csrfClient';
 
 interface FavoriteButtonProps {
   sessionId: string;
@@ -58,19 +59,11 @@ export default function FavoriteButton({
     setLoading(true);
     try {
       if (isFavorited) {
-        const response = await fetch(`/api/sessions/${sessionId}/favorite`, {
-          method: 'DELETE',
-        });
-        if (response.ok) {
-          setIsFavorited(false);
-        }
+        await csrfDelete(`/api/sessions/${sessionId}/favorite`);
+        setIsFavorited(false);
       } else {
-        const response = await fetch(`/api/sessions/${sessionId}/favorite`, {
-          method: 'POST',
-        });
-        if (response.ok) {
-          setIsFavorited(true);
-        }
+        await csrfPost(`/api/sessions/${sessionId}/favorite`, {});
+        setIsFavorited(true);
       }
     } catch (err) {
       console.error('Error toggling favorite:', err);
@@ -89,11 +82,10 @@ export default function FavoriteButton({
       aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
     >
       <Heart
-        className={`${sizeClasses[size]} transition-colors ${
-          isFavorited
+        className={`${sizeClasses[size]} transition-colors ${isFavorited
             ? 'fill-red-500 text-red-500'
             : 'text-gray-400 hover:text-red-500'
-        }`}
+          }`}
       />
     </button>
   );

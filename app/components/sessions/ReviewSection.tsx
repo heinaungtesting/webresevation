@@ -7,6 +7,7 @@ import Button from '../ui/Button';
 import StarRating from './StarRating';
 import { formatDate } from '@/lib/utils';
 import { MessageSquare } from 'lucide-react';
+import { csrfPost } from '@/lib/csrfClient';
 
 interface Review {
   id: string;
@@ -84,19 +85,10 @@ export default function ReviewSection({
     setError('');
 
     try {
-      const response = await fetch(`/api/sessions/${sessionId}/reviews`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          rating: newRating,
-          comment: newComment,
-        }),
+      await csrfPost(`/api/sessions/${sessionId}/reviews`, {
+        rating: newRating,
+        comment: newComment,
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to submit review');
-      }
 
       // Refresh reviews
       await fetchReviews();

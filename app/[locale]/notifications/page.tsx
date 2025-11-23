@@ -20,6 +20,7 @@ import Button from '@/app/components/ui/Button';
 import Card from '@/app/components/ui/Card';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import Loading from '@/app/components/ui/Loading';
+import { csrfPatch, csrfDelete } from '@/lib/csrfClient';
 
 interface Notification {
   id: string;
@@ -79,24 +80,18 @@ export default function NotificationsPage() {
 
   const handleMarkAsRead = async (notificationIds?: string[]) => {
     try {
-      const response = await fetch('/api/users/me/notifications', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(
-          notificationIds ? { notificationIds } : { markAll: true }
-        ),
-      });
+      await csrfPatch('/api/users/me/notifications',
+        notificationIds ? { notificationIds } : { markAll: true }
+      );
 
-      if (response.ok) {
-        if (notificationIds) {
-          setNotifications(prev =>
-            prev.map(n =>
-              notificationIds.includes(n.id) ? { ...n, read: true } : n
-            )
-          );
-        } else {
-          setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-        }
+      if (notificationIds) {
+        setNotifications(prev =>
+          prev.map(n =>
+            notificationIds.includes(n.id) ? { ...n, read: true } : n
+          )
+        );
+      } else {
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       }
     } catch (err) {
       console.error('Error marking notifications as read:', err);
@@ -105,13 +100,8 @@ export default function NotificationsPage() {
 
   const handleDelete = async (notificationId: string) => {
     try {
-      const response = await fetch(`/api/users/me/notifications?id=${notificationId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setNotifications(prev => prev.filter(n => n.id !== notificationId));
-      }
+      await csrfDelete(`/api/users/me/notifications?id=${notificationId}`);
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
     } catch (err) {
       console.error('Error deleting notification:', err);
     }
@@ -121,13 +111,8 @@ export default function NotificationsPage() {
     if (!confirm('Are you sure you want to delete all notifications?')) return;
 
     try {
-      const response = await fetch('/api/users/me/notifications?all=true', {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setNotifications([]);
-      }
+      await csrfDelete('/api/users/me/notifications?all=true');
+      setNotifications([]);
     } catch (err) {
       console.error('Error clearing notifications:', err);
     }
@@ -235,9 +220,8 @@ export default function NotificationsPage() {
               {notifications.map((notification) => (
                 <li
                   key={notification.id}
-                  className={`relative group ${
-                    !notification.read ? 'bg-blue-50' : 'bg-white'
-                  } hover:bg-gray-50 transition-colors`}
+                  className={`relative group ${!notification.read ? 'bg-blue-50' : 'bg-white'
+                    } hover:bg-gray-50 transition-colors`}
                 >
                   <button
                     onClick={() => handleNotificationClick(notification)}
@@ -249,11 +233,10 @@ export default function NotificationsPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p
-                          className={`text-sm ${
-                            !notification.read
+                          className={`text-sm ${!notification.read
                               ? 'font-semibold text-gray-900'
                               : 'font-medium text-gray-700'
-                          }`}
+                            }`}
                         >
                           {notification.title}
                         </p>

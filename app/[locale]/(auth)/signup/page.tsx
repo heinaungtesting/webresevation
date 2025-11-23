@@ -7,6 +7,7 @@ import Button from '@/app/components/ui/Button';
 import Input from '@/app/components/ui/Input';
 import Select from '@/app/components/ui/Select';
 import { AlertCircle, Zap, Users, Calendar, TrendingUp, CheckCircle } from 'lucide-react';
+import { csrfPost } from '@/lib/csrfClient';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -70,29 +71,16 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          language: formData.language,
-        }),
+      await csrfPost('/api/auth/signup', {
+        email: formData.email,
+        password: formData.password,
+        language: formData.language,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setErrors({ email: data.error || 'Signup failed' });
-        return;
-      }
 
       // Redirect to verification success page
       router.push('/verify-email?email=' + encodeURIComponent(formData.email));
     } catch (err) {
-      setErrors({ email: 'An error occurred. Please try again.' });
+      setErrors({ email: err instanceof Error ? err.message : 'An error occurred. Please try again.' });
     } finally {
       setLoading(false);
     }
@@ -256,9 +244,9 @@ export default function SignupPage() {
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs text-slate-600">Password strength</span>
                       <span className={`text-xs font-semibold ${passwordStrength.strength <= 2 ? 'text-red-600' :
-                          passwordStrength.strength <= 3 ? 'text-yellow-600' :
-                            passwordStrength.strength <= 4 ? 'text-blue-600' :
-                              'text-green-600'
+                        passwordStrength.strength <= 3 ? 'text-yellow-600' :
+                          passwordStrength.strength <= 4 ? 'text-blue-600' :
+                            'text-green-600'
                         }`}>
                         {passwordStrength.label}
                       </span>

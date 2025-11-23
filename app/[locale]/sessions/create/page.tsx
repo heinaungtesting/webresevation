@@ -11,6 +11,7 @@ import Card from '@/app/components/ui/Card';
 import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import { getLanguageOptions } from '@/app/components/ui/LanguageFlag';
+import { csrfPost } from '@/lib/csrfClient';
 
 export default function CreateSessionPage() {
   const router = useRouter();
@@ -145,33 +146,21 @@ export default function CreateSessionPage() {
     try {
       const dateTime = new Date(formData.date + 'T' + formData.time);
 
-      const response = await fetch('/api/sessions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sport_center_id: formData.sport_center_id,
-          sport_type: formData.sport_type,
-          skill_level: formData.skill_level,
-          date_time: dateTime.toISOString(),
-          duration_minutes: parseInt(formData.duration_minutes),
-          max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
-          description_en: formData.description_en || null,
-          description_ja: formData.description_ja || null,
-          // Language exchange & vibe fields
-          primary_language: formData.primary_language,
-          allow_english: formData.allow_english,
-          vibe: formData.vibe,
-        }),
+      const session = await csrfPost('/api/sessions', {
+        sport_center_id: formData.sport_center_id,
+        sport_type: formData.sport_type,
+        skill_level: formData.skill_level,
+        date_time: dateTime.toISOString(),
+        duration_minutes: parseInt(formData.duration_minutes),
+        max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
+        description_en: formData.description_en || null,
+        description_ja: formData.description_ja || null,
+        // Language exchange & vibe fields
+        primary_language: formData.primary_language,
+        allow_english: formData.allow_english,
+        vibe: formData.vibe,
       });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to create session');
-      }
-
-      const session = await response.json();
       router.push(`/sessions/${session.id}`);
     } catch (err: any) {
       console.error('Error creating session:', err);

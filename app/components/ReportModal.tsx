@@ -5,6 +5,7 @@ import { X, Flag, AlertTriangle, Loader2, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/app/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { csrfPost } from '@/lib/csrfClient';
 
 type ReportReason = 'HARASSMENT' | 'NO_SHOW' | 'SPAM' | 'CREEPY_BEHAVIOR' | 'FAKE_PROFILE' | 'OTHER';
 type EntityType = 'USER' | 'SESSION';
@@ -100,24 +101,12 @@ export default function ReportModal({
     setError('');
 
     try {
-      const response = await fetch('/api/reports', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          entity_type: entityType,
-          ...(entityType === 'USER' ? { reported_user_id: entityId } : { session_id: entityId }),
-          reason: selectedReason,
-          description: description.trim() || undefined,
-        }),
+      await csrfPost('/api/reports', {
+        entity_type: entityType,
+        ...(entityType === 'USER' ? { reported_user_id: entityId } : { session_id: entityId }),
+        reason: selectedReason,
+        description: description.trim() || undefined,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit report');
-      }
 
       setSuccess(true);
       // Auto close after success

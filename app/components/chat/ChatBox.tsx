@@ -1,26 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import Button from '../ui/Button';
 import MessageBubble from './MessageBubble';
 import Loading from '../ui/Loading';
 import ErrorMessage from '../ui/ErrorMessage';
 import EmptyState from '../ui/EmptyState';
-import { createClient } from '@/lib/supabase/client';
-import type { RealtimeChannel } from '@supabase/supabase-js';
-
-interface Message {
-  id: string;
-  content: string;
-  sender_id: string;
-  created_at: string;
-  sender: {
-    id: string;
-    email: string;
-    username?: string | null;
-  };
-}
+import { useSocketMessages } from '@/lib/hooks/useSocketMessages';
+import { csrfPost, csrfPut } from '@/lib/csrfClient';
 
 interface ChatBoxProps {
   conversationId: string;
@@ -28,116 +16,34 @@ interface ChatBoxProps {
 }
 
 export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const channelRef = useRef<RealtimeChannel | null>(null);
+
+  // Use Socket.io hook for real-time messaging
+  const {
+    messages,
+    sendMessage,
+    isLoading: loading,
+    error,
+    isConnected,
+    refresh
+  } = useSocketMessages(conversationId, {
+    onNewMessage: (message) => {
+      // Mark conversation as read when new message arrives
+      if (message.sender_id !== currentUserId) {
+        csrfPut(`/api/conversations/${conversationId}/read`, {}).catch(console.error);
+      }
+      scrollToBottom();
+    }
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const fetchMessages = useCallback(async () => {
-    try {
-      const response = await fetch(`/api/conversations/${conversationId}/messages`);
-      if (!response.ok) throw new Error('Failed to fetch messages');
-      const data = await response.json();
-      setMessages(data);
-      setError('');
-
-      // Mark as read
-      await fetch(`/api/conversations/${conversationId}/read`, {
-        method: 'PUT',
-      });
-    } catch (err) {
-      console.error('Error fetching messages:', err);
-      setError('Failed to load messages');
-    } finally {
-      setLoading(false);
-    }
-  }, [conversationId]);
-
-  // Initial fetch and Supabase Realtime subscription
-  useEffect(() => {
-    fetchMessages();
-
-    // Setup Supabase Realtime subscription for new messages
-    const supabase = createClient();
-
-    // Subscribe to INSERT events on the Message table for this conversation
-    const channel = supabase
-      .channel(`messages:${conversationId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'Message',
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        async (payload) => {
-          // Fetch the complete message with sender info since realtime only gives us the raw row
-          const newMsg = payload.new as any;
-
-          // Only process if it's not our own message (we add those optimistically)
-          if (newMsg.sender_id !== currentUserId) {
-            try {
-              // Fetch sender details
-              const response = await fetch(`/api/users/${newMsg.sender_id}`);
-              let sender = { id: newMsg.sender_id, email: 'Unknown', username: null };
-
-              if (response.ok) {
-                const userData = await response.json();
-                sender = {
-                  id: userData.id,
-                  email: userData.email,
-                  username: userData.username,
-                };
-              }
-
-              const messageWithSender: Message = {
-                id: newMsg.id,
-                content: newMsg.content,
-                sender_id: newMsg.sender_id,
-                created_at: newMsg.created_at,
-                sender,
-              };
-
-              setMessages((prev) => {
-                // Avoid duplicates
-                if (prev.some((m) => m.id === messageWithSender.id)) {
-                  return prev;
-                }
-                return [...prev, messageWithSender];
-              });
-            } catch (err) {
-              console.error('Error processing realtime message:', err);
-              // Fallback: refetch all messages
-              fetchMessages();
-            }
-          }
-        }
-      )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log(`Subscribed to messages for conversation ${conversationId}`);
-        }
-      });
-
-    channelRef.current = channel;
-
-    // Cleanup subscription on unmount or conversation change
-    return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-      }
-    };
-  }, [conversationId, currentUserId, fetchMessages]);
-
+  // Scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -151,33 +57,13 @@ export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps)
     setSending(true);
 
     try {
-      const response = await fetch(`/api/conversations/${conversationId}/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content: messageContent }),
-      });
+      // Use Socket.io hook's sendMessage method
+      await sendMessage(messageContent);
 
-      if (!response.ok) throw new Error('Failed to send message');
-
-      const sentMessage = await response.json();
-
-      // Add the sent message to the list (optimistic update)
-      setMessages((prev) => {
-        // Avoid duplicates in case realtime already added it
-        if (prev.some((m) => m.id === sentMessage.id)) {
-          return prev;
-        }
-        return [...prev, sentMessage];
-      });
-
-      setError('');
       inputRef.current?.focus();
     } catch (err) {
       console.error('Error sending message:', err);
-      setError('Failed to send message');
-      setNewMessage(messageContent); // Restore message
+      setNewMessage(messageContent); // Restore message on error
     } finally {
       setSending(false);
     }
@@ -198,7 +84,7 @@ export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps)
     return (
       <ErrorMessage
         message={error}
-        onRetry={fetchMessages}
+        onRetry={refresh}
       />
     );
   }
@@ -219,7 +105,7 @@ export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps)
               <MessageBubble
                 key={message.id}
                 content={message.content}
-                sender={message.sender}
+                sender={message.sender || { id: message.sender_id, email: 'Unknown', username: null }}
                 created_at={message.created_at}
                 isOwn={message.sender_id === currentUserId}
               />

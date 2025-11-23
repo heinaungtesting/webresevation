@@ -10,6 +10,7 @@ import Card from '@/app/components/ui/Card';
 import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import AvatarUpload from '@/app/components/profile/AvatarUpload';
+import { csrfPatch } from '@/lib/csrfClient';
 
 export default function ProfileEditPage() {
   const router = useRouter();
@@ -92,18 +93,7 @@ export default function ProfileEditPage() {
     setError('');
 
     try {
-      const response = await fetch('/api/users/me', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to update profile');
-      }
+      await csrfPatch('/api/users/me', formData);
 
       setSuccess(true);
       setTimeout(() => {
@@ -237,11 +227,10 @@ export default function ProfileEditPage() {
                     key={sport}
                     type="button"
                     onClick={() => toggleSport(sport)}
-                    className={`px-4 py-3 rounded-lg border-2 transition-all duration-200 text-sm font-medium capitalize ${
-                      formData.sport_preferences.includes(sport)
+                    className={`px-4 py-3 rounded-lg border-2 transition-all duration-200 text-sm font-medium capitalize ${formData.sport_preferences.includes(sport)
                         ? 'border-blue-600 bg-blue-50 text-blue-700'
                         : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-                    }`}
+                      }`}
                   >
                     {sport.replace('-', ' ')}
                   </button>

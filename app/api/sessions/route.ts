@@ -272,8 +272,8 @@ export async function POST(request: Request) {
     } = validationResult.data;
 
     // Use transaction to create session and auto-join creator
-    const session = await prisma.$transaction(async (tx: any) => {
-      const newSession = await tx.session.create({
+    const newSession = await prisma.$transaction(async (tx: any) => {
+      const session = await tx.session.create({
         data: {
           sport_center_id,
           sport_type,
@@ -295,25 +295,22 @@ export async function POST(request: Request) {
       await tx.userSession.create({
         data: {
           user_id: user.id,
-          session_id: newSession.id,
+          session_id: session.id,
         },
       });
 
-      // Return session with sport_center and participant count
-      return tx.session.findUnique({
-        where: { id: newSession.id },
-        include: {
-          sport_center: true,
-          _count: {
-            select: { user_sessions: true },
-          },
-        },
-      });
+      return session;
+    });
+
+    // Fetch sport_center separately (outside transaction for better performance)
+    const sport_center = await prisma.sportCenter.findUnique({
+      where: { id: newSession.sport_center_id },
     });
 
     return NextResponse.json({
-      ...session,
-      current_participants: session?._count?.user_sessions || 1,
+      ...newSession,
+      sport_center,
+      current_participants: 1, // Creator is the first participant
     }, { status: 201 });
   } catch (error) {
     console.error('Error creating session:', error);

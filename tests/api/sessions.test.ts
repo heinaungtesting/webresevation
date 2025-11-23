@@ -14,6 +14,9 @@ vi.mock('@/lib/prisma', () => ({
     userSession: {
       create: vi.fn(),
     },
+    sportCenter: {
+      findUnique: vi.fn(),
+    },
     $transaction: vi.fn(),
   },
 }));
@@ -310,15 +313,36 @@ describe('Sessions API Routes', () => {
         error: null
       });
       mockPrisma.$transaction.mockImplementation(async (callback: any) => {
+        const sessionWithoutSportCenter = {
+          id: 'session-123',
+          sport_center_id: '123e4567-e89b-12d3-a456-426614174000',
+          sport_type: 'basketball',
+          skill_level: 'beginner',
+          date_time: new Date(validSessionData.date_time),
+          duration_minutes: 90,
+          max_participants: 10,
+          description_en: 'Fun basketball session',
+          description_ja: 'バスケットボールの楽しいセッション',
+          primary_language: 'ja',
+          allow_english: true,
+          vibe: 'CASUAL',
+          created_by: mockUser.id,
+        };
         return callback({
           session: {
-            create: vi.fn().mockResolvedValue({ ...mockCreatedSession, id: 'new-session' }),
+            create: vi.fn().mockResolvedValue(sessionWithoutSportCenter),
             findUnique: vi.fn().mockResolvedValue(mockCreatedSession)
           },
           userSession: {
             create: vi.fn().mockResolvedValue({})
           }
         });
+      });
+      // Mock the sportCenter.findUnique call that happens after the transaction
+      mockPrisma.sportCenter.findUnique.mockResolvedValue({
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        name_en: 'Test Center',
+        name_ja: 'テストセンター'
       });
     });
 

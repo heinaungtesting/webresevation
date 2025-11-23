@@ -19,6 +19,7 @@ import Badge from '@/app/components/ui/Badge';
 import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import { formatDate } from '@/lib/utils';
+import { csrfPatch } from '@/lib/csrfClient';
 
 interface User {
   id: string;
@@ -96,17 +97,7 @@ export default function AdminUsersPage() {
     }
 
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_admin: !currentStatus }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to update user');
-      }
-
+      await csrfPatch(`/api/admin/users/${userId}`, { is_admin: !currentStatus });
       await fetchUsers();
     } catch (err: any) {
       alert(err.message || 'Failed to update user');

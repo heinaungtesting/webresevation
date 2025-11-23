@@ -14,6 +14,7 @@ import FavoriteButton from '@/app/components/sessions/FavoriteButton';
 import AttendanceTracker from '@/app/components/sessions/AttendanceTracker';
 import ReportModal from '@/app/components/ReportModal';
 import StudentBadge from '@/app/components/ui/StudentBadge';
+import { csrfPost, csrfDelete } from '@/lib/csrfClient';
 
 export default function SessionDetailPage() {
   const params = useParams();
@@ -86,15 +87,7 @@ export default function SessionDetailPage() {
 
     setActionLoading(true);
     try {
-      const response = await fetch(`/api/sessions/${params.id}/waitlist`, {
-        method: 'POST',
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to join waitlist');
-      }
+      const data = await csrfPost(`/api/sessions/${params.id}/waitlist`, {});
 
       setIsOnWaitlist(true);
       setWaitlistPosition(data.position);
@@ -110,14 +103,7 @@ export default function SessionDetailPage() {
   const handleLeaveWaitlist = async () => {
     setActionLoading(true);
     try {
-      const response = await fetch(`/api/sessions/${params.id}/waitlist`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to leave waitlist');
-      }
+      await csrfDelete(`/api/sessions/${params.id}/waitlist`);
 
       setIsOnWaitlist(false);
       setWaitlistPosition(null);
@@ -140,35 +126,17 @@ export default function SessionDetailPage() {
     try {
       if (isAttending) {
         // Cancel attendance
-        const response = await fetch('/api/attendance', {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        await csrfDelete('/api/attendance', {
           body: JSON.stringify({ session_id: session?.id }),
+          headers: { 'Content-Type': 'application/json' },
         });
-
-        if (!response.ok) {
-          throw new Error('Failed to cancel attendance');
-        }
 
         setIsAttending(false);
         // Refresh session data
         await fetchSession();
       } else {
-        // Mark attendance
-        const response = await fetch('/api/attendance', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ session_id: session?.id }),
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Failed to mark attendance');
-        }
+        // Mark attendance (join session)
+        await csrfPost('/api/attendance', { session_id: session?.id });
 
         setIsAttending(true);
         // Refresh session data

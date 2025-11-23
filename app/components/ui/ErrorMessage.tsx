@@ -15,7 +15,7 @@ export default function ErrorMessage({
   fullScreen = false,
 }: ErrorMessageProps) {
   const content = (
-    <div className="flex flex-col items-center justify-center text-center p-8">
+    <div className="flex flex-col items-center justify-center text-center p-8" suppressHydrationWarning>
       <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 text-red-600 mb-4">
         <AlertCircle className="w-8 h-8" />
       </div>

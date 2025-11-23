@@ -10,6 +10,7 @@ import Select from '@/app/components/ui/Select';
 import Card from '@/app/components/ui/Card';
 import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
+import { csrfPatch } from '@/lib/csrfClient';
 
 export default function EditSessionPage() {
   const router = useRouter();
@@ -156,27 +157,16 @@ export default function EditSessionPage() {
     try {
       const dateTime = new Date(formData.date + 'T' + formData.time);
 
-      const response = await fetch(`/api/sessions/${sessionId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sport_center_id: formData.sport_center_id,
-          sport_type: formData.sport_type,
-          skill_level: formData.skill_level,
-          date_time: dateTime.toISOString(),
-          duration_minutes: parseInt(formData.duration_minutes),
-          max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
-          description_en: formData.description_en || null,
-          description_ja: formData.description_ja || null,
-        }),
+      await csrfPatch(`/api/sessions/${sessionId}`, {
+        sport_center_id: formData.sport_center_id,
+        sport_type: formData.sport_type,
+        skill_level: formData.skill_level,
+        date_time: dateTime.toISOString(),
+        duration_minutes: parseInt(formData.duration_minutes),
+        max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
+        description_en: formData.description_en || null,
+        description_ja: formData.description_ja || null,
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to update session');
-      }
 
       // Success! Redirect to created sessions page
       router.push('/my-sessions/created');

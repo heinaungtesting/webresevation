@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { Camera, X, Loader2 } from 'lucide-react';
 import Button from '../ui/Button';
+import { csrfFetch, csrfDelete } from '@/lib/csrfClient';
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string | null;
@@ -56,7 +57,7 @@ export default function AvatarUpload({
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await fetch('/api/users/me/avatar', {
+      const response = await csrfFetch('/api/users/me/avatar', {
         method: 'POST',
         body: formData,
       });
@@ -88,15 +89,7 @@ export default function AvatarUpload({
     setDeleting(true);
     setError('');
     try {
-      const response = await fetch('/api/users/me/avatar', {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to delete avatar');
-      }
-
+      await csrfDelete('/api/users/me/avatar');
       onDelete();
     } catch (err: any) {
       console.error('Error deleting avatar:', err);

@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { csrfPost } from '@/lib/csrfClient';
 
 interface UserProfile {
   avatar_url?: string | null;
@@ -22,8 +23,8 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   profile: null,
   loading: true,
-  signOut: async () => {},
-  refreshProfile: async () => {},
+  signOut: async () => { },
+  refreshProfile: async () => { },
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -75,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   const signOut = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
+    await csrfPost('/api/auth/logout', {});
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);

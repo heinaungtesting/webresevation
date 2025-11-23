@@ -10,6 +10,7 @@ import Card from '@/app/components/ui/Card';
 import Select from '@/app/components/ui/Select';
 import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
+import { csrfPatch } from '@/lib/csrfClient';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -65,18 +66,7 @@ export default function SettingsPage() {
     setError('');
 
     try {
-      const response = await fetch('/api/users/me', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(settings),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to update settings');
-      }
+      await csrfPatch('/api/users/me', settings);
 
       setSuccess(true);
       // Reload page if language changed

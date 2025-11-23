@@ -9,6 +9,7 @@ import Card from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import Badge from '@/app/components/ui/Badge';
 import { Calendar, Clock, TrendingUp, History, Loader2, Plus } from 'lucide-react';
+import { csrfDelete } from '@/lib/csrfClient';
 
 interface AttendedSession {
   attendance_id: string;
@@ -70,17 +71,10 @@ export default function MySessionsPage() {
     setCancellingId(sessionId);
 
     try {
-      const response = await fetch('/api/attendance', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      await csrfDelete('/api/attendance', {
         body: JSON.stringify({ session_id: sessionId }),
+        headers: { 'Content-Type': 'application/json' },
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to cancel attendance');
-      }
 
       // Refresh the sessions list
       await fetchMySessions();
@@ -186,21 +180,19 @@ export default function MySessionsPage() {
             <nav className="flex -mb-px">
               <button
                 onClick={() => setActiveTab('upcoming')}
-                className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'upcoming'
+                className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${activeTab === 'upcoming'
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 Upcoming ({data?.upcoming.length || 0})
               </button>
               <button
                 onClick={() => setActiveTab('past')}
-                className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'past'
+                className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${activeTab === 'past'
                     ? 'border-blue-600 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 Past ({data?.past.length || 0})
               </button>

@@ -22,6 +22,7 @@ import Badge from '@/app/components/ui/Badge';
 import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import { formatDate, cn } from '@/lib/utils';
+import { csrfPatch, csrfPost } from '@/lib/csrfClient';
 
 interface Report {
   id: string;
@@ -128,16 +129,11 @@ export default function AdminReportsPage() {
   const updateReportStatus = async (reportId: string, status: string, adminNotes?: string) => {
     try {
       setActionLoading(true);
-      const response = await fetch('/api/admin/reports', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ report_id: reportId, status, admin_notes: adminNotes }),
+      await csrfPatch('/api/admin/reports', {
+        report_id: reportId,
+        status,
+        admin_notes: adminNotes,
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to update report');
-      }
 
       await fetchReports();
       setSelectedReport(null);
@@ -156,16 +152,10 @@ export default function AdminReportsPage() {
 
     try {
       setActionLoading(true);
-      const response = await fetch('/api/admin/reports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, reason: banReason }),
+      await csrfPost('/api/admin/reports', {
+        user_id: userId,
+        reason: banReason,
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to ban user');
-      }
 
       alert('User has been banned successfully');
       await fetchReports();

@@ -1,3 +1,4 @@
+import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
 
@@ -55,4 +56,16 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+// Only use Sentry in production to speed up development
+const finalConfig = process.env.NODE_ENV === 'production'
+  ? withSentryConfig(withNextIntl(nextConfig), {
+    org: "hein-htet-aung",
+    project: "javascript-nextjs",
+    silent: !process.env.CI,
+    widenClientFileUpload: true,
+    disableLogger: true,
+    automaticVercelMonitors: true,
+  })
+  : withNextIntl(nextConfig);
+
+export default finalConfig;

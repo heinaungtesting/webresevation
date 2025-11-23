@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Check, X, Users, AlertTriangle, Loader2, CheckCircle, Shield } from 'lucide-react';
 import Button from '@/app/components/ui/Button';
 import Avatar from '@/app/components/ui/Avatar';
+import { csrfPost } from '@/lib/csrfClient';
 
 interface Participant {
   user_id: string;
@@ -116,16 +117,7 @@ export default function AttendanceTracker({
         attended,
       }));
 
-      const response = await fetch(`/api/sessions/${sessionId}/attendance`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ attendees }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to mark attendance');
-      }
+      await csrfPost(`/api/sessions/${sessionId}/attendance`, { attendees });
 
       setSuccess(true);
       // Refresh data by refetching
@@ -213,15 +205,14 @@ export default function AttendanceTracker({
           {data.participants.map((participant) => (
             <div
               key={participant.user_id}
-              className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
-                data.attendance_marked
+              className={`flex items-center justify-between p-4 rounded-xl border transition-all ${data.attendance_marked
                   ? participant.status === 'ATTENDED'
                     ? 'bg-green-50 border-green-200'
                     : 'bg-red-50 border-red-200'
                   : attendance[participant.user_id]
                     ? 'bg-green-50 border-green-200'
                     : 'bg-red-50 border-red-200'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-3">
                 <Avatar
@@ -249,11 +240,10 @@ export default function AttendanceTracker({
               {data.attendance_marked ? (
                 // Show status badge if already marked
                 <div
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-                    participant.status === 'ATTENDED'
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg ${participant.status === 'ATTENDED'
                       ? 'bg-green-100 text-green-700'
                       : 'bg-red-100 text-red-700'
-                  }`}
+                    }`}
                 >
                   {participant.status === 'ATTENDED' ? (
                     <>
@@ -271,11 +261,10 @@ export default function AttendanceTracker({
                 // Interactive toggle if not yet marked
                 <button
                   onClick={() => handleToggleAttendance(participant.user_id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                    attendance[participant.user_id]
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${attendance[participant.user_id]
                       ? 'bg-green-500 text-white hover:bg-green-600'
                       : 'bg-red-500 text-white hover:bg-red-600'
-                  }`}
+                    }`}
                 >
                   {attendance[participant.user_id] ? (
                     <>

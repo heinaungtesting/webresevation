@@ -16,6 +16,7 @@ import Button from '@/app/components/ui/Button';
 import Input from '@/app/components/ui/Input';
 import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
+import { csrfPost, csrfPatch, csrfDelete } from '@/lib/csrfClient';
 
 interface SportCenter {
   id: string;
@@ -87,20 +88,10 @@ export default function AdminSportCentersPage() {
     setError('');
 
     try {
-      const url = editingId
-        ? `/api/admin/sport-centers/${editingId}`
-        : '/api/admin/sport-centers';
-      const method = editingId ? 'PATCH' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to save sport center');
+      if (editingId) {
+        await csrfPatch(`/api/admin/sport-centers/${editingId}`, formData);
+      } else {
+        await csrfPost('/api/admin/sport-centers', formData);
       }
 
       // Reset form and refresh list
@@ -135,15 +126,7 @@ export default function AdminSportCentersPage() {
     }
 
     try {
-      const response = await fetch(`/api/admin/sport-centers/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to delete sport center');
-      }
-
+      await csrfDelete(`/api/admin/sport-centers/${id}`);
       await fetchSportCenters();
     } catch (err: any) {
       alert(err.message || 'Failed to delete sport center');

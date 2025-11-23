@@ -7,6 +7,7 @@ import Button from '@/app/components/ui/Button';
 import Input from '@/app/components/ui/Input';
 import { AlertCircle, Zap, Users, Calendar, TrendingUp } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { csrfPost } from '@/lib/csrfClient';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -45,20 +46,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Login failed');
-        return;
-      }
+      const data = await csrfPost('/api/auth/login', { email, password });
 
       // Redirect to home or previous page
       const searchParams = new URLSearchParams(window.location.search);
@@ -66,7 +54,7 @@ export default function LoginPage() {
       router.push(redirectTo);
       router.refresh();
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(err instanceof Error ? err.message : 'An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }

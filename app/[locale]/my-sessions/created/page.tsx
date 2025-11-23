@@ -19,6 +19,7 @@ import Badge from '@/app/components/ui/Badge';
 import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import { formatDate, formatTime } from '@/lib/utils';
+import { csrfDelete } from '@/lib/csrfClient';
 
 interface Session {
   id: string;
@@ -81,14 +82,7 @@ export default function MyCreatedSessionsPage() {
     }
 
     try {
-      const response = await fetch(`/api/sessions/${sessionId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to cancel session');
-      }
+      await csrfDelete(`/api/sessions/${sessionId}`);
 
       // Refresh the list
       await fetchCreatedSessions();
