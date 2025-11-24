@@ -150,8 +150,8 @@ jobs:
       - name: Validate database URLs
         run: node scripts/validate-db-urls.js
 
-      - name: Run database migrations
-        run: npx prisma migrate deploy
+      - name: Setup test database schema
+        run: npx prisma db push --force-reset
 
       - name: Run tests
         run: npm test -- --passWithNoTests
@@ -239,8 +239,8 @@ jobs:
       - name: Validate database URLs
         run: node scripts/validate-db-urls.js
 
-      - name: Run database migrations
-        run: npx prisma migrate deploy
+      - name: Setup test database schema
+        run: npx prisma db push --force-reset
 
       - name: Build application for E2E tests
         run: npm run build

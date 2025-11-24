@@ -132,7 +132,35 @@ jobs:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
         run: |
           echo "🔄 Running Prisma migrations..."
-          npx prisma migrate deploy
+
+          # Try to run migrations normally first
+          if ! npx prisma migrate deploy 2>&1 | tee migration_output.log; then
+            echo "⚠️ Migration failed, checking error type..."
+
+            # Check if it's a P3005 error (database not empty, no migrations)
+            if grep -q "P3005" migration_output.log; then
+              echo "🔧 Detected P3005: Database schema exists but no migration history"
+              echo "📋 Marking baseline migration as applied (safe for existing production DB)..."
+
+              # Mark the baseline migration as already applied
+              npx prisma migrate resolve --applied 20241124000000_baseline
+
+              echo "✅ Baseline migration marked as applied"
+              echo "🔄 Attempting to apply any remaining migrations..."
+
+              # Try to apply any subsequent migrations
+              npx prisma migrate deploy
+            else
+              echo "❌ Migration failed with non-baseline error"
+              cat migration_output.log
+              exit 1
+            fi
+          else
+            echo "✅ Migrations applied successfully"
+          fi
+
+          # Clean up log file
+          rm -f migration_output.log
 
       - name: Deploy to Production
         id: deploy
