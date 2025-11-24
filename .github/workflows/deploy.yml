@@ -76,6 +76,8 @@ jobs:
     name: Deploy Production
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
     environment:
       name: production
       url: ${{ steps.deploy.outputs.url }}
@@ -165,7 +167,10 @@ jobs:
       - name: Deploy to Production
         id: deploy
         run: |
+          echo "🚀 Deploying to production..."
           url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "✅ Deployment completed"
+          echo "🌐 Deployment URL: $url"
           echo "url=$url" >> $GITHUB_OUTPUT
 
       - name: Notify Sentry of Release
@@ -193,12 +198,27 @@ jobs:
 
       - name: Check health endpoint
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ needs.deploy-production.outputs.url }}/api/health || echo "000")
-          if [ "$response" != "200" ]; then
-            echo "Health check failed with status: $response"
+          DEPLOY_URL="${{ needs.deploy-production.outputs.url }}"
+          echo "🌐 Deployment URL: $DEPLOY_URL"
+          echo "🔍 Health check URL: $DEPLOY_URL/api/health"
+
+          if [ -z "$DEPLOY_URL" ]; then
+            echo "❌ No deployment URL available"
             exit 1
           fi
-          echo "Health check passed!"
+
+          echo "🔄 Performing health check..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" "$DEPLOY_URL/api/health" || echo "000")
+          echo "📊 Health check response code: $response"
+
+          if [ "$response" != "200" ]; then
+            echo "❌ Health check failed with status: $response"
+            echo "🔍 Attempting to get response body for debugging..."
+            curl -s "$DEPLOY_URL/api/health" || echo "Failed to fetch response body"
+            exit 1
+          fi
+
+          echo "✅ Health check passed!"
 
       - name: Notify on failure
         if: failure()
