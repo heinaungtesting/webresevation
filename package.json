@@ -7,7 +7,7 @@
     "dev": "NODE_OPTIONS='--max-old-space-size=2048' next dev",
     "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --quiet --ignore-pattern scripts/",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",

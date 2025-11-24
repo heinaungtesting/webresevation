@@ -14,7 +14,9 @@ describe('Utils', () => {
     });
 
     it('should handle conditional classes', () => {
-      const result = cn('base', true && 'included', false && 'excluded');
+      const isIncluded = true;
+      const isExcluded = false;
+      const result = cn('base', isIncluded && 'included', isExcluded && 'excluded');
       expect(result).toBe('base included');
     });
 
@@ -43,11 +45,12 @@ describe('Utils', () => {
     });
 
     it('should handle mixed inputs', () => {
+      const showConditional = true;
       const result = cn(
         'base',
         ['array1', 'array2'],
         { 'conditional': true, 'false-conditional': false },
-        true && 'inline-conditional',
+        showConditional && 'inline-conditional',
         'end'
       );
       expect(result).toBe('base array1 array2 conditional inline-conditional end');
