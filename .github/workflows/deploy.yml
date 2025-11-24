@@ -97,11 +97,42 @@ jobs:
       - name: Build Project
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: Validate Database URLs
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: |
+          echo "Checking DATABASE_URL format..."
+          if [[ -z "$DATABASE_URL" ]]; then
+            echo "❌ DATABASE_URL is not set"
+            exit 1
+          fi
+          if [[ ! "$DATABASE_URL" =~ ^postgresql:// ]]; then
+            echo "❌ DATABASE_URL must start with postgresql://"
+            echo "Current format: ${DATABASE_URL:0:20}..."
+            exit 1
+          fi
+
+          echo "Checking DIRECT_URL format..."
+          if [[ -z "$DIRECT_URL" ]]; then
+            echo "❌ DIRECT_URL is not set"
+            exit 1
+          fi
+          if [[ ! "$DIRECT_URL" =~ ^postgresql:// ]]; then
+            echo "❌ DIRECT_URL must start with postgresql://"
+            echo "Current format: ${DIRECT_URL:0:20}..."
+            exit 1
+          fi
+
+          echo "✅ Database URLs format validation passed"
+
       - name: Run Database Migrations
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
-        run: npx prisma migrate deploy
+        run: |
+          echo "🔄 Running Prisma migrations..."
+          npx prisma migrate deploy
 
       - name: Deploy to Production
         id: deploy

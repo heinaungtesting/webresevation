@@ -147,6 +147,9 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
+      - name: Validate database URLs
+        run: node scripts/validate-db-urls.js
+
       - name: Run database migrations
         run: npx prisma migrate deploy
 
@@ -232,6 +235,9 @@ jobs:
 
       - name: Generate Prisma client
         run: npx prisma generate
+
+      - name: Validate database URLs
+        run: node scripts/validate-db-urls.js
 
       - name: Run database migrations
         run: npx prisma migrate deploy
