@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 
     io = new SocketIOServer(httpServer, {
       cors: {
-        origin: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+        origin: process.env.NEXT_PUBLIC_APP_URL || "https://webresevation-gbvm9a1l4-heinaungtestings-projects.vercel.app",
         methods: ["GET", "POST"],
         credentials: true
       },
@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     success: true,
     message: 'Socket.io server initialized',
-    socketUrl: `ws://localhost:${process.env.SOCKET_PORT || 3001}`
+    socketUrl: `wss://webresevation-gbvm9a1l4-heinaungtestings-projects.vercel.app:${process.env.SOCKET_PORT || 3001}`
   });
 }
 

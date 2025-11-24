@@ -60,7 +60,7 @@ const clientEnvSchema = z.object({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1, 'NEXT_PUBLIC_SUPABASE_ANON_KEY is required'),
 
   // App URL
-  NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),
+  NEXT_PUBLIC_APP_URL: z.string().url().default('https://webresevation-gbvm9a1l4-heinaungtestings-projects.vercel.app'),
 
   // Analytics (optional)
   NEXT_PUBLIC_GA_ID: z.string().optional(),

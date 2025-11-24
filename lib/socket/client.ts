@@ -31,7 +31,7 @@ class SocketManager {
 
     this.isConnecting = true;
 
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'ws://localhost:3001';
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'wss://webresevation-gbvm9a1l4-heinaungtestings-projects.vercel.app:3001';
 
     console.log(`🔌 Connecting to Socket.io server at ${socketUrl}...`);
 

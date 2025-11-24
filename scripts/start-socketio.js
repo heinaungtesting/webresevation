@@ -12,7 +12,7 @@ const { createServer } = require('http');
 
 // Configuration
 const PORT = process.env.SOCKET_PORT || 3001;
-const CORS_ORIGIN = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+const CORS_ORIGIN = process.env.NEXT_PUBLIC_APP_URL || 'https://webresevation-gbvm9a1l4-heinaungtestings-projects.vercel.app';
 
 // Create HTTP server
 const httpServer = createServer();
@@ -162,13 +162,13 @@ httpServer.on('error', (error) => {
 
 // Start server
 httpServer.listen(PORT, () => {
-  console.log(`✅ Socket.io server running on http://localhost:${PORT}`);
+  console.log(`✅ Socket.io server running on port ${PORT}`);
   console.log(`📊 Active users: ${activeUsers.size}`);
   console.log(`🏠 Active conversations: ${conversationRooms.size}`);
   console.log('');
   console.log('Ready to handle real-time connections! 🎉');
   console.log('');
-  console.log('💡 To test: http://localhost:3000/test-socketio');
+  console.log('💡 To test: https://webresevation-gbvm9a1l4-heinaungtestings-projects.vercel.app/test-socketio');
 });
 
 // Graceful shutdown

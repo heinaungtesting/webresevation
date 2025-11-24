@@ -101,7 +101,7 @@ export async function sendWelcomeEmail(to: string, userName: string) {
             </ul>
 
             <p style="text-align: center;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/sessions" class="button">Browse Sessions</a>
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://webresevation-gbvm9a1l4-heinaungtestings-projects.vercel.app'}/sessions" class="button">Browse Sessions</a>
             </p>
 
             <p>If you have any questions, feel free to reach out to our support team.</p>
@@ -249,7 +249,7 @@ export async function sendMessageNotificationEmail(
             </div>
 
             <p style="text-align: center;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/messages/${messageDetails.conversationId}" class="button">View Message</a>
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://webresevation-gbvm9a1l4-heinaungtestings-projects.vercel.app'}/messages/${messageDetails.conversationId}" class="button">View Message</a>
             </p>
 
             <p><strong>The SportsMatch Tokyo Team</strong></p>
@@ -325,7 +325,7 @@ export async function sendSessionUpdateEmail(
             <p>${isCancelled ? 'We apologize for any inconvenience. Please check out other available sessions.' : 'Please make note of these changes.'}</p>
 
             <p style="text-align: center;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/sessions" class="button">Browse Sessions</a>
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://webresevation-gbvm9a1l4-heinaungtestings-projects.vercel.app'}/sessions" class="button">Browse Sessions</a>
             </p>
 
             <p><strong>The SportsMatch Tokyo Team</strong></p>

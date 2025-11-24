@@ -81,7 +81,7 @@ export function createSocketServer(port = 3001) {
       SocketData
     >(server, {
       cors: {
-        origin: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+        origin: process.env.NEXT_PUBLIC_APP_URL || "https://webresevation-gbvm9a1l4-heinaungtestings-projects.vercel.app",
         methods: ["GET", "POST"],
         credentials: true
       },
@@ -245,7 +245,7 @@ export function createSocketServer(port = 3001) {
     });
 
     server.listen(port, () => {
-      console.log(`🚀 Socket.io server running on http://localhost:${port}`);
+      console.log(`🚀 Socket.io server running on port ${port}`);
     });
 
     return { server, io };
