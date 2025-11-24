@@ -2,7 +2,6 @@ import { ImageResponse } from 'next/og';
 import { prisma } from '@/lib/prisma';
 
 // Image metadata
-export const runtime = 'edge';
 export const alt = 'SportsMatch Session';
 export const size = {
   width: 1200,
