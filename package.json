@@ -25,9 +25,6 @@
     "socket:start": "node scripts/start-socketio.js",
     "dev:full": "concurrently \"npm run socket:start\" \"npm run dev\""
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/heinaungtesting/webresevation.git"
