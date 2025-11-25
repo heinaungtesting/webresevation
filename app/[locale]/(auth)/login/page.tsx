@@ -8,6 +8,7 @@ import Input from '@/app/components/ui/Input';
 import { AlertCircle, Zap, Users, Calendar, TrendingUp } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { csrfPost } from '@/lib/csrfClient';
+import { getAppUrl } from '@/lib/env';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback`,
+          redirectTo: `${getAppUrl()}/api/auth/callback`,
         },
       });
 
@@ -226,23 +227,27 @@ export default function LoginPage() {
               <Input
                 label="Email"
                 type="email"
+                name="email"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 fullWidth
                 autoComplete="email"
+                data-testid="email-input"
               />
 
               <Input
                 label="Password"
                 type="password"
+                name="password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 fullWidth
                 autoComplete="current-password"
+                data-testid="password-input"
               />
 
               <div className="flex items-center justify-between text-sm">
@@ -261,6 +266,7 @@ export default function LoginPage() {
                 fullWidth
                 loading={loading}
                 className="mt-6"
+                data-testid="login-button"
               >
                 <Zap className="w-4 h-4 mr-2" />
                 Log In

@@ -264,7 +264,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8" suppressHydrationWarning>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8" suppressHydrationWarning>
         {/* Happening Now Section */}
         {happeningNow.length > 0 && (
           <motion.section
@@ -473,7 +473,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
             </>
           )}
         </motion.section>
-      </main>
+      </div>
 
       {/* Map/List Toggle FAB */}
       <motion.button
