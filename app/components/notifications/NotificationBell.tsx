@@ -1,32 +1,57 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Bell } from 'lucide-react';
 import NotificationDropdown from './NotificationDropdown';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { useSocketNotifications } from '@/lib/hooks/useSocketNotifications';
+import { useUserNotifications } from '@/lib/realtime/client';
 import { csrfPatch, csrfDelete } from '@/lib/csrfClient';
 
 export default function NotificationBell() {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Use Socket.io hook for real-time notifications
-  const {
-    notifications,
-    unreadCount,
-    markAsRead,
-    markAllAsRead,
-    isLoading: loading,
-    error,
-    isConnected
-  } = useSocketNotifications({
-    userId: user?.id,
-    enableBrowserNotifications: true,
-    enableSounds: true
-  });
+  // Fetch initial notifications
+  useEffect(() => {
+    if (!user?.id) return;
 
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/users/me/notifications');
+        if (!response.ok) throw new Error('Failed to fetch notifications');
+        const data = await response.json();
+        setNotifications(data.notifications || []);
+      } catch (err) {
+        console.error('Error fetching notifications:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, [user?.id]);
+
+  // Subscribe to new notifications with Supabase Realtime
+  const handleNewNotification = useCallback((notification: any) => {
+    setNotifications(prev => [notification, ...prev]);
+
+    // Show browser notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(notification.title, {
+        body: notification.message,
+        icon: '/icon.png',
+      });
+    }
+  }, []);
+
+  useUserNotifications(user?.id || '', handleNewNotification);
+
+  // Calculate unread count
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -50,11 +75,15 @@ export default function NotificationBell() {
       if (notificationIds) {
         // Mark specific notifications as read
         for (const id of notificationIds) {
-          await markAsRead(id);
+          await csrfPatch(`/api/users/me/notifications/${id}/read`, {});
+          setNotifications(prev =>
+            prev.map(n => (n.id === id ? { ...n, read: true } : n))
+          );
         }
       } else {
         // Mark all notifications as read
-        await markAllAsRead();
+        await csrfPatch('/api/users/me/notifications/read-all', {});
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       }
     } catch (err) {
       console.error('Error marking notifications as read:', err);
@@ -64,7 +93,7 @@ export default function NotificationBell() {
   const handleDelete = async (notificationId: string) => {
     try {
       await csrfDelete(`/api/users/me/notifications?id=${notificationId}`);
-      // The Socket hook will automatically update the state via real-time events
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
     } catch (err) {
       console.error('Error deleting notification:', err);
     }
@@ -73,7 +102,7 @@ export default function NotificationBell() {
   const handleClearAll = async () => {
     try {
       await csrfDelete('/api/users/me/notifications?all=true');
-      // The Socket hook will automatically update the state via real-time events
+      setNotifications([]);
     } catch (err) {
       console.error('Error clearing notifications:', err);
     }

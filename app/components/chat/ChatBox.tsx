@@ -7,7 +7,7 @@ import MessageBubble from './MessageBubble';
 import Loading from '../ui/Loading';
 import ErrorMessage from '../ui/ErrorMessage';
 import EmptyState from '../ui/EmptyState';
-import { useSocketMessages } from '@/lib/hooks/useSocketMessages';
+import { useConversationMessages } from '@/lib/realtime/client';
 import { csrfPost, csrfPut } from '@/lib/csrfClient';
 
 interface ChatBoxProps {
@@ -18,26 +18,43 @@ interface ChatBoxProps {
 export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps) {
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Use Socket.io hook for real-time messaging
-  const {
-    messages,
-    sendMessage,
-    isLoading: loading,
-    error,
-    isConnected,
-    refresh
-  } = useSocketMessages(conversationId, {
-    onNewMessage: (message) => {
-      // Mark conversation as read when new message arrives
-      if (message.sender_id !== currentUserId) {
-        csrfPut(`/api/conversations/${conversationId}/read`, {}).catch(console.error);
+  // Fetch initial messages
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/conversations/${conversationId}/messages`);
+        if (!response.ok) throw new Error('Failed to fetch messages');
+        const data = await response.json();
+        setMessages(data.messages || []);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-      scrollToBottom();
+    };
+
+    fetchMessages();
+  }, [conversationId]);
+
+  // Subscribe to new messages with Supabase Realtime
+  const handleNewMessage = useCallback((message: any) => {
+    setMessages(prev => [...prev, message]);
+
+    // Mark conversation as read when new message arrives
+    if (message.sender_id !== currentUserId) {
+      csrfPut(`/api/conversations/${conversationId}/read`, {}).catch(console.error);
     }
-  });
+    scrollToBottom();
+  }, [conversationId, currentUserId]);
+
+  useConversationMessages(conversationId, handleNewMessage);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -57,8 +74,10 @@ export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps)
     setSending(true);
 
     try {
-      // Use Socket.io hook's sendMessage method
-      await sendMessage(messageContent);
+      // Send message via API
+      await csrfPost(`/api/conversations/${conversationId}/messages`, {
+        content: messageContent,
+      });
 
       inputRef.current?.focus();
     } catch (err) {
@@ -84,7 +103,6 @@ export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps)
     return (
       <ErrorMessage
         message={error}
-        onRetry={refresh}
       />
     );
   }
