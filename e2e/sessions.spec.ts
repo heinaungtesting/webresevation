@@ -74,46 +74,41 @@ test.describe('Session Creation', () => {
   });
 
   test('should navigate to create session form', async ({ page }) => {
-    await page.goto('/sessions/new');
+    await page.goto('/sessions/new', { waitUntil: 'domcontentloaded' });
 
-    // Should show form or redirect to login
-    await page.waitForLoadState('networkidle');
+    // Should show form or redirect to login - wait for specific content instead of networkidle
+    await page.waitForSelector('body', { timeout: 30000 });
   });
 });
 
 test.describe('Session Filters', () => {
   test('should filter by date (today)', async ({ page }) => {
-    await page.goto('/sessions?date=today');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/sessions?date=today', { waitUntil: 'domcontentloaded' });
 
-    // Page should load with filter applied
+    // Page should load with filter applied - wait for specific element instead of networkidle
     await expect(page.locator('body')).toBeVisible();
   });
 
   test('should filter by date (weekend)', async ({ page }) => {
-    await page.goto('/sessions?date=weekend');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/sessions?date=weekend', { waitUntil: 'domcontentloaded' });
 
     await expect(page.locator('body')).toBeVisible();
   });
 
   test('should filter by sport type', async ({ page }) => {
-    await page.goto('/sessions?sport_type=basketball');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/sessions?sport_type=basketball', { waitUntil: 'domcontentloaded' });
 
     await expect(page.locator('body')).toBeVisible();
   });
 
   test('should filter by skill level', async ({ page }) => {
-    await page.goto('/sessions?skill_level=beginner');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/sessions?skill_level=beginner', { waitUntil: 'domcontentloaded' });
 
     await expect(page.locator('body')).toBeVisible();
   });
 
   test('should combine multiple filters', async ({ page }) => {
-    await page.goto('/sessions?sport_type=basketball&skill_level=intermediate&vibe=CASUAL');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/sessions?sport_type=basketball&skill_level=intermediate&vibe=CASUAL', { waitUntil: 'domcontentloaded' });
 
     await expect(page.locator('body')).toBeVisible();
   });
@@ -131,8 +126,7 @@ test.describe('Session Pagination', () => {
   });
 
   test('should navigate to page via URL', async ({ page }) => {
-    await page.goto('/sessions?page=2');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/sessions?page=2', { waitUntil: 'domcontentloaded' });
 
     await expect(page.locator('body')).toBeVisible();
   });

@@ -101,6 +101,12 @@ function formatErrors(errors: z.ZodError): string {
  * Called at server startup
  */
 function validateServerEnv(): ServerEnv {
+  // Only validate on server-side (not in browser)
+  if (typeof window !== 'undefined') {
+    // Return empty object on client side - server env vars aren't accessible anyway
+    return {} as ServerEnv;
+  }
+
   const result = serverEnvSchema.safeParse(process.env);
 
   if (!result.success) {
