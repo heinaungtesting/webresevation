@@ -20,7 +20,14 @@ class SocketManager {
   /**
    * Connect to Socket.io server
    */
-  connect(userId?: string, username?: string): SocketIOClient {
+  connect(userId?: string, username?: string): SocketIOClient | null {
+    // Disable Socket.io on Vercel (serverless doesn't support WebSockets)
+    if (process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.VERCEL) {
+      console.warn('⚠️  Socket.io is disabled on Vercel (serverless environment)');
+      console.warn('💡 Use Supabase Realtime, Pusher, or Ably for real-time features on Vercel');
+      return null;
+    }
+
     if (this.socket?.connected) {
       return this.socket;
     }
@@ -31,7 +38,7 @@ class SocketManager {
 
     this.isConnecting = true;
 
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'wss://webresevation-gbvm9a1l4-heinaungtestings-projects.vercel.app:3001';
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
     console.log(`🔌 Connecting to Socket.io server at ${socketUrl}...`);
 
@@ -220,8 +227,13 @@ export function useSocketConnection(userId?: string, username?: string) {
   return { connect, disconnect, isConnected };
 }
 
-// Helper to ensure socket is initialized in development
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+// Helper to ensure socket is initialized in development (local only, not Vercel)
+if (
+  typeof window !== 'undefined' &&
+  process.env.NODE_ENV === 'development' &&
+  !process.env.NEXT_PUBLIC_VERCEL_ENV &&
+  !process.env.VERCEL
+) {
   // Initialize Socket.io API route
   fetch('/api/socket')
     .then(response => response.json())
