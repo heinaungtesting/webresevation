@@ -47,17 +47,34 @@ export default function MySessionsPage() {
   const fetchMySessions = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/users/me/sessions');
 
-      if (!response.ok) {
+      // Fetch upcoming and past sessions in parallel
+      const [upcomingResponse, pastResponse] = await Promise.all([
+        fetch('/api/users/me/sessions?type=upcoming&limit=100'),
+        fetch('/api/users/me/sessions?type=past&limit=100'),
+      ]);
+
+      if (!upcomingResponse.ok || !pastResponse.ok) {
         throw new Error('Failed to fetch sessions');
       }
 
-      const data = await response.json();
-      setData(data);
+      const upcomingData = await upcomingResponse.json();
+      const pastData = await pastResponse.json();
+
+      setData({
+        upcoming: upcomingData.data || [],
+        past: pastData.data || [],
+        total: (upcomingData.pagination?.totalCount || 0) + (pastData.pagination?.totalCount || 0),
+      });
     } catch (err) {
       setError('Failed to load your sessions');
       console.error(err);
+      // Set empty data to prevent undefined errors
+      setData({
+        upcoming: [],
+        past: [],
+        total: 0,
+      });
     } finally {
       setLoading(false);
     }
@@ -181,8 +198,8 @@ export default function MySessionsPage() {
               <button
                 onClick={() => setActiveTab('upcoming')}
                 className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${activeTab === 'upcoming'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
                 Upcoming ({data?.upcoming.length || 0})
@@ -190,8 +207,8 @@ export default function MySessionsPage() {
               <button
                 onClick={() => setActiveTab('past')}
                 className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${activeTab === 'past'
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
                 Past ({data?.past.length || 0})
