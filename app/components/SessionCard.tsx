@@ -187,13 +187,16 @@ export default function SessionCard({ session }: SessionCardProps) {
               </Button>
             </Link>
           ) : (
-            <Button
-              variant="gradient"
-              size="sm"
-              className="flex-1 min-h-[44px]"
-            >
-              Join
-            </Button>
+            <Link href={`/sessions/${session.id}`} className="flex-1">
+              <Button
+                variant="gradient"
+                size="sm"
+                fullWidth
+                className="min-h-[44px]"
+              >
+                Join
+              </Button>
+            </Link>
           )}
         </div>
       </div>
