@@ -9,7 +9,7 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import type { RealtimeChannel } from '@supabase/supabase-js';
+import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 /**
  * React hook for subscribing to new messages in a conversation
@@ -310,8 +310,8 @@ export function useRealtimeSubscription(
                     schema: 'public',
                     table: config.table,
                     filter: config.filter,
-                },
-                (payload) => {
+                } as any,
+                (payload: RealtimePostgresChangesPayload<any>) => {
                     console.log(`📡 Realtime data from ${config.table}:`, payload);
                     config.onData(payload);
                 }
