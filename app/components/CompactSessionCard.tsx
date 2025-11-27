@@ -1,9 +1,12 @@
+'use client';
+
 import Link from 'next/link';
 import { Session, SportType } from '@/types';
 import Badge from './ui/Badge';
 import { formatTime } from '@/lib/utils';
 import { Users, Clock, MapPin } from 'lucide-react';
 import { AvatarGroup } from './ui/Avatar';
+import { useState, useEffect } from 'react';
 
 interface CompactSessionCardProps {
   session: Session;
@@ -31,23 +34,42 @@ export default function CompactSessionCard({ session, variant = 'horizontal', cl
     ? session.max_participants - session.current_participants
     : null;
 
-  // Calculate time until session
-  const sessionDate = new Date(session.date_time);
-  const now = new Date();
-  const diffMs = sessionDate.getTime() - now.getTime();
-  const diffMins = Math.floor(diffMs / (1000 * 60));
-  const diffHours = Math.floor(diffMins / 60);
+  // Use state for time-dependent calculations to avoid hydration mismatch
+  const [timeLabel, setTimeLabel] = useState(formatTime(session.date_time));
+  const [isUrgent, setIsUrgent] = useState(false);
 
-  let timeLabel = '';
-  if (diffMins < 0) {
-    timeLabel = 'Started';
-  } else if (diffMins < 60) {
-    timeLabel = `${diffMins}m`;
-  } else if (diffHours < 3) {
-    timeLabel = `${diffHours}h ${diffMins % 60}m`;
-  } else {
-    timeLabel = formatTime(session.date_time);
-  }
+  useEffect(() => {
+    // Calculate time until session (client-side only)
+    const updateTimeLabel = () => {
+      const sessionDate = new Date(session.date_time);
+      const now = new Date();
+      const diffMs = sessionDate.getTime() - now.getTime();
+      const diffMins = Math.floor(diffMs / (1000 * 60));
+      const diffHours = Math.floor(diffMins / 60);
+
+      let label = '';
+      if (diffMins < 0) {
+        label = 'Started';
+        setIsUrgent(false);
+      } else if (diffMins < 60) {
+        label = `${diffMins}m`;
+        setIsUrgent(true);
+      } else if (diffHours < 3) {
+        label = `${diffHours}h ${diffMins % 60}m`;
+        setIsUrgent(true);
+      } else {
+        label = formatTime(session.date_time);
+        setIsUrgent(false);
+      }
+      setTimeLabel(label);
+    };
+
+    updateTimeLabel();
+    // Update every minute
+    const interval = setInterval(updateTimeLabel, 60000);
+    return () => clearInterval(interval);
+  }, [session.date_time]);
+
 
   return (
     <Link href={`/sessions/${session.id}`} className={`block h-full ${className}`}>
@@ -64,7 +86,7 @@ export default function CompactSessionCard({ session, variant = 'horizontal', cl
               </h3>
               <div className="flex items-center gap-1 mt-0.5">
                 <Clock className="w-3 h-3 text-slate-400" />
-                <span className={`text-xs font-medium ${diffMins < 60 ? 'text-rose-500' : 'text-slate-500'
+                <span className={`text-xs font-medium ${isUrgent ? 'text-rose-500' : 'text-slate-500'
                   }`}>
                   {timeLabel}
                 </span>
@@ -120,10 +142,10 @@ export default function CompactSessionCard({ session, variant = 'horizontal', cl
           <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${isFull
-                  ? 'bg-rose-500'
-                  : spotsLeft && spotsLeft <= 3
-                    ? 'bg-amber-500'
-                    : 'bg-emerald-500'
+                ? 'bg-rose-500'
+                : spotsLeft && spotsLeft <= 3
+                  ? 'bg-amber-500'
+                  : 'bg-emerald-500'
                 }`}
               style={{ width: `${Math.min((session.current_participants / session.max_participants) * 100, 100)}%` }}
             />

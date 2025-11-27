@@ -44,9 +44,14 @@ export default function ReviewSection({
   const [newRating, setNewRating] = useState(0);
   const [newComment, setNewComment] = useState('');
   const [hasReviewed, setHasReviewed] = useState(false);
+  const [isPastSession, setIsPastSession] = useState(false);
 
-  const isPastSession = new Date(sessionDate) < new Date();
   const canReview = user && hasAttended && isPastSession && !hasReviewed;
+
+  useEffect(() => {
+    // Check if session is in the past (client-side only to avoid hydration mismatch)
+    setIsPastSession(new Date(sessionDate) < new Date());
+  }, [sessionDate]);
 
   useEffect(() => {
     fetchReviews();

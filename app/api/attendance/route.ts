@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { ensureUserExists } from '@/lib/ensure-user';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,18 @@ export async function POST(request: Request) {
     }
 
     const { session_id } = validationResult.data;
+
+    // CRITICAL: Ensure user exists in database before creating attendance
+    // This prevents P2003 foreign key constraint errors
+    try {
+      await ensureUserExists(user);
+    } catch (error: any) {
+      console.error('[/api/attendance] Failed to ensure user exists:', error);
+      return NextResponse.json(
+        { error: error.message || 'Failed to sync user account. Please try logging out and back in.' },
+        { status: 500 }
+      );
+    }
 
     // Use a transaction to prevent race conditions
     // This ensures atomicity between checking capacity and creating the record
