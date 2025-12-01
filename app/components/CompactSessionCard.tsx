@@ -1,10 +1,11 @@
 'use client';
 
+import { memo } from 'react';
 import Link from 'next/link';
 import { Session, SportType } from '@/types';
 import Badge from './ui/Badge';
 import { formatTime } from '@/lib/utils';
-import { Users, Clock, MapPin } from 'lucide-react';
+import { Clock, MapPin } from 'lucide-react';
 import { AvatarGroup } from './ui/Avatar';
 import { useState, useEffect } from 'react';
 
@@ -25,7 +26,7 @@ const sportConfig: Record<SportType, { icon: string; gradient: string }> = {
   other: { icon: '🏃', gradient: 'from-slate-500 to-slate-600' },
 };
 
-export default function CompactSessionCard({ session, variant = 'horizontal', className = '' }: CompactSessionCardProps) {
+function CompactSessionCard({ session, variant = 'horizontal', className = '' }: CompactSessionCardProps) {
   const sport = sportConfig[session.sport_type] || sportConfig.other;
   const isFull = Boolean(session.max_participants && session.current_participants >= session.max_participants);
 
@@ -158,3 +159,6 @@ export default function CompactSessionCard({ session, variant = 'horizontal', cl
     </Link>
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders when parent updates
+export default memo(CompactSessionCard);

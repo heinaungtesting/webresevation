@@ -1,9 +1,18 @@
 import { prisma } from '@/lib/prisma';
+import { sessionCache, sessionListKey } from '@/lib/cache';
 import HomeFeed from './HomeFeed';
 
-// Fetch upcoming sessions from database
+// Fetch upcoming sessions from database with caching
 async function getUpcomingSessions() {
   try {
+    const cacheKey = sessionListKey({ type: 'upcoming', limit: 20 });
+    
+    // Try to get from cache first
+    const cached = await sessionCache.get<any[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const sessions = await prisma.session.findMany({
       where: {
         date_time: {
@@ -45,20 +54,33 @@ async function getUpcomingSessions() {
     });
 
     // Map to include current_participants
-    return sessions.map((session: any) => ({
+    const result = sessions.map((session: any) => ({
       ...session,
       current_participants: session._count.user_sessions,
       _count: undefined,
     }));
+
+    // Cache the result
+    await sessionCache.set(cacheKey, result);
+
+    return result;
   } catch (error) {
     console.error('Error fetching sessions:', error);
     return [];
   }
 }
 
-// Fetch sessions happening within the next 3 hours
+// Fetch sessions happening within the next 3 hours with caching
 async function getHappeningNowSessions() {
   try {
+    const cacheKey = sessionListKey({ type: 'happening_now' });
+    
+    // Try to get from cache first (shorter TTL for time-sensitive data)
+    const cached = await sessionCache.get<any[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const now = new Date();
     const threeHoursLater = new Date(now.getTime() + 3 * 60 * 60 * 1000);
 
@@ -98,11 +120,16 @@ async function getHappeningNowSessions() {
       take: 10,
     });
 
-    return sessions.map((session: any) => ({
+    const result = sessions.map((session: any) => ({
       ...session,
       current_participants: session._count.user_sessions,
       _count: undefined,
     }));
+
+    // Cache with shorter TTL for time-sensitive data
+    await sessionCache.set(cacheKey, result);
+
+    return result;
   } catch (error) {
     console.error('Error fetching happening now sessions:', error);
     return [];

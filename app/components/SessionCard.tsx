@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import Link from 'next/link';
 import { Session, SportType, SkillLevel } from '@/types';
 import Badge from './ui/Badge';
@@ -5,7 +6,7 @@ import Button from './ui/Button';
 import FavoriteButton from './sessions/FavoriteButton';
 import VibeBadge, { SessionVibe } from './ui/VibeBadge';
 import LanguageFlag from './ui/LanguageFlag';
-import { formatDate, formatTime } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { Users, Clock, MapPin, ArrowRight, Bell } from 'lucide-react';
 import { AvatarGroup } from './ui/Avatar';
 
@@ -30,7 +31,7 @@ const skillConfig: Record<SkillLevel, { color: 'success' | 'warning' | 'info'; l
   advanced: { color: 'info', label: 'Advanced' },
 };
 
-export default function SessionCard({ session }: SessionCardProps) {
+function SessionCard({ session }: SessionCardProps) {
   const sport = sportConfig[session.sport_type] || sportConfig.other;
   const skill = skillConfig[session.skill_level];
   const isFull = Boolean(session.max_participants && session.current_participants >= session.max_participants);
@@ -206,3 +207,6 @@ export default function SessionCard({ session }: SessionCardProps) {
     </div>
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders when parent updates
+export default memo(SessionCard);
