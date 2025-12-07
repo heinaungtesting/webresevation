@@ -1,0 +1,83 @@
+# =============================================================================
+# Docker Compose Configuration for SportsMatch Tokyo
+# =============================================================================
+# Usage:
+#   Development: docker compose up dev
+#   Production:  docker compose up prod
+#
+# For Windows: Make sure Docker Desktop is installed and running
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Development Service (with hot-reloading)
+  # ---------------------------------------------------------------------------
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: sportsmatch-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source code for hot-reloading
+      - .:/app
+      # Prevent overwriting node_modules with local version
+      - /app/node_modules
+      - /app/.next
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Production Service (optimized build)
+  # ---------------------------------------------------------------------------
+  prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sportsmatch-prod
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  # ---------------------------------------------------------------------------
+  # Optional: Local PostgreSQL (if not using Supabase)
+  # ---------------------------------------------------------------------------
+  # Uncomment this section if you want to use a local database instead of Supabase
+  #
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: sportsmatch-postgres
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     POSTGRES_USER: sportsmatch
+  #     POSTGRES_PASSWORD: sportsmatch_password
+  #     POSTGRES_DB: sportsmatch
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U sportsmatch"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # volumes:
+  #   postgres_data:

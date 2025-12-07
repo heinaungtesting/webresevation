@@ -1,0 +1,35 @@
+# =============================================================================
+# Development Dockerfile for SportsMatch Tokyo (Next.js + Prisma)
+# =============================================================================
+# Optimized for hot-reloading and development experience
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies required for Prisma and development
+RUN apk add --no-cache libc6-compat openssl bash
+
+# Copy package files first (for better layer caching)
+COPY package.json package-lock.json ./
+COPY prisma ./prisma/
+
+# Install all dependencies (including devDependencies)
+RUN npm ci --legacy-peer-deps
+
+# Generate Prisma Client
+RUN npx prisma generate
+
+# Copy the rest of the application
+COPY . .
+
+# Set environment variables
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=8192 --max-semi-space-size=1024"
+
+# Expose port
+EXPOSE 3000
+
+# Start development server with hot-reloading
+CMD ["npm", "run", "dev"]

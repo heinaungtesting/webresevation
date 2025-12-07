@@ -1,0 +1,62 @@
+# =============================================================================
+# Docker Ignore - Exclude files from Docker build context
+# =============================================================================
+
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js build outputs
+.next
+out
+build
+
+# Testing
+coverage
+test-results
+playwright-report
+.nyc_output
+
+# Environment files (will be mounted separately)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE and OS files
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Docker files (prevent recursive copies)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation and misc
+*.md
+!README.md
+LICENSE
+docs
+
+# Debug and development scripts
+*.sh
+*.log
+
+# Prisma migrations (keep schema)
+prisma/migrations
+
+# Temporary files
+tmp
+temp
+*.tmp
