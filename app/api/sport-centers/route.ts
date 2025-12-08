@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { unstable_cache } from 'next/cache';
 
-export const dynamic = 'force-dynamic';
-
 // Cache sport centers for 1 hour since they don't change frequently
 const getCachedSportCenters = unstable_cache(
   async () => {

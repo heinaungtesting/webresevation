@@ -33,13 +33,15 @@ export default function FavoriteButton({
     lg: 'p-2.5',
   };
 
+  if (!user) return null;
+
+  const currentlyFavorited = isFavorited(sessionId);
+
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!user || loading) return;
-
-    const currentlyFavorited = isFavorited(sessionId);
+    if (loading) return;
     
     setLoading(true);
     try {
@@ -56,10 +58,6 @@ export default function FavoriteButton({
       setLoading(false);
     }
   };
-
-  if (!user) return null;
-
-  const currentlyFavorited = isFavorited(sessionId);
 
   return (
     <button

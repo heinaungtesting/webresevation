@@ -38,7 +38,11 @@ export function useFavorites() {
   }, [user]);
   
   const addFavorite = (sessionId: string) => {
-    setFavorites(prev => new Set([...prev, sessionId]));
+    setFavorites(prev => {
+      const newSet = new Set(prev);
+      newSet.add(sessionId);
+      return newSet;
+    });
   };
   
   const removeFavorite = (sessionId: string) => {
