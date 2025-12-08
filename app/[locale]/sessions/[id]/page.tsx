@@ -14,7 +14,6 @@ import FavoriteButton from '@/app/components/sessions/FavoriteButton';
 import AttendanceTracker from '@/app/components/sessions/AttendanceTracker';
 import ReportModal from '@/app/components/ReportModal';
 import StudentBadge from '@/app/components/ui/StudentBadge';
-import SessionMap from '@/app/components/SessionMap';
 import { csrfPost, csrfDelete } from '@/lib/csrfClient';
 
 export default function SessionDetailPage() {
@@ -285,7 +284,7 @@ export default function SessionDetailPage() {
               </p>
             </Card>
 
-            {/* Map Section */}
+            {/* Location Section */}
             {session.sport_center?.latitude && session.sport_center?.longitude && (
               <Card padding="lg">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
@@ -293,10 +292,29 @@ export default function SessionDetailPage() {
                     <MapPin className="w-5 h-5 text-gray-600" />
                     <h2 className="text-xl font-semibold">Location</h2>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-2">
+                </div>
+
+                {/* Location Details */}
+                <div className="mb-4 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+                  <p className="font-semibold text-gray-900 mb-1 text-lg">
+                    {session.sport_center?.name_en}
+                  </p>
+                  <p className="text-sm text-gray-600 mb-3 flex items-start gap-2">
+                    <MapPin className="w-4 h-4 mt-0.5 text-gray-500 flex-shrink-0" />
+                    <span>{session.sport_center?.address_en}</span>
+                  </p>
+                  {session.sport_center?.station_en && (
+                    <div className="flex items-center gap-1.5 text-sm text-blue-700 bg-white/50 rounded-lg px-3 py-2 mb-3">
+                      <span>🚉</span>
+                      <span className="font-medium">Near {session.sport_center.station_en}</span>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4">
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="md"
                       onClick={() => {
                         const address = encodeURIComponent(
                           session.sport_center?.address_en ||
@@ -304,50 +322,42 @@ export default function SessionDetailPage() {
                         );
                         window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
                       }}
-                      className="text-sm flex items-center justify-center"
+                      className="flex-1 flex items-center justify-center bg-white hover:bg-gray-50"
                     >
-                      <ExternalLink className="w-4 h-4 mr-1.5" />
-                      <span className="hidden sm:inline">Open in Maps</span>
-                      <span className="sm:hidden">Open Map</span>
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Open in Google Maps
                     </Button>
                     <Button
                       variant="primary"
-                      size="sm"
+                      size="md"
                       onClick={() => {
                         const destination = `${session.sport_center?.latitude},${session.sport_center?.longitude}`;
                         window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}`, '_blank');
                       }}
-                      className="text-sm flex items-center justify-center"
+                      className="flex-1 flex items-center justify-center"
                     >
-                      <Navigation className="w-4 h-4 mr-1.5" />
+                      <Navigation className="w-4 h-4 mr-2" />
                       Get Directions
                     </Button>
                   </div>
                 </div>
 
-                {/* Location Details */}
-                <div className="mb-4 p-4 bg-gray-50 rounded-xl">
-                  <p className="font-semibold text-gray-900 mb-1">
-                    {session.sport_center?.name_en}
-                  </p>
-                  <p className="text-sm text-gray-600 mb-2">
-                    {session.sport_center?.address_en}
-                  </p>
-                  {session.sport_center?.station_en && (
-                    <div className="flex items-center gap-1.5 text-sm text-blue-600">
-                      <span>🚉</span>
-                      <span>Near {session.sport_center.station_en}</span>
+                {/* Visual Map Placeholder */}
+                <div className="relative h-[200px] sm:h-[240px] rounded-xl overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 border-2 border-dashed border-slate-300">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                      <MapPin className="w-8 h-8 text-blue-600" />
                     </div>
-                  )}
-                </div>
-
-                {/* Map */}
-                <div className="h-[300px] sm:h-[400px]">
-                  <SessionMap
-                    sessions={[session]}
-                    height="100%"
-                    showLegend={false}
-                  />
+                    <p className="text-slate-700 font-medium mb-1">View Location on Map</p>
+                    <p className="text-sm text-slate-500 max-w-xs">
+                      Click buttons above to open in Google Maps for full map view and directions
+                    </p>
+                  </div>
+                  {/* Decorative grid pattern */}
+                  <div className="absolute inset-0 opacity-10" style={{
+                    backgroundImage: 'linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)',
+                    backgroundSize: '20px 20px'
+                  }}></div>
                 </div>
               </Card>
             )}
