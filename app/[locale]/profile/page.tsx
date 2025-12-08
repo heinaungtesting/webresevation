@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { Edit, MapPin, Calendar, Mail } from 'lucide-react';
+import { Edit, MapPin, Calendar, Mail, Sparkles, Trophy, Crown, Target, Award } from 'lucide-react';
 import Button from '@/app/components/ui/Button';
 import Card from '@/app/components/ui/Card';
 import Badge from '@/app/components/ui/Badge';
@@ -52,9 +52,99 @@ export default function ProfilePage() {
     }
   };
 
+  // Calculate achievements
+  const getAchievements = () => {
+    if (!stats) return [];
+
+    const achievements = [];
+    const totalSessions = stats.total_sessions || 0;
+    const createdSessions = stats.created_sessions || 0;
+    const reliabilityScore = stats.reliability_score ?? 100;
+    const sportCount = stats.sport_breakdown ? Object.keys(stats.sport_breakdown).length : 0;
+
+    // First Session
+    if (totalSessions >= 1) {
+      achievements.push({
+        icon: '🌟',
+        title: 'First Step',
+        description: 'Attended your first session!',
+        color: 'from-yellow-400 to-orange-400',
+        unlocked: true,
+      });
+    }
+
+    // Regular Player
+    if (totalSessions >= 10) {
+      achievements.push({
+        icon: '🏆',
+        title: 'Regular Player',
+        description: 'Joined 10 sessions',
+        color: 'from-blue-400 to-indigo-400',
+        unlocked: true,
+      });
+    }
+
+    // Super Star
+    if (totalSessions >= 50) {
+      achievements.push({
+        icon: '👑',
+        title: 'Super Star',
+        description: 'Amazing! 50+ sessions',
+        color: 'from-purple-400 to-pink-400',
+        unlocked: true,
+      });
+    }
+
+    // Perfect Attendance
+    if (reliabilityScore === 100 && totalSessions >= 5) {
+      achievements.push({
+        icon: '🎯',
+        title: 'Perfect Attendance',
+        description: '100% reliability!',
+        color: 'from-green-400 to-emerald-400',
+        unlocked: true,
+      });
+    }
+
+    // Sport Enthusiast
+    if (sportCount >= 5) {
+      achievements.push({
+        icon: '💪',
+        title: 'Sport Enthusiast',
+        description: 'Played 5+ different sports',
+        color: 'from-red-400 to-orange-400',
+        unlocked: true,
+      });
+    }
+
+    // Host Master
+    if (createdSessions >= 10) {
+      achievements.push({
+        icon: '🎊',
+        title: 'Host Master',
+        description: 'Created 10+ sessions',
+        color: 'from-cyan-400 to-blue-400',
+        unlocked: true,
+      });
+    }
+
+    // Add locked achievements
+    if (totalSessions < 50) {
+      achievements.push({
+        icon: '👑',
+        title: 'Super Star',
+        description: `${50 - totalSessions} more sessions to unlock`,
+        color: 'from-gray-300 to-gray-400',
+        unlocked: false,
+      });
+    }
+
+    return achievements;
+  };
+
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage
             title="Please log in"
@@ -67,15 +157,15 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Loading text="Loading profile..." fullScreen />
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+        <Loading text="Loading your cute profile... ✨" fullScreen />
       </div>
     );
   }
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage message={error || 'Profile not found'} onRetry={fetchProfile} />
         </div>
@@ -84,89 +174,108 @@ export default function ProfilePage() {
   }
 
   const displayName = profile.display_name || profile.username || profile.email.split('@')[0];
+  const achievements = getAchievements();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* Cute Header with Sparkles */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
+          <div className="flex items-center gap-3">
+            <Sparkles className="w-8 h-8 text-pink-500" />
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
+              My Cute Profile ✨
+            </h1>
+          </div>
           <Button
             variant="primary"
             onClick={() => router.push('/profile/edit')}
-            className="gap-2"
+            className="gap-2 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 border-0"
           >
             <Edit className="w-4 h-4" />
             Edit Profile
           </Button>
         </div>
 
-        {/* Profile Card */}
-        <Card padding="lg" className="mb-6">
+        {/* Kawaii Profile Card */}
+        <Card padding="lg" className="mb-6 bg-white/80 backdrop-blur-sm border-2 border-pink-100 shadow-xl">
           <div className="flex flex-col sm:flex-row items-start gap-6">
-            {/* Avatar */}
-            <div className="flex-shrink-0">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                {profile.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    alt={displayName}
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="text-3xl font-bold text-white">
-                    {displayName.charAt(0).toUpperCase()}
-                  </span>
-                )}
+            {/* Cute Avatar with Glow */}
+            <div className="flex-shrink-0 relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-400 to-purple-400 rounded-full blur-xl opacity-50 animate-pulse"></div>
+              <div className="relative w-28 h-28 rounded-full bg-gradient-to-br from-pink-400 via-purple-400 to-blue-400 p-1">
+                <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+                  {profile.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt={displayName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-4xl font-bold bg-gradient-to-br from-pink-500 to-purple-500 bg-clip-text text-transparent">
+                      {displayName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
               </div>
+              {/* Kawaii Decoration */}
+              <div className="absolute -top-2 -right-2 text-2xl animate-bounce">🌸</div>
             </div>
 
-            {/* Info */}
+            {/* Info with Cute Styling */}
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-900 mb-1">
-                {displayName}
-              </h2>
+              <div className="flex items-center gap-2 mb-2">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                  {displayName}
+                </h2>
+                <span className="text-xl">💖</span>
+              </div>
               {profile.username && (
-                <p className="text-gray-600 mb-3">@{profile.username}</p>
+                <p className="text-purple-600 font-medium mb-3">@{profile.username}</p>
               )}
 
               {profile.bio && (
-                <p className="text-gray-700 mb-4">{profile.bio}</p>
+                <p className="text-gray-700 mb-4 bg-gradient-to-r from-pink-50 to-purple-50 p-3 rounded-2xl border border-pink-100">
+                  {profile.bio}
+                </p>
               )}
 
-              <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  {profile.email}
+              <div className="flex flex-wrap gap-3 text-sm text-gray-600">
+                <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-pink-100">
+                  <Mail className="w-4 h-4 text-pink-500" />
+                  <span>{profile.email}</span>
                   {profile.email_verified && (
-                    <Badge variant="success" size="sm">
-                      Verified
+                    <Badge variant="success" size="sm" className="ml-1">
+                      ✓
                     </Badge>
                   )}
                 </div>
                 {profile.location && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    {profile.location}
+                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-purple-100">
+                    <MapPin className="w-4 h-4 text-purple-500" />
+                    <span>{profile.location}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Joined {formatDate(profile.created_at)}
+                <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-blue-100">
+                  <Calendar className="w-4 h-4 text-blue-500" />
+                  <span>Joined {formatDate(profile.created_at)}</span>
                 </div>
               </div>
 
-              {/* Sport Preferences */}
+              {/* Cute Sport Preferences */}
               {profile.sport_preferences && profile.sport_preferences.length > 0 && (
                 <div className="mt-4">
-                  <p className="text-sm font-medium text-gray-700 mb-2">
-                    Favorite Sports
+                  <p className="text-sm font-semibold text-purple-600 mb-2 flex items-center gap-2">
+                    <span>🏃‍♀️</span> Favorite Sports
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {profile.sport_preferences.map((sport: string) => (
-                      <Badge key={sport} variant="info">
+                      <span
+                        key={sport}
+                        className="px-3 py-1 bg-gradient-to-r from-pink-100 to-purple-100 text-purple-700 rounded-full text-sm font-medium border border-purple-200"
+                      >
                         {sport.replace('-', ' ')}
-                      </Badge>
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -175,7 +284,46 @@ export default function ProfilePage() {
           </div>
         </Card>
 
-        {/* Statistics */}
+        {/* Achievements Section - Super Kawaii! */}
+        {achievements.length > 0 && (
+          <Card padding="lg" className="mb-6 bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200">
+            <div className="flex items-center gap-3 mb-4">
+              <Trophy className="w-6 h-6 text-yellow-600" />
+              <h3 className="text-2xl font-bold text-yellow-800">Achievements ⭐</h3>
+            </div>
+            <p className="text-sm text-yellow-700 mb-4">Collect badges by being awesome! かわいい~ ✨</p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {achievements.map((achievement, index) => (
+                <div
+                  key={index}
+                  className={`relative p-4 rounded-2xl transition-all duration-300 ${
+                    achievement.unlocked
+                      ? 'bg-white border-2 border-yellow-200 shadow-md hover:shadow-lg hover:scale-105'
+                      : 'bg-gray-50 border-2 border-dashed border-gray-300 opacity-60'
+                  }`}
+                >
+                  <div className={`w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br ${achievement.color} flex items-center justify-center text-3xl shadow-lg`}>
+                    {achievement.icon}
+                  </div>
+                  <h4 className={`text-sm font-bold text-center mb-1 ${achievement.unlocked ? 'text-gray-900' : 'text-gray-500'}`}>
+                    {achievement.title}
+                  </h4>
+                  <p className={`text-xs text-center ${achievement.unlocked ? 'text-gray-600' : 'text-gray-400'}`}>
+                    {achievement.description}
+                  </p>
+                  {achievement.unlocked && (
+                    <div className="absolute top-2 right-2">
+                      <span className="text-lg animate-bounce">✨</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* Statistics with Cute Styling */}
         {stats && <UserStats stats={stats} />}
       </div>
     </div>
