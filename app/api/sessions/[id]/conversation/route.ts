@@ -131,15 +131,17 @@ export async function GET(
           },
         });
       } catch (error: unknown) {
-        // Ignore unique constraint violation - user is already a participant
-        if (
-          error &&
-          typeof error === 'object' &&
-          'code' in error &&
-          error.code !== 'P2002'
-        ) {
+        // Ignore P2002 unique constraint violation - user is already a participant
+        // Re-throw all other errors
+        const isPrismaError =
+          error && typeof error === 'object' && 'code' in error;
+        const isUniqueConstraintViolation =
+          isPrismaError && error.code === 'P2002';
+
+        if (!isUniqueConstraintViolation) {
           throw error;
         }
+        // If it is a unique constraint violation, we silently ignore it
       }
     }
 
