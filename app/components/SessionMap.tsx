@@ -23,6 +23,18 @@ interface SessionMapProps {
 const TOKYO_CENTER = { lat: 35.6895, lng: 139.6917 };
 const DEFAULT_ZOOM = 12;
 
+// Zoom level thresholds based on coordinate span (in degrees)
+// Larger span = lower zoom to fit all markers
+const ZOOM_THRESHOLDS = [
+  { maxSpan: 0.5, zoom: 9 },
+  { maxSpan: 0.2, zoom: 10 },
+  { maxSpan: 0.1, zoom: 11 },
+  { maxSpan: 0.05, zoom: 12 },
+  { maxSpan: 0.02, zoom: 13 },
+  { maxSpan: 0.01, zoom: 14 },
+  { maxSpan: 0, zoom: 15 }, // Fallback for very close markers
+];
+
 // Sport type to pin color mapping
 const sportPinColors: Record<string, { background: string; glyph: string; border: string }> = {
   badminton: { background: '#10B981', glyph: '#fff', border: '#059669' },
@@ -116,24 +128,11 @@ export default function SessionMap({
     const lngSpan = bounds.east - bounds.west;
     const maxSpan = Math.max(latSpan, lngSpan);
 
-    // Determine zoom level: larger span = lower zoom
-    // These values are empirically tuned for good UX
-    let calculatedZoom = DEFAULT_ZOOM;
-    if (maxSpan > 0.5) {
-      calculatedZoom = 9;
-    } else if (maxSpan > 0.2) {
-      calculatedZoom = 10;
-    } else if (maxSpan > 0.1) {
-      calculatedZoom = 11;
-    } else if (maxSpan > 0.05) {
-      calculatedZoom = 12;
-    } else if (maxSpan > 0.02) {
-      calculatedZoom = 13;
-    } else if (maxSpan > 0.01) {
-      calculatedZoom = 14;
-    } else {
-      calculatedZoom = 15;
-    }
+    // Determine zoom level based on coordinate span
+    // Find the first threshold where maxSpan exceeds the threshold value
+    const calculatedZoom =
+      ZOOM_THRESHOLDS.find((threshold) => maxSpan > threshold.maxSpan)?.zoom ||
+      DEFAULT_ZOOM;
 
     return {
       center: calculatedCenter,
