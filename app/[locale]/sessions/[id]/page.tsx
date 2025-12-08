@@ -331,7 +331,7 @@ export default function SessionDetailPage() {
                   {session.sport_center?.station_en && (
                     <div className="flex items-center gap-1.5 text-sm text-blue-700 bg-white/50 rounded-lg px-3 py-2 mb-3">
                       <span>🚉</span>
-                      <span className="font-medium">Near {session.sport_center.station_en}</span>
+                      <span className="font-medium">{t('near', { station: session.sport_center.station_en })}</span>
                     </div>
                   )}
 
