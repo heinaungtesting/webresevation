@@ -80,6 +80,14 @@ export default function SessionMap({
 
   // Calculate map center and zoom based on markers
   const { center, zoom } = useMemo(() => {
+    if (markersData.length === 0) {
+      // No markers: use default Tokyo center
+      return {
+        center: TOKYO_CENTER,
+        zoom: DEFAULT_ZOOM,
+      };
+    }
+
     if (markersData.length === 1) {
       // Single marker: center on it with higher zoom
       return {
@@ -87,10 +95,49 @@ export default function SessionMap({
         zoom: 15,
       };
     }
-    // Multiple markers: use default Tokyo center
+
+    // Multiple markers: calculate center and bounds
+    const bounds = {
+      north: Math.max(...markersData.map((m) => m.position.lat)),
+      south: Math.min(...markersData.map((m) => m.position.lat)),
+      east: Math.max(...markersData.map((m) => m.position.lng)),
+      west: Math.min(...markersData.map((m) => m.position.lng)),
+    };
+
+    // Calculate center point
+    const calculatedCenter = {
+      lat: (bounds.north + bounds.south) / 2,
+      lng: (bounds.east + bounds.west) / 2,
+    };
+
+    // Calculate zoom level based on the span of coordinates
+    // The zoom level is inversely related to the span
+    const latSpan = bounds.north - bounds.south;
+    const lngSpan = bounds.east - bounds.west;
+    const maxSpan = Math.max(latSpan, lngSpan);
+
+    // Determine zoom level: larger span = lower zoom
+    // These values are empirically tuned for good UX
+    let calculatedZoom = DEFAULT_ZOOM;
+    if (maxSpan > 0.5) {
+      calculatedZoom = 9;
+    } else if (maxSpan > 0.2) {
+      calculatedZoom = 10;
+    } else if (maxSpan > 0.1) {
+      calculatedZoom = 11;
+    } else if (maxSpan > 0.05) {
+      calculatedZoom = 12;
+    } else if (maxSpan > 0.02) {
+      calculatedZoom = 13;
+    } else if (maxSpan > 0.01) {
+      calculatedZoom = 14;
+    } else {
+      calculatedZoom = 15;
+    }
+
     return {
-      center: TOKYO_CENTER,
-      zoom: DEFAULT_ZOOM,
+      center: calculatedCenter,
+      zoom: calculatedZoom,
     };
   }, [markersData]);
 
