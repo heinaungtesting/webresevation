@@ -23,6 +23,18 @@ interface SessionMapProps {
 const TOKYO_CENTER = { lat: 35.6895, lng: 139.6917 };
 const DEFAULT_ZOOM = 12;
 
+// Zoom level thresholds based on coordinate span (in degrees)
+// Larger span = lower zoom to fit all markers
+const ZOOM_THRESHOLDS = [
+  { maxSpan: 0.5, zoom: 9 },
+  { maxSpan: 0.2, zoom: 10 },
+  { maxSpan: 0.1, zoom: 11 },
+  { maxSpan: 0.05, zoom: 12 },
+  { maxSpan: 0.02, zoom: 13 },
+  { maxSpan: 0.01, zoom: 14 },
+  { maxSpan: 0, zoom: 15 }, // Fallback for very close markers
+];
+
 // Sport type to pin color mapping
 const sportPinColors: Record<string, { background: string; glyph: string; border: string }> = {
   badminton: { background: '#10B981', glyph: '#fff', border: '#059669' },
@@ -80,6 +92,14 @@ export default function SessionMap({
 
   // Calculate map center and zoom based on markers
   const { center, zoom } = useMemo(() => {
+    if (markersData.length === 0) {
+      // No markers: use default Tokyo center
+      return {
+        center: TOKYO_CENTER,
+        zoom: DEFAULT_ZOOM,
+      };
+    }
+
     if (markersData.length === 1) {
       // Single marker: center on it with higher zoom
       return {
@@ -87,10 +107,36 @@ export default function SessionMap({
         zoom: 15,
       };
     }
-    // Multiple markers: use default Tokyo center
+
+    // Multiple markers: calculate center and bounds
+    const bounds = {
+      north: Math.max(...markersData.map((m) => m.position.lat)),
+      south: Math.min(...markersData.map((m) => m.position.lat)),
+      east: Math.max(...markersData.map((m) => m.position.lng)),
+      west: Math.min(...markersData.map((m) => m.position.lng)),
+    };
+
+    // Calculate center point
+    const calculatedCenter = {
+      lat: (bounds.north + bounds.south) / 2,
+      lng: (bounds.east + bounds.west) / 2,
+    };
+
+    // Calculate zoom level based on the span of coordinates
+    // The zoom level is inversely related to the span
+    const latSpan = bounds.north - bounds.south;
+    const lngSpan = bounds.east - bounds.west;
+    const maxSpan = Math.max(latSpan, lngSpan);
+
+    // Determine zoom level based on coordinate span
+    // Find the first threshold where maxSpan exceeds the threshold value
+    const calculatedZoom =
+      ZOOM_THRESHOLDS.find((threshold) => maxSpan > threshold.maxSpan)?.zoom ||
+      DEFAULT_ZOOM;
+
     return {
-      center: TOKYO_CENTER,
-      zoom: DEFAULT_ZOOM,
+      center: calculatedCenter,
+      zoom: calculatedZoom,
     };
   }, [markersData]);
 
