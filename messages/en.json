@@ -5,7 +5,9 @@
     "mySessions": "My Sessions",
     "messages": "Messages",
     "profile": "Profile",
+    "favorites": "Favorites",
     "settings": "Settings",
+    "admin": "Admin",
     "login": "Login",
     "signUp": "Sign Up",
     "signOut": "Sign Out"

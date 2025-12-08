@@ -5,7 +5,9 @@
     "mySessions": "参加予定",
     "messages": "メッセージ",
     "profile": "プロフィール",
+    "favorites": "お気に入り",
     "settings": "設定",
+    "admin": "管理者",
     "login": "ログイン",
     "signUp": "新規登録",
     "signOut": "ログアウト"
