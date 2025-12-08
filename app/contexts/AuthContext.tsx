@@ -9,6 +9,7 @@ interface UserProfile {
   avatar_url?: string | null;
   display_name?: string | null;
   username?: string | null;
+  is_admin?: boolean;
 }
 
 interface AuthContextType {
@@ -42,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           avatar_url: data.avatar_url,
           display_name: data.display_name,
           username: data.username,
+          is_admin: data.is_admin,
         });
       }
     } catch (err) {

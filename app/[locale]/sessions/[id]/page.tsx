@@ -8,18 +8,20 @@ import Card from '@/app/components/ui/Card';
 import Badge from '@/app/components/ui/Badge';
 import { Session } from '@/types';
 import { formatDate } from '@/lib/utils';
-import { MapPin, Clock, Users, Info, ArrowLeft, Loader2, Flag, MoreVertical, Bell, BellOff } from 'lucide-react';
+import { MapPin, Clock, Users, Info, ArrowLeft, Loader2, Flag, MoreVertical, Bell, BellOff, ExternalLink, Navigation } from 'lucide-react';
 import ReviewSection from '@/app/components/sessions/ReviewSection';
 import FavoriteButton from '@/app/components/sessions/FavoriteButton';
 import AttendanceTracker from '@/app/components/sessions/AttendanceTracker';
 import ReportModal from '@/app/components/ReportModal';
 import StudentBadge from '@/app/components/ui/StudentBadge';
 import { csrfPost, csrfDelete } from '@/lib/csrfClient';
+import { useTranslations } from 'next-intl';
 
 export default function SessionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const t = useTranslations('sessionDetail');
   const [session, setSession] = useState<Session | null>(null);
   const [isAttending, setIsAttending] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -144,6 +146,29 @@ export default function SessionDetailPage() {
       }
     } catch (err: any) {
       alert(err.message || 'An error occurred');
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleOpenChat = async () => {
+    if (!session) return;
+
+    setActionLoading(true);
+    try {
+      // Get or create conversation for this session
+      const response = await fetch(`/api/sessions/${session.id}/conversation`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to access chat');
+      }
+
+      const conversation = await response.json();
+      // Navigate to the conversation
+      router.push(`/messages/${conversation.id}`);
+    } catch (err: any) {
+      alert(err.message || 'Failed to open chat');
       console.error(err);
     } finally {
       setActionLoading(false);
@@ -284,6 +309,84 @@ export default function SessionDetailPage() {
               </p>
             </Card>
 
+            {/* Location Section */}
+            {session.sport_center?.latitude && session.sport_center?.longitude && (
+              <Card padding="lg">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-gray-600" />
+                    <h2 className="text-xl font-semibold">{t('location')}</h2>
+                  </div>
+                </div>
+
+                {/* Location Details */}
+                <div className="mb-4 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+                  <p className="font-semibold text-gray-900 mb-1 text-lg">
+                    {session.sport_center?.name_en}
+                  </p>
+                  <p className="text-sm text-gray-600 mb-3 flex items-start gap-2">
+                    <MapPin className="w-4 h-4 mt-0.5 text-gray-500 flex-shrink-0" />
+                    <span>{session.sport_center?.address_en}</span>
+                  </p>
+                  {session.sport_center?.station_en && (
+                    <div className="flex items-center gap-1.5 text-sm text-blue-700 bg-white/50 rounded-lg px-3 py-2 mb-3">
+                      <span>🚉</span>
+                      <span className="font-medium">{t('near', { station: session.sport_center.station_en })}</span>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                    <Button
+                      variant="outline"
+                      size="md"
+                      onClick={() => {
+                        const address = encodeURIComponent(
+                          session.sport_center?.address_en ||
+                          `${session.sport_center?.latitude},${session.sport_center?.longitude}`
+                        );
+                        window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
+                      }}
+                      className="flex-1 flex items-center justify-center bg-white hover:bg-gray-50"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      {t('openInGoogleMaps')}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="md"
+                      onClick={() => {
+                        const destination = `${session.sport_center?.latitude},${session.sport_center?.longitude}`;
+                        window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}`, '_blank');
+                      }}
+                      className="flex-1 flex items-center justify-center"
+                    >
+                      <Navigation className="w-4 h-4 mr-2" />
+                      {t('getDirections')}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Visual Map Placeholder */}
+                <div className="relative h-[200px] sm:h-[240px] rounded-xl overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 border-2 border-dashed border-slate-300">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                      <MapPin className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <p className="text-slate-700 font-medium mb-1">{t('viewLocationOnMap')}</p>
+                    <p className="text-sm text-slate-500 max-w-xs">
+                      {t('mapInstructions')}
+                    </p>
+                  </div>
+                  {/* Decorative grid pattern */}
+                  <div className="absolute inset-0 opacity-10" style={{
+                    backgroundImage: 'linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px)',
+                    backgroundSize: '20px 20px'
+                  }}></div>
+                </div>
+              </Card>
+            )}
+
             {/* Attendees Section */}
             <Card padding="lg">
               <h2 className="text-xl font-semibold mb-4">
@@ -386,9 +489,17 @@ export default function SessionDetailPage() {
                   <Button
                     variant="primary"
                     fullWidth
-                    onClick={() => router.push(`/chat/${session.id}`)}
+                    onClick={handleOpenChat}
+                    disabled={actionLoading}
                   >
-                    Open Chat Room
+                    {actionLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      'Open Chat Room'
+                    )}
                   </Button>
                 </div>
               ) : (

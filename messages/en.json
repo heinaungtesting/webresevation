@@ -5,7 +5,9 @@
     "mySessions": "My Sessions",
     "messages": "Messages",
     "profile": "Profile",
+    "favorites": "Favorites",
     "settings": "Settings",
+    "admin": "Admin",
     "login": "Login",
     "signUp": "Sign Up",
     "signOut": "Sign Out"
@@ -47,6 +49,43 @@
       "title": "Ready to Get Started?",
       "subtitle": "Join our community and find your next game today",
       "createAccount": "Create Free Account"
+    },
+    "greeting": {
+      "morning": "Good Morning",
+      "afternoon": "Good Afternoon",
+      "evening": "Good Evening"
+    },
+    "readyForGame": "Ready for your next game?",
+    "searchPlaceholder": "Search sports, venues...",
+    "createSession": "Create Session",
+    "filters": {
+      "all": "All",
+      "today": "Today",
+      "weekend": "This Weekend"
+    },
+    "happeningNow": "Happening Now",
+    "seeAll": "See all",
+    "forYou": "For You",
+    "mapView": "Map View",
+    "listView": "List View",
+    "loading": "Loading sessions...",
+    "tryAgain": "Try Again",
+    "refresh": "Refresh",
+    "failedToLoad": "Failed to load sessions",
+    "emptyState": {
+      "createSession": {
+        "title": "Create a Session",
+        "description": "Be the first to host a game. Set the time, place, and let others join you."
+      },
+      "exploreVenues": {
+        "title": "Explore Venues",
+        "description": "Discover sport centers near you"
+      },
+      "noMatches": "No matches found",
+      "noResults": "No results for \"{query}\"",
+      "noSessionsForFilter": "No {filter} sessions available right now",
+      "checkBackSoon": "Check back soon for new games",
+      "clearFilters": "Clear filters"
     }
   },
   "sessions": {
@@ -107,6 +146,7 @@
     "backToSessions": "Back to Sessions",
     "description": "Description",
     "noDescription": "No description provided.",
+    "location": "Location",
     "whosGoing": "Who's Going ({count})",
     "player": "Player {number}",
     "joinSession": "Join this session",
@@ -115,6 +155,10 @@
     "openChatRoom": "Open Chat Room",
     "sessionFull": "This session is full",
     "free": "Free to join • No payment required",
+    "openInGoogleMaps": "Open in Google Maps",
+    "getDirections": "Get Directions",
+    "viewLocationOnMap": "View Location on Map",
+    "mapInstructions": "Click buttons above to open in Google Maps for full map view and directions",
     "rules": {
       "title": "Session Rules",
       "respectful": "Be respectful to all players",
@@ -217,5 +261,67 @@
     "edit": "Edit",
     "close": "Close",
     "back": "Back"
+  },
+  "profile": {
+    "title": "My Cute Profile ✨",
+    "editProfile": "Edit Profile",
+    "loading": "Loading your cute profile... ✨",
+    "pleaseLogin": "Please log in",
+    "needLogin": "You need to be logged in to view your profile",
+    "profileNotFound": "Profile not found",
+    "verified": "Verified",
+    "favoriteSports": "Favorite Sports",
+    "joined": "Joined {date}",
+    "near": "Near {station}",
+    "achievements": {
+      "title": "Achievements ⭐",
+      "subtitle": "Collect badges by being awesome! かわいい~ ✨",
+      "firstStep": {
+        "title": "First Step",
+        "description": "Attended your first session!"
+      },
+      "regularPlayer": {
+        "title": "Regular Player",
+        "description": "Joined 10 sessions"
+      },
+      "superStar": {
+        "title": "Super Star",
+        "description": "Amazing! 50+ sessions"
+      },
+      "perfectAttendance": {
+        "title": "Perfect Attendance",
+        "description": "100% reliability!"
+      },
+      "sportEnthusiast": {
+        "title": "Sport Enthusiast",
+        "description": "Played 5+ different sports"
+      },
+      "hostMaster": {
+        "title": "Host Master",
+        "description": "Created 10+ sessions"
+      },
+      "locked": "{count} more sessions to unlock"
+    },
+    "edit": {
+      "title": "Edit Profile ✨",
+      "loading": "Loading your cute profile... ✨",
+      "username": "Username",
+      "displayName": "Display Name",
+      "bio": "Bio",
+      "location": "Location",
+      "favoriteSports": "Favorite Sports",
+      "usernamePlaceholder": "your-username",
+      "displayNamePlaceholder": "Your Cute Name",
+      "bioPlaceholder": "Tell us about yourself... ✨",
+      "locationPlaceholder": "e.g., Shibuya, Tokyo 🗼",
+      "selectSports": "Select your favorite sports! The more, the better~ 💪",
+      "cancel": "Cancel",
+      "saveChanges": "Save Changes",
+      "saving": "Saving...",
+      "success": "Profile updated successfully! Redirecting...",
+      "motivational": "Make your profile shine! ✨ かわいい~ 🌸",
+      "avatarInfo": "JPEG, PNG, WebP, or GIF. Max 5MB.",
+      "removePhoto": "Remove Photo"
+    }
   }
 }

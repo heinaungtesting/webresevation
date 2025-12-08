@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
 interface HomeFeedProps {
   sessions: Session[];
@@ -21,23 +22,6 @@ interface HomeFeedProps {
 
 type FilterType = 'all' | 'badminton' | 'tennis' | 'basketball' | 'soccer' | 'today' | 'weekend';
 type ViewMode = 'list' | 'map';
-
-const sportFilters: { id: FilterType; label: string; icon?: string }[] = [
-  { id: 'all', label: 'All' },
-  { id: 'badminton', label: 'Badminton', icon: '🏸' },
-  { id: 'tennis', label: 'Tennis', icon: '🎾' },
-  { id: 'basketball', label: 'Basketball', icon: '🏀' },
-  { id: 'soccer', label: 'Soccer', icon: '⚽' },
-  { id: 'today', label: 'Today' },
-  { id: 'weekend', label: 'This Weekend' },
-];
-
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good Morning';
-  if (hour < 17) return 'Good Afternoon';
-  return 'Good Evening';
-}
 
 /**
  * Fetch sessions from the API with filters
@@ -76,13 +60,34 @@ async function fetchSessions(params: {
 
 export default function HomeFeed({ sessions: initialSessions, happeningNow }: HomeFeedProps) {
   const { user, profile } = useAuth();
+  const t = useTranslations('home');
+  const tSessions = useTranslations('sessions');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const displayName = profile?.display_name || profile?.username || user?.email?.split('@')[0] || 'there';
+
+  // Get greeting based on time of day
+  const getGreeting = (): string => {
+    const hour = new Date().getHours();
+    if (hour < 12) return t('greeting.morning');
+    if (hour < 17) return t('greeting.afternoon');
+    return t('greeting.evening');
+  };
   const greeting = getGreeting();
+
+  // Sport filters with translations
+  const sportFilters: { id: FilterType; label: string; icon?: string }[] = [
+    { id: 'all', label: t('filters.all') },
+    { id: 'badminton', label: tSessions('badminton'), icon: '🏸' },
+    { id: 'tennis', label: tSessions('tennis'), icon: '🎾' },
+    { id: 'basketball', label: tSessions('basketball'), icon: '🏀' },
+    { id: 'soccer', label: tSessions('soccer'), icon: '⚽' },
+    { id: 'today', label: t('filters.today') },
+    { id: 'weekend', label: t('filters.weekend') },
+  ];
 
   // Debounce search input to prevent API spamming (300ms delay)
   const handleSearchChange = useDebouncedCallback((value: string) => {
@@ -195,7 +200,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight" suppressHydrationWarning>
                   {greeting}, <span className="text-primary-600">{displayName.split(' ')[0]}</span>
                 </h1>
-                <p className="text-sm text-slate-500 font-medium">Ready for your next game?</p>
+                <p className="text-sm text-slate-500 font-medium">{t('readyForGame')}</p>
               </div>
               <div className="flex items-center gap-3">
                 {user && (
@@ -211,7 +216,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
                 <Link href="/sessions/create" className="hidden md:block">
                   <Button variant="gradient" size="sm" className="shadow-md hover:shadow-lg">
                     <Plus className="w-4 h-4 mr-1.5" />
-                    Create Session
+                    {t('createSession')}
                   </Button>
                 </Link>
               </div>
@@ -224,7 +229,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
               </div>
               <input
                 type="text"
-                placeholder="Search sports, venues..."
+                placeholder={t('searchPlaceholder')}
                 className="block w-full pl-10 pr-10 py-2.5 border border-slate-200 rounded-xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 sm:text-sm"
                 value={searchQuery}
                 onChange={handleSearchInputChange}
@@ -278,13 +283,13 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
                 </span>
-                <h2 className="text-lg font-bold text-slate-900">Happening Now</h2>
+                <h2 className="text-lg font-bold text-slate-900">{t('happeningNow')}</h2>
               </div>
               <Link
                 href="/sessions?filter=now"
                 className="text-sm text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1 group"
               >
-                See all
+                {t('seeAll')}
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
@@ -319,7 +324,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
               <div className="p-1.5 rounded-lg bg-primary-100 text-primary-600">
                 <Sparkles className="w-4 h-4" />
               </div>
-              <h2 className="text-lg font-bold text-slate-900">For You</h2>
+              <h2 className="text-lg font-bold text-slate-900">{t('forYou')}</h2>
               {isFetching && !isLoading && (
                 <Loader2 className="w-4 h-4 text-primary-500 animate-spin ml-2" />
               )}
@@ -329,7 +334,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
                 <button
                   onClick={() => refetch()}
                   className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1"
-                  title="Refresh"
+                  title={t('refresh')}
                 >
                   <RefreshCw className={cn("w-4 h-4", isFetching && "animate-spin")} />
                 </button>
@@ -338,7 +343,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
                 href="/sessions"
                 className="text-sm text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1 group"
               >
-                View all
+                {t('viewAll')}
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
@@ -349,7 +354,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
             <div className="flex items-center justify-center py-20">
               <div className="text-center">
                 <Loader2 className="w-8 h-8 text-primary-500 animate-spin mx-auto mb-4" />
-                <p className="text-slate-500">Loading sessions...</p>
+                <p className="text-slate-500">{t('loading')}</p>
               </div>
             </div>
           )}
@@ -361,13 +366,13 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
                 <div className="inline-flex p-4 rounded-full bg-red-50 mb-4">
                   <Filter className="w-6 h-6 text-red-500" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-1">Failed to load sessions</h3>
+                <h3 className="text-lg font-semibold text-slate-900 mb-1">{t('failedToLoad')}</h3>
                 <p className="text-slate-500 mb-4">
                   {error instanceof Error ? error.message : 'An error occurred'}
                 </p>
                 <Button onClick={() => refetch()} variant="outline" size="sm">
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Try Again
+                  {t('tryAgain')}
                 </Button>
               </div>
             </div>
@@ -424,9 +429,9 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
                           <ChevronRight className="w-5 h-5" />
                         </div>
                       </div>
-                      <h3 className="text-2xl font-bold mb-2">Create a Session</h3>
+                      <h3 className="text-2xl font-bold mb-2">{t('emptyState.createSession.title')}</h3>
                       <p className="text-white/90 text-base max-w-md">
-                        Be the first to host a game. Set the time, place, and let others join you.
+                        {t('emptyState.createSession.description')}
                       </p>
                     </div>
                   </Link>
@@ -439,9 +444,9 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
                     <div className="p-3 rounded-2xl bg-primary-50 w-fit mb-6 group-hover:bg-primary-100 transition-colors">
                       <MapPin className="w-8 h-8 text-primary-600" />
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">Explore Venues</h3>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">{t('emptyState.exploreVenues.title')}</h3>
                     <p className="text-slate-500">
-                      Discover sport centers near you
+                      {t('emptyState.exploreVenues.description')}
                     </p>
                   </Link>
 
@@ -450,13 +455,13 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
                     <div className="inline-flex p-4 rounded-full bg-white shadow-sm mb-4">
                       <Filter className="w-6 h-6 text-slate-400" />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-900 mb-1">No matches found</h3>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-1">{t('emptyState.noMatches')}</h3>
                     <p className="text-slate-500">
                       {searchQuery
-                        ? `No results for "${searchQuery}"`
+                        ? t('emptyState.noResults', { query: searchQuery })
                         : activeFilter !== 'all'
-                          ? `No ${activeFilter} sessions available right now`
-                          : 'Check back soon for new games'
+                          ? t('emptyState.noSessionsForFilter', { filter: activeFilter })
+                          : t('emptyState.checkBackSoon')
                       }
                     </p>
                     {(searchQuery || activeFilter !== 'all') && (
@@ -464,7 +469,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
                         onClick={clearFilters}
                         className="mt-4 text-primary-600 font-medium hover:underline"
                       >
-                        Clear filters
+                        {t('emptyState.clearFilters')}
                       </button>
                     )}
                   </div>
@@ -494,12 +499,12 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
         {viewMode === 'list' ? (
           <>
             <Map className="w-5 h-5" />
-            <span className="text-sm font-semibold">Map View</span>
+            <span className="text-sm font-semibold">{t('mapView')}</span>
           </>
         ) : (
           <>
             <List className="w-5 h-5" />
-            <span className="text-sm font-semibold">List View</span>
+            <span className="text-sm font-semibold">{t('listView')}</span>
           </>
         )}
       </motion.button>

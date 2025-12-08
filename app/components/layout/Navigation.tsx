@@ -157,7 +157,7 @@ export default function Navigation() {
                             onClick={() => setShowUserMenu(false)}
                           >
                             <Heart className="w-4 h-4 text-slate-400" suppressHydrationWarning />
-                            Favorites
+                            {t('favorites')}
                           </Link>
                           <Link
                             href="/settings"
@@ -167,14 +167,16 @@ export default function Navigation() {
                             <Settings className="w-4 h-4 text-slate-400" suppressHydrationWarning />
                             {t('settings')}
                           </Link>
-                          <Link
-                            href="/admin"
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                            onClick={() => setShowUserMenu(false)}
-                          >
-                            <Shield className="w-4 h-4 text-slate-400" suppressHydrationWarning />
-                            Admin
-                          </Link>
+                          {profile?.is_admin && (
+                            <Link
+                              href="/admin"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                              onClick={() => setShowUserMenu(false)}
+                            >
+                              <Shield className="w-4 h-4 text-slate-400" suppressHydrationWarning />
+                              {t('admin')}
+                            </Link>
+                          )}
                         </div>
 
                         <div className="border-t border-slate-100 pt-1">
@@ -251,7 +253,7 @@ export default function Navigation() {
                         onClick={() => setShowUserMenu(false)}
                       >
                         <Heart className="w-4 h-4 text-slate-400" suppressHydrationWarning />
-                        Favorites
+                        {t('favorites')}
                       </Link>
                       <Link
                         href="/settings"
@@ -261,6 +263,16 @@ export default function Navigation() {
                         <Settings className="w-4 h-4 text-slate-400" suppressHydrationWarning />
                         {t('settings')}
                       </Link>
+                      {profile?.is_admin && (
+                        <Link
+                          href="/admin"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <Shield className="w-4 h-4 text-slate-400" suppressHydrationWarning />
+                          {t('admin')}
+                        </Link>
+                      )}
                     </div>
 
                     <div className="px-4 py-2 border-t border-slate-100">
