@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { sendSessionUpdateEmail } from '@/lib/email';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -116,11 +117,11 @@ export async function DELETE(
     import('@/lib/cache').then(({ cacheDeletePattern, sessionCache, sessionKey }) => {
       // Clear all session list caches
       cacheDeletePattern('list:*', { prefix: 'session' }).catch((err) => {
-        console.error('Failed to invalidate session list cache:', err);
+        logger.error({ err }, 'Failed to invalidate session list cache');
       });
       // Clear the specific session detail cache
       sessionCache.delete(sessionKey(id)).catch((err) => {
-        console.error('Failed to invalidate session detail cache:', err);
+        logger.error({ err }, 'Failed to invalidate session detail cache');
       });
     });
 
@@ -225,11 +226,11 @@ export async function PATCH(
     import('@/lib/cache').then(({ cacheDeletePattern, sessionCache, sessionKey }) => {
       // Clear all session list caches
       cacheDeletePattern('list:*', { prefix: 'session' }).catch((err) => {
-        console.error('Failed to invalidate session list cache:', err);
+        logger.error({ err }, 'Failed to invalidate session list cache');
       });
       // Clear the specific session detail cache
       sessionCache.delete(sessionKey(id)).catch((err) => {
-        console.error('Failed to invalidate session detail cache:', err);
+        logger.error({ err }, 'Failed to invalidate session detail cache');
       });
     });
 

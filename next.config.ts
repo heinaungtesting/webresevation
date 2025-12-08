@@ -9,12 +9,8 @@ const nextConfig: NextConfig = {
   output: 'standalone',
 
   // Webpack configuration
-  webpack: (config, { isServer }) => {
-    // Exclude test files from pino dependencies
-    config.resolve.alias = {
-      ...config.resolve.alias,
-    };
-    
+  webpack: (config) => {
+    // Suppress warnings for pino dependencies (they include test files which are not needed)
     config.module = {
       ...config.module,
       exprContextCritical: false,

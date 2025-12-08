@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { apiRateLimiter } from '@/lib/rate-limit';
 import { sessionCache, sessionListKey } from '@/lib/cache';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -242,7 +243,7 @@ export async function GET(request: Request) {
 
     // Store in cache (non-blocking)
     sessionCache.set(cacheKey, result).catch((err) => {
-      console.error('Failed to cache sessions:', err);
+      logger.error({ err }, 'Failed to cache sessions');
     });
 
     return NextResponse.json(result);
@@ -334,7 +335,7 @@ export async function POST(request: Request) {
     // Use pattern matching to clear all cached session lists
     import('@/lib/cache').then(({ cacheDeletePattern }) => {
       cacheDeletePattern('list:*', { prefix: 'session' }).catch((err) => {
-        console.error('Failed to invalidate session cache:', err);
+        logger.error({ err }, 'Failed to invalidate session cache');
       });
     });
 

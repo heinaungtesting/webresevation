@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sportCenterCache } from '@/lib/cache';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +25,7 @@ export async function GET() {
 
     // Store in cache (non-blocking) - sport centers change rarely
     sportCenterCache.set(cacheKey, sportCenters).catch((err) => {
-      console.error('Failed to cache sport centers:', err);
+      logger.error({ err }, 'Failed to cache sport centers');
     });
 
     // Add cache headers - sport centers change rarely (1 hour cache)
