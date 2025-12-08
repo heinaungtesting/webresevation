@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Send, Loader2 } from 'lucide-react';
+import { useDebouncedCallback } from 'use-debounce';
 import Button from '../ui/Button';
 import MessageBubble from './MessageBubble';
 import Loading from '../ui/Loading';
@@ -44,15 +45,24 @@ export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps)
   }, [conversationId]);
 
   // Subscribe to new messages with Supabase Realtime
+  // Debounce rapid updates to prevent excessive re-renders
+  const debouncedSetMessages = useDebouncedCallback((newMessages: any[]) => {
+    setMessages(newMessages);
+  }, 100);
+
   const handleNewMessage = useCallback((message: any) => {
-    setMessages(prev => [...prev, message]);
+    setMessages(prev => {
+      const newMessages = [...prev, message];
+      debouncedSetMessages(newMessages);
+      return newMessages;
+    });
 
     // Mark conversation as read when new message arrives
     if (message.sender_id !== currentUserId) {
       csrfPut(`/api/conversations/${conversationId}/read`, {}).catch(console.error);
     }
     scrollToBottom();
-  }, [conversationId, currentUserId]);
+  }, [conversationId, currentUserId, debouncedSetMessages]);
 
   useConversationMessages(conversationId, handleNewMessage);
 

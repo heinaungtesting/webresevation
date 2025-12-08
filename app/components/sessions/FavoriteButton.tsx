@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Heart } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
+import { useFavorites } from '@/app/hooks/useFavorites';
 import { csrfPost, csrfDelete } from '@/lib/csrfClient';
 
 interface FavoriteButtonProps {
@@ -17,7 +18,7 @@ export default function FavoriteButton({
   className = '',
 }: FavoriteButtonProps) {
   const { user } = useAuth();
-  const [isFavorited, setIsFavorited] = useState(false);
+  const { isFavorited, addFavorite, removeFavorite } = useFavorites();
   const [loading, setLoading] = useState(false);
 
   const sizeClasses = {
@@ -32,38 +33,22 @@ export default function FavoriteButton({
     lg: 'p-2.5',
   };
 
-  useEffect(() => {
-    if (user) {
-      checkFavoriteStatus();
-    }
-  }, [user, sessionId]);
-
-  const checkFavoriteStatus = async () => {
-    try {
-      const response = await fetch(`/api/sessions/${sessionId}/favorite`);
-      if (response.ok) {
-        const data = await response.json();
-        setIsFavorited(data.isFavorited);
-      }
-    } catch (err) {
-      console.error('Error checking favorite status:', err);
-    }
-  };
-
   const toggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (!user || loading) return;
 
+    const currentlyFavorited = isFavorited(sessionId);
+    
     setLoading(true);
     try {
-      if (isFavorited) {
+      if (currentlyFavorited) {
         await csrfDelete(`/api/sessions/${sessionId}/favorite`);
-        setIsFavorited(false);
+        removeFavorite(sessionId);
       } else {
         await csrfPost(`/api/sessions/${sessionId}/favorite`, {});
-        setIsFavorited(true);
+        addFavorite(sessionId);
       }
     } catch (err) {
       console.error('Error toggling favorite:', err);
@@ -74,15 +59,17 @@ export default function FavoriteButton({
 
   if (!user) return null;
 
+  const currentlyFavorited = isFavorited(sessionId);
+
   return (
     <button
       onClick={toggleFavorite}
       disabled={loading}
       className={`${buttonSizes[size]} rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors disabled:opacity-50 ${className}`}
-      aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+      aria-label={currentlyFavorited ? 'Remove from favorites' : 'Add to favorites'}
     >
       <Heart
-        className={`${sizeClasses[size]} transition-colors ${isFavorited
+        className={`${sizeClasses[size]} transition-colors ${currentlyFavorited
             ? 'fill-red-500 text-red-500'
             : 'text-gray-400 hover:text-red-500'
           }`}

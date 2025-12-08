@@ -24,8 +24,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user) {
-      fetchProfile();
-      fetchStats();
+      Promise.all([fetchProfile(), fetchStats()]);
     }
   }, [user]);
 
