@@ -175,7 +175,8 @@
     "duration": "Duration: {minutes} minutes",
     "participants": "{current} / {max} participants",
     "participantsNoMax": "{current} participants",
-    "near": "Near {station}"
+    "near": "Near {station}",
+    "sessionsBySport": "Sessions by Sport"
   },
   "mySessions": {
     "title": "My Sessions",

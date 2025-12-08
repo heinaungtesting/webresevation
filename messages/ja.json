@@ -174,7 +174,8 @@
     "duration": "時間: {minutes}分",
     "participants": "{current} / {max}人参加",
     "participantsNoMax": "{current}人参加",
-    "near": "{station}近く"
+    "near": "{station}近く",
+    "sessionsBySport": "スポーツ別セッション"
   },
   "mySessions": {
     "title": "参加予定",

@@ -11,6 +11,7 @@ import {
 import { Session } from '@/types';
 import CompactSessionCard from './CompactSessionCard';
 import { MapPin, AlertCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface SessionMapProps {
   sessions: Session[];
@@ -58,6 +59,7 @@ export default function SessionMap({
   showLegend = true,
   className = ''
 }: SessionMapProps) {
+  const t = useTranslations('sessionDetail');
   const [selectedMarker, setSelectedMarker] = useState<string | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -207,7 +209,7 @@ export default function SessionMap({
       {/* Legend - only show for multiple sessions */}
       {showLegend && markersData.length > 1 && (
         <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-3 border border-slate-200">
-          <p className="text-xs font-semibold text-slate-700 mb-2">Sessions by Sport</p>
+          <p className="text-xs font-semibold text-slate-700 mb-2">{t('sessionsBySport')}</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(sportEmoji).slice(0, 6).map(([sport, emoji]) => (
               <div
