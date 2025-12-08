@@ -35,9 +35,26 @@ export async function GET(
       );
     }
 
-    // Check if conversation already exists for this session
-    let conversation = await prisma.conversation.findUnique({
+    // Get all participants of the session
+    const sessionParticipants = await prisma.userSession.findMany({
       where: { session_id: sessionId },
+      select: { user_id: true },
+    });
+
+    // Use upsert to atomically create or get the conversation
+    // This prevents race conditions when multiple users access simultaneously
+    let conversation = await prisma.conversation.upsert({
+      where: { session_id: sessionId },
+      create: {
+        type: 'session',
+        session_id: sessionId,
+        participants: {
+          create: sessionParticipants.map((p) => ({
+            user_id: p.user_id,
+          })),
+        },
+      },
+      update: {},
       include: {
         participants: {
           include: {
@@ -67,60 +84,14 @@ export async function GET(
       },
     });
 
-    // If conversation doesn't exist, create it
-    if (!conversation) {
-      // Get all participants of the session
-      const sessionParticipants = await prisma.userSession.findMany({
-        where: { session_id: sessionId },
-        select: { user_id: true },
-      });
+    // Ensure current user is a participant (in case they joined after conversation was created)
+    const isParticipant = conversation.participants.some(
+      (p) => p.user_id === user.id
+    );
 
-      conversation = await prisma.conversation.create({
-        data: {
-          type: 'session',
-          session_id: sessionId,
-          participants: {
-            create: sessionParticipants.map((p) => ({
-              user_id: p.user_id,
-            })),
-          },
-        },
-        include: {
-          participants: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  email: true,
-                  username: true,
-                  display_name: true,
-                  avatar_url: true,
-                },
-              },
-            },
-          },
-          session: {
-            select: {
-              id: true,
-              sport_type: true,
-              date_time: true,
-              sport_center: {
-                select: {
-                  name_en: true,
-                },
-              },
-            },
-          },
-        },
-      });
-    } else {
-      // Conversation exists, make sure current user is a participant
-      const isParticipant = conversation.participants.some(
-        (p) => p.user_id === user.id
-      );
-
-      if (!isParticipant) {
-        // Add user as participant
+    if (!isParticipant) {
+      // Add user as participant with error handling for duplicate constraint
+      try {
         await prisma.conversationParticipant.create({
           data: {
             conversation_id: conversation.id,
@@ -159,6 +130,16 @@ export async function GET(
             },
           },
         });
+      } catch (error: unknown) {
+        // Ignore unique constraint violation - user is already a participant
+        if (
+          error &&
+          typeof error === 'object' &&
+          'code' in error &&
+          error.code !== 'P2002'
+        ) {
+          throw error;
+        }
       }
     }
 
