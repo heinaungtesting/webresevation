@@ -14,6 +14,9 @@ import { MapPin, AlertCircle } from 'lucide-react';
 
 interface SessionMapProps {
   sessions: Session[];
+  height?: string; // e.g., "400px", "60vh"
+  showLegend?: boolean; // Show sport legend
+  className?: string;
 }
 
 // Tokyo center coordinates
@@ -49,7 +52,12 @@ interface MarkerData {
   position: { lat: number; lng: number };
 }
 
-export default function SessionMap({ sessions }: SessionMapProps) {
+export default function SessionMap({
+  sessions,
+  height = '60vh',
+  showLegend = true,
+  className = ''
+}: SessionMapProps) {
   const [selectedMarker, setSelectedMarker] = useState<string | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -70,6 +78,22 @@ export default function SessionMap({ sessions }: SessionMapProps) {
       }));
   }, [sessions]);
 
+  // Calculate map center and zoom based on markers
+  const { center, zoom } = useMemo(() => {
+    if (markersData.length === 1) {
+      // Single marker: center on it with higher zoom
+      return {
+        center: markersData[0].position,
+        zoom: 15,
+      };
+    }
+    // Multiple markers: use default Tokyo center
+    return {
+      center: TOKYO_CENTER,
+      zoom: DEFAULT_ZOOM,
+    };
+  }, [markersData]);
+
   // Handle marker click
   const handleMarkerClick = useCallback((sessionId: string) => {
     setSelectedMarker((prev) => (prev === sessionId ? null : sessionId));
@@ -83,7 +107,7 @@ export default function SessionMap({ sessions }: SessionMapProps) {
   // Error state: No API key
   if (!apiKey) {
     return (
-      <div className="h-[60vh] w-full rounded-3xl bg-slate-100 border-2 border-dashed border-slate-200 flex items-center justify-center">
+      <div className={`w-full rounded-3xl bg-slate-100 border-2 border-dashed border-slate-200 flex items-center justify-center ${className}`} style={{ height }}>
         <div className="text-center p-6">
           <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <AlertCircle className="w-8 h-8 text-amber-600" />
@@ -104,7 +128,7 @@ export default function SessionMap({ sessions }: SessionMapProps) {
   // Empty state: No sessions with coordinates
   if (markersData.length === 0) {
     return (
-      <div className="h-[60vh] w-full rounded-3xl bg-slate-100 border-2 border-dashed border-slate-200 flex items-center justify-center">
+      <div className={`w-full rounded-3xl bg-slate-100 border-2 border-dashed border-slate-200 flex items-center justify-center ${className}`} style={{ height }}>
         <div className="text-center p-6">
           <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
             <MapPin className="w-8 h-8 text-slate-400" />
@@ -119,11 +143,11 @@ export default function SessionMap({ sessions }: SessionMapProps) {
   }
 
   return (
-    <div className="h-[60vh] w-full rounded-3xl overflow-hidden shadow-lg border border-slate-200">
+    <div className={`w-full rounded-3xl overflow-hidden shadow-lg border border-slate-200 relative ${className}`} style={{ height }}>
       <APIProvider apiKey={apiKey}>
         <Map
-          defaultCenter={TOKYO_CENTER}
-          defaultZoom={DEFAULT_ZOOM}
+          defaultCenter={center}
+          defaultZoom={zoom}
           mapId="sportsmatch-session-map"
           gestureHandling="greedy"
           disableDefaultUI={false}
@@ -180,21 +204,23 @@ export default function SessionMap({ sessions }: SessionMapProps) {
         </Map>
       </APIProvider>
 
-      {/* Legend */}
-      <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-3 border border-slate-200">
-        <p className="text-xs font-semibold text-slate-700 mb-2">Sessions by Sport</p>
-        <div className="flex flex-wrap gap-2">
-          {Object.entries(sportEmoji).slice(0, 6).map(([sport, emoji]) => (
-            <div
-              key={sport}
-              className="flex items-center gap-1 text-xs text-slate-600"
-            >
-              <span>{emoji}</span>
-              <span className="capitalize">{sport.replace('-', ' ')}</span>
-            </div>
-          ))}
+      {/* Legend - only show for multiple sessions */}
+      {showLegend && markersData.length > 1 && (
+        <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-3 border border-slate-200">
+          <p className="text-xs font-semibold text-slate-700 mb-2">Sessions by Sport</p>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(sportEmoji).slice(0, 6).map(([sport, emoji]) => (
+              <div
+                key={sport}
+                className="flex items-center gap-1 text-xs text-slate-600"
+              >
+                <span>{emoji}</span>
+                <span className="capitalize">{sport.replace('-', ' ')}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

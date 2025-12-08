@@ -8,7 +8,7 @@ import Card from '@/app/components/ui/Card';
 import Badge from '@/app/components/ui/Badge';
 import { Session } from '@/types';
 import { formatDate } from '@/lib/utils';
-import { MapPin, Clock, Users, Info, ArrowLeft, Loader2, Flag, MoreVertical, Bell, BellOff } from 'lucide-react';
+import { MapPin, Clock, Users, Info, ArrowLeft, Loader2, Flag, MoreVertical, Bell, BellOff, ExternalLink, Navigation } from 'lucide-react';
 import ReviewSection from '@/app/components/sessions/ReviewSection';
 import FavoriteButton from '@/app/components/sessions/FavoriteButton';
 import AttendanceTracker from '@/app/components/sessions/AttendanceTracker';
@@ -288,11 +288,67 @@ export default function SessionDetailPage() {
             {/* Map Section */}
             {session.sport_center?.latitude && session.sport_center?.longitude && (
               <Card padding="lg">
-                <div className="flex items-center gap-2 mb-4">
-                  <MapPin className="w-5 h-5 text-gray-600" />
-                  <h2 className="text-xl font-semibold">Location</h2>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-gray-600" />
+                    <h2 className="text-xl font-semibold">Location</h2>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const address = encodeURIComponent(
+                          session.sport_center?.address_en ||
+                          `${session.sport_center?.latitude},${session.sport_center?.longitude}`
+                        );
+                        window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
+                      }}
+                      className="text-sm flex items-center justify-center"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-1.5" />
+                      <span className="hidden sm:inline">Open in Maps</span>
+                      <span className="sm:hidden">Open Map</span>
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => {
+                        const destination = `${session.sport_center?.latitude},${session.sport_center?.longitude}`;
+                        window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}`, '_blank');
+                      }}
+                      className="text-sm flex items-center justify-center"
+                    >
+                      <Navigation className="w-4 h-4 mr-1.5" />
+                      Get Directions
+                    </Button>
+                  </div>
                 </div>
-                <SessionMap sessions={[session]} />
+
+                {/* Location Details */}
+                <div className="mb-4 p-4 bg-gray-50 rounded-xl">
+                  <p className="font-semibold text-gray-900 mb-1">
+                    {session.sport_center?.name_en}
+                  </p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {session.sport_center?.address_en}
+                  </p>
+                  {session.sport_center?.station_en && (
+                    <div className="flex items-center gap-1.5 text-sm text-blue-600">
+                      <span>🚉</span>
+                      <span>Near {session.sport_center.station_en}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Map */}
+                <div className="h-[300px] sm:h-[400px]">
+                  <SessionMap
+                    sessions={[session]}
+                    height="100%"
+                    showLegend={false}
+                  />
+                </div>
               </Card>
             )}
 
