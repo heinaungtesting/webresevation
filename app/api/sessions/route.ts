@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { apiRateLimiter } from '@/lib/rate-limit';
-import { sessionCache, sessionListKey } from '@/lib/cache';
+import { sessionCache, sessionListKey, cacheDeletePattern } from '@/lib/cache';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
@@ -331,12 +331,9 @@ export async function POST(request: Request) {
       return session;
     });
 
-    // Invalidate session list cache when a new session is created
-    // Use pattern matching to clear all cached session lists
-    import('@/lib/cache').then(({ cacheDeletePattern }) => {
-      cacheDeletePattern('list:*', { prefix: 'session' }).catch((err) => {
-        logger.error({ err }, 'Failed to invalidate session cache');
-      });
+    // Invalidate session list cache when a new session is created (non-blocking)
+    cacheDeletePattern('list:*', { prefix: 'session' }).catch((err) => {
+      logger.error({ err }, 'Failed to invalidate session cache');
     });
 
     // Fetch sport_center separately (outside transaction for better performance)

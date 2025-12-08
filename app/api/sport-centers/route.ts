@@ -35,7 +35,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error('Error fetching sport centers:', error);
+    logger.error({ err: error }, 'Error fetching sport centers');
     return NextResponse.json(
       { error: 'Failed to fetch sport centers' },
       { status: 500 }

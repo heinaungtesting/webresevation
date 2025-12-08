@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { sendSessionUpdateEmail } from '@/lib/email';
 import { logger } from '@/lib/logger';
+import { cacheDeletePattern, sessionCache, sessionKey } from '@/lib/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -113,16 +114,12 @@ export async function DELETE(
       where: { id },
     });
 
-    // Invalidate session list cache when a session is deleted
-    import('@/lib/cache').then(({ cacheDeletePattern, sessionCache, sessionKey }) => {
-      // Clear all session list caches
-      cacheDeletePattern('list:*', { prefix: 'session' }).catch((err) => {
-        logger.error({ err }, 'Failed to invalidate session list cache');
-      });
-      // Clear the specific session detail cache
-      sessionCache.delete(sessionKey(id)).catch((err) => {
-        logger.error({ err }, 'Failed to invalidate session detail cache');
-      });
+    // Invalidate session caches when a session is deleted (non-blocking)
+    cacheDeletePattern('list:*', { prefix: 'session' }).catch((err) => {
+      logger.error({ err }, 'Failed to invalidate session list cache');
+    });
+    sessionCache.delete(sessionKey(id)).catch((err) => {
+      logger.error({ err }, 'Failed to invalidate session detail cache');
     });
 
     // Send cancellation notifications to all participants (non-blocking)
@@ -222,16 +219,12 @@ export async function PATCH(
       },
     });
 
-    // Invalidate session caches when a session is updated
-    import('@/lib/cache').then(({ cacheDeletePattern, sessionCache, sessionKey }) => {
-      // Clear all session list caches
-      cacheDeletePattern('list:*', { prefix: 'session' }).catch((err) => {
-        logger.error({ err }, 'Failed to invalidate session list cache');
-      });
-      // Clear the specific session detail cache
-      sessionCache.delete(sessionKey(id)).catch((err) => {
-        logger.error({ err }, 'Failed to invalidate session detail cache');
-      });
+    // Invalidate session caches when a session is updated (non-blocking)
+    cacheDeletePattern('list:*', { prefix: 'session' }).catch((err) => {
+      logger.error({ err }, 'Failed to invalidate session list cache');
+    });
+    sessionCache.delete(sessionKey(id)).catch((err) => {
+      logger.error({ err }, 'Failed to invalidate session detail cache');
     });
 
     // Send update notifications to participants (non-blocking)

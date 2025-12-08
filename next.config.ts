@@ -11,10 +11,7 @@ const nextConfig: NextConfig = {
   // Webpack configuration
   webpack: (config) => {
     // Suppress warnings for pino dependencies (they include test files which are not needed)
-    config.module = {
-      ...config.module,
-      exprContextCritical: false,
-    };
+    config.module.exprContextCritical = false;
     
     return config;
   },
