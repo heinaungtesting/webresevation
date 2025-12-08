@@ -152,6 +152,29 @@ export default function SessionDetailPage() {
     }
   };
 
+  const handleOpenChat = async () => {
+    if (!session) return;
+
+    setActionLoading(true);
+    try {
+      // Get or create conversation for this session
+      const response = await fetch(`/api/sessions/${session.id}/conversation`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to access chat');
+      }
+
+      const conversation = await response.json();
+      // Navigate to the conversation
+      router.push(`/messages/${conversation.id}`);
+    } catch (err: any) {
+      alert(err.message || 'Failed to open chat');
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -466,9 +489,17 @@ export default function SessionDetailPage() {
                   <Button
                     variant="primary"
                     fullWidth
-                    onClick={() => router.push(`/chat/${session.id}`)}
+                    onClick={handleOpenChat}
+                    disabled={actionLoading}
                   >
-                    Open Chat Room
+                    {actionLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      'Open Chat Room'
+                    )}
                   </Button>
                 </div>
               ) : (
