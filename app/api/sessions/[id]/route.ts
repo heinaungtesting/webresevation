@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { sendSessionUpdateEmail } from '@/lib/email';
+import { logger } from '@/lib/logger';
+import { cacheDeletePattern, sessionCache, sessionKey } from '@/lib/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,6 +114,14 @@ export async function DELETE(
       where: { id },
     });
 
+    // Invalidate session caches when a session is deleted (non-blocking)
+    cacheDeletePattern('list:*', { prefix: 'session' }).catch((err) => {
+      logger.error({ err }, 'Failed to invalidate session list cache');
+    });
+    sessionCache.delete(sessionKey(id)).catch((err) => {
+      logger.error({ err }, 'Failed to invalidate session detail cache');
+    });
+
     // Send cancellation notifications to all participants (non-blocking)
     existingSession.user_sessions.forEach((participant: any) => {
       if (participant.user.notification_email && participant.user_id !== user.id) {
@@ -207,6 +217,14 @@ export async function PATCH(
       include: {
         sport_center: true,
       },
+    });
+
+    // Invalidate session caches when a session is updated (non-blocking)
+    cacheDeletePattern('list:*', { prefix: 'session' }).catch((err) => {
+      logger.error({ err }, 'Failed to invalidate session list cache');
+    });
+    sessionCache.delete(sessionKey(id)).catch((err) => {
+      logger.error({ err }, 'Failed to invalidate session detail cache');
     });
 
     // Send update notifications to participants (non-blocking)

@@ -1,38 +1,34 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { logger, createTimer } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
 // GET /api/users/me - Get current user profile
 export async function GET() {
+  const timer = createTimer(logger, 'GET /api/users/me');
+  
   try {
-    const startTime = Date.now();
-    console.log('[/api/users/me] Starting request...');
-
     const supabase = await createClient();
-    console.log(`[/api/users/me] Supabase client created in ${Date.now() - startTime}ms`);
-
-    const authStartTime = Date.now();
+    
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser();
-    console.log(`[/api/users/me] Auth check completed in ${Date.now() - authStartTime}ms`);
 
     if (authError) {
-      console.error('[/api/users/me] Auth error:', authError);
+      logger.error({ err: authError }, 'Authentication failed');
       return NextResponse.json({ error: 'Authentication failed' }, { status: 401 });
     }
 
     if (!user) {
-      console.log('[/api/users/me] No user found in session');
+      logger.debug('No user found in session');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log(`[/api/users/me] User authenticated: ${user.id}`);
+    logger.debug({ userId: user.id }, 'User authenticated');
 
-    const dbStartTime = Date.now();
     const profile = await prisma.user.findUnique({
       where: { id: user.id },
       select: {
@@ -58,16 +54,15 @@ export async function GET() {
         },
       },
     });
-    console.log(`[/api/users/me] Database query completed in ${Date.now() - dbStartTime}ms`);
 
     if (!profile) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    console.log(`[/api/users/me] Total request time: ${Date.now() - startTime}ms`);
+    timer.endWithWarning(500);
     return NextResponse.json(profile);
   } catch (error: any) {
-    console.error('Error fetching user profile:', error);
+    logger.error({ err: error }, 'Error fetching user profile');
 
     // Handle timeout errors
     if (error.name === 'AbortError') {

@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
   // Enable standalone output for Docker deployment
   output: 'standalone',
 
+  // Webpack configuration
+  webpack: (config) => {
+    // Suppress warnings for pino dependencies (they include test files which are not needed)
+    config.module.exprContextCritical = false;
+    
+    return config;
+  },
+
   // Security headers for production
   async headers() {
     return [

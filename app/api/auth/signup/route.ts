@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { sendWelcomeEmail } from '@/lib/email';
 import { authRateLimiter, createRateLimitHeaders } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -92,20 +93,20 @@ export async function POST(request: Request) {
           data.user.email!,
           data.user.email!.split('@')[0] // Use email username as default name
         ).catch((err) => {
-          console.error('Failed to send welcome email:', err);
+          logger.error({ err }, 'Failed to send welcome email');
           // Don't fail signup if email fails
         });
       } catch (dbError) {
-        console.error('Database error:', dbError);
+        logger.error({ err: dbError }, 'Database error during signup');
 
         // CRITICAL: Clean up Supabase auth user to prevent ghost user state
         // This prevents users from existing in Supabase Auth but not in the database
         try {
           const adminClient = createAdminClient();
           await adminClient.auth.admin.deleteUser(data.user.id);
-          console.log(`Cleaned up Supabase auth user ${data.user.id} after database error`);
+          logger.info({ userId: data.user.id }, 'Cleaned up Supabase auth user after database error');
         } catch (cleanupError) {
-          console.error('Failed to cleanup Supabase auth user:', cleanupError);
+          logger.error({ err: cleanupError, userId: data.user.id }, 'Failed to cleanup Supabase auth user');
           // Log for manual cleanup if automatic cleanup fails
         }
 
