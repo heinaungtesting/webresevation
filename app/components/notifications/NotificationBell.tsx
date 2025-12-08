@@ -38,16 +38,8 @@ export default function NotificationBell() {
 
   // Subscribe to new notifications with Supabase Realtime
   // Debounce rapid updates to prevent excessive re-renders
-  const debouncedSetNotifications = useDebouncedCallback((newNotifications: any[]) => {
-    setNotifications(newNotifications);
-  }, 100);
-
   const handleNewNotification = useCallback((notification: any) => {
-    setNotifications(prev => {
-      const newNotifications = [notification, ...prev];
-      debouncedSetNotifications(newNotifications);
-      return newNotifications;
-    });
+    setNotifications(prev => [notification, ...prev]);
 
     // Show browser notification
     if ('Notification' in window && Notification.permission === 'granted') {
@@ -56,9 +48,11 @@ export default function NotificationBell() {
         icon: '/icon.png',
       });
     }
-  }, [debouncedSetNotifications]);
+  }, []);
 
-  useUserNotifications(user?.id || '', handleNewNotification);
+  const debouncedHandleNewNotification = useDebouncedCallback(handleNewNotification, 100);
+
+  useUserNotifications(user?.id || '', debouncedHandleNewNotification);
 
   // Calculate unread count
   const unreadCount = notifications.filter(n => !n.read).length;

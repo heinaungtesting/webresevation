@@ -46,25 +46,19 @@ export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps)
 
   // Subscribe to new messages with Supabase Realtime
   // Debounce rapid updates to prevent excessive re-renders
-  const debouncedSetMessages = useDebouncedCallback((newMessages: any[]) => {
-    setMessages(newMessages);
-  }, 100);
-
   const handleNewMessage = useCallback((message: any) => {
-    setMessages(prev => {
-      const newMessages = [...prev, message];
-      debouncedSetMessages(newMessages);
-      return newMessages;
-    });
+    setMessages(prev => [...prev, message]);
 
     // Mark conversation as read when new message arrives
     if (message.sender_id !== currentUserId) {
       csrfPut(`/api/conversations/${conversationId}/read`, {}).catch(console.error);
     }
     scrollToBottom();
-  }, [conversationId, currentUserId, debouncedSetMessages]);
+  }, [conversationId, currentUserId]);
 
-  useConversationMessages(conversationId, handleNewMessage);
+  const debouncedHandleNewMessage = useDebouncedCallback(handleNewMessage, 100);
+
+  useConversationMessages(conversationId, debouncedHandleNewMessage);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

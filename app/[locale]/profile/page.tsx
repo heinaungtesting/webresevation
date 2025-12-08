@@ -24,7 +24,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user) {
-      Promise.all([fetchProfile(), fetchStats()]);
+      Promise.all([fetchProfile(), fetchStats()]).catch(err => {
+        console.error('Error fetching profile data:', err);
+      });
     }
   }, [user]);
 
