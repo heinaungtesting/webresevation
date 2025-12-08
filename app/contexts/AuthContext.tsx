@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { csrfPost } from '@/lib/csrfClient';
@@ -33,8 +33,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
+  
+  // Add a ref to track if profile was recently fetched
+  const lastFetchRef = useRef<number>(0);
+  const CACHE_DURATION = 30000; // 30 seconds
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (force = false) => {
+    const now = Date.now();
+    if (!force && now - lastFetchRef.current < CACHE_DURATION) {
+      return; // Use cached data
+    }
+    lastFetchRef.current = now;
+    
     try {
       const response = await fetch('/api/users/me');
       if (response.ok) {
@@ -86,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshProfile = async () => {
     if (user) {
-      await fetchProfile();
+      await fetchProfile(true);
     }
   };
 

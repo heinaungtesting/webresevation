@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Bell } from 'lucide-react';
+import { useDebouncedCallback } from 'use-debounce';
 import NotificationDropdown from './NotificationDropdown';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useUserNotifications } from '@/lib/realtime/client';
@@ -36,6 +37,7 @@ export default function NotificationBell() {
   }, [user?.id]);
 
   // Subscribe to new notifications with Supabase Realtime
+  // Debounce rapid updates to prevent excessive re-renders
   const handleNewNotification = useCallback((notification: any) => {
     setNotifications(prev => [notification, ...prev]);
 
@@ -48,7 +50,9 @@ export default function NotificationBell() {
     }
   }, []);
 
-  useUserNotifications(user?.id || '', handleNewNotification);
+  const debouncedHandleNewNotification = useDebouncedCallback(handleNewNotification, 100);
+
+  useUserNotifications(user?.id || '', debouncedHandleNewNotification);
 
   // Calculate unread count
   const unreadCount = notifications.filter(n => !n.read).length;
