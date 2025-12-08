@@ -112,6 +112,18 @@ export async function DELETE(
       where: { id },
     });
 
+    // Invalidate session list cache when a session is deleted
+    import('@/lib/cache').then(({ cacheDeletePattern, sessionCache, sessionKey }) => {
+      // Clear all session list caches
+      cacheDeletePattern('list:*', { prefix: 'session' }).catch((err) => {
+        console.error('Failed to invalidate session list cache:', err);
+      });
+      // Clear the specific session detail cache
+      sessionCache.delete(sessionKey(id)).catch((err) => {
+        console.error('Failed to invalidate session detail cache:', err);
+      });
+    });
+
     // Send cancellation notifications to all participants (non-blocking)
     existingSession.user_sessions.forEach((participant: any) => {
       if (participant.user.notification_email && participant.user_id !== user.id) {
@@ -207,6 +219,18 @@ export async function PATCH(
       include: {
         sport_center: true,
       },
+    });
+
+    // Invalidate session caches when a session is updated
+    import('@/lib/cache').then(({ cacheDeletePattern, sessionCache, sessionKey }) => {
+      // Clear all session list caches
+      cacheDeletePattern('list:*', { prefix: 'session' }).catch((err) => {
+        console.error('Failed to invalidate session list cache:', err);
+      });
+      // Clear the specific session detail cache
+      sessionCache.delete(sessionKey(id)).catch((err) => {
+        console.error('Failed to invalidate session detail cache:', err);
+      });
     });
 
     // Send update notifications to participants (non-blocking)

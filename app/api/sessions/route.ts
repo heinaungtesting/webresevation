@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { apiRateLimiter } from '@/lib/rate-limit';
+import { sessionCache, sessionListKey } from '@/lib/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -176,6 +177,26 @@ export async function GET(request: Request) {
       ];
     }
 
+    // Generate cache key based on query parameters
+    const cacheKey = sessionListKey({
+      sportType: sportType || 'all',
+      skillLevel: skillLevel || 'all',
+      search: search || '',
+      dateFilter: dateFilter || '',
+      startDate: startDate || '',
+      endDate: endDate || '',
+      vibe: vibe || '',
+      allowEnglish: allowEnglish || '',
+      page,
+      limit,
+    });
+
+    // Try to get from cache first
+    const cachedResult = await sessionCache.get<any>(cacheKey);
+    if (cachedResult) {
+      return NextResponse.json(cachedResult);
+    }
+
     // Execute count and data queries in parallel for efficiency
     const [sessions, totalCount] = await Promise.all([
       prisma.session.findMany({
@@ -207,7 +228,7 @@ export async function GET(request: Request) {
     const hasNextPage = page < totalPages;
     const hasPrevPage = page > 1;
 
-    return NextResponse.json({
+    const result = {
       data: sessionsWithCounts,
       pagination: {
         page,
@@ -217,7 +238,14 @@ export async function GET(request: Request) {
         hasNextPage,
         hasPrevPage,
       },
+    };
+
+    // Store in cache (non-blocking)
+    sessionCache.set(cacheKey, result).catch((err) => {
+      console.error('Failed to cache sessions:', err);
     });
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching sessions:', error);
     return NextResponse.json(
@@ -300,6 +328,14 @@ export async function POST(request: Request) {
       });
 
       return session;
+    });
+
+    // Invalidate session list cache when a new session is created
+    // Use pattern matching to clear all cached session lists
+    import('@/lib/cache').then(({ cacheDeletePattern }) => {
+      cacheDeletePattern('list:*', { prefix: 'session' }).catch((err) => {
+        console.error('Failed to invalidate session cache:', err);
+      });
     });
 
     // Fetch sport_center separately (outside transaction for better performance)

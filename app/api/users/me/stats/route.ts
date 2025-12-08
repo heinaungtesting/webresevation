@@ -46,28 +46,24 @@ export async function GET() {
       }),
     ]);
 
-    // Get sport breakdown
-    const sportSessions = await prisma.userSession.groupBy({
-      by: ['session_id'],
+    // Get sport breakdown - optimized to avoid N+1 query pattern
+    // Use a single query with join instead of separate groupBy and findMany
+    const userSessionsWithSport = await prisma.userSession.findMany({
       where: {
         user_id: user.id,
       },
-    });
-
-    const sessionIds = sportSessions.map((s: any) => s.session_id);
-    const sessions = await prisma.session.findMany({
-      where: {
-        id: {
-          in: sessionIds,
+      select: {
+        session: {
+          select: {
+            sport_type: true,
+          },
         },
       },
-      select: {
-        sport_type: true,
-      },
     });
 
-    const sportBreakdown = sessions.reduce((acc: any, session: any) => {
-      acc[session.sport_type] = (acc[session.sport_type] || 0) + 1;
+    const sportBreakdown = userSessionsWithSport.reduce((acc: any, us: any) => {
+      const sportType = us.session.sport_type;
+      acc[sportType] = (acc[sportType] || 0) + 1;
       return acc;
     }, {});
 

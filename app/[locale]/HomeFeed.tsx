@@ -89,10 +89,11 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
     { id: 'weekend', label: t('filters.weekend') },
   ];
 
-  // Debounce search input to prevent API spamming (300ms delay)
+  // Debounce search input to prevent API spamming (500ms delay for better performance)
+  // Increased from 300ms to reduce unnecessary API calls while still maintaining good UX
   const handleSearchChange = useDebouncedCallback((value: string) => {
     setDebouncedSearch(value);
-  }, 300);
+  }, 500);
 
   // Determine if we should fetch from API (filters are applied)
   const hasFilters = activeFilter !== 'all' || debouncedSearch.trim() !== '';

@@ -66,8 +66,11 @@ function CompactSessionCard({ session, variant = 'horizontal', className = '' }:
     };
 
     updateTimeLabel();
-    // Update every minute
-    const interval = setInterval(updateTimeLabel, 60000);
+    // Update every 30 seconds instead of every minute for better UX
+    // Only update if the component is still mounted
+    const interval = setInterval(() => {
+      updateTimeLabel();
+    }, 30000);
     return () => clearInterval(interval);
   }, [session.date_time]);
 
