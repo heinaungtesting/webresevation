@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sendSessionReminderEmail } from '@/lib/email';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,7 +54,7 @@ export async function GET(request: Request) {
       },
     });
 
-    console.log(`Found ${upcomingSessions.length} sessions with reminders to send`);
+    logger.info({ sessionCount: upcomingSessions.length }, 'Found sessions with reminders to send');
 
     let emailsSent = 0;
     let emailsFailed = 0;
