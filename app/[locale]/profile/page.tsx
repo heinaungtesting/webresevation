@@ -11,10 +11,12 @@ import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import UserStats from '@/app/components/profile/UserStats';
 import { formatDate } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user } = useAuth();
+  const t = useTranslations('profile');
   const [profile, setProfile] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -66,8 +68,8 @@ export default function ProfilePage() {
     if (totalSessions >= 1) {
       achievements.push({
         icon: '🌟',
-        title: 'First Step',
-        description: 'Attended your first session!',
+        title: t('achievements.firstStep.title'),
+        description: t('achievements.firstStep.description'),
         color: 'from-yellow-400 to-orange-400',
         unlocked: true,
       });
@@ -77,8 +79,8 @@ export default function ProfilePage() {
     if (totalSessions >= 10) {
       achievements.push({
         icon: '🏆',
-        title: 'Regular Player',
-        description: 'Joined 10 sessions',
+        title: t('achievements.regularPlayer.title'),
+        description: t('achievements.regularPlayer.description'),
         color: 'from-blue-400 to-indigo-400',
         unlocked: true,
       });
@@ -88,8 +90,8 @@ export default function ProfilePage() {
     if (totalSessions >= 50) {
       achievements.push({
         icon: '👑',
-        title: 'Super Star',
-        description: 'Amazing! 50+ sessions',
+        title: t('achievements.superStar.title'),
+        description: t('achievements.superStar.description'),
         color: 'from-purple-400 to-pink-400',
         unlocked: true,
       });
@@ -99,8 +101,8 @@ export default function ProfilePage() {
     if (reliabilityScore === 100 && totalSessions >= 5) {
       achievements.push({
         icon: '🎯',
-        title: 'Perfect Attendance',
-        description: '100% reliability!',
+        title: t('achievements.perfectAttendance.title'),
+        description: t('achievements.perfectAttendance.description'),
         color: 'from-green-400 to-emerald-400',
         unlocked: true,
       });
@@ -110,8 +112,8 @@ export default function ProfilePage() {
     if (sportCount >= 5) {
       achievements.push({
         icon: '💪',
-        title: 'Sport Enthusiast',
-        description: 'Played 5+ different sports',
+        title: t('achievements.sportEnthusiast.title'),
+        description: t('achievements.sportEnthusiast.description'),
         color: 'from-red-400 to-orange-400',
         unlocked: true,
       });
@@ -121,8 +123,8 @@ export default function ProfilePage() {
     if (createdSessions >= 10) {
       achievements.push({
         icon: '🎊',
-        title: 'Host Master',
-        description: 'Created 10+ sessions',
+        title: t('achievements.hostMaster.title'),
+        description: t('achievements.hostMaster.description'),
         color: 'from-cyan-400 to-blue-400',
         unlocked: true,
       });
@@ -132,8 +134,8 @@ export default function ProfilePage() {
     if (totalSessions < 50) {
       achievements.push({
         icon: '👑',
-        title: 'Super Star',
-        description: `${50 - totalSessions} more sessions to unlock`,
+        title: t('achievements.superStar.title'),
+        description: t('achievements.locked', { count: 50 - totalSessions }),
         color: 'from-gray-300 to-gray-400',
         unlocked: false,
       });
@@ -147,8 +149,8 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage
-            title="Please log in"
-            message="You need to be logged in to view your profile"
+            title={t('pleaseLogin')}
+            message={t('needLogin')}
           />
         </div>
       </div>
@@ -158,7 +160,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-        <Loading text="Loading your cute profile... ✨" fullScreen />
+        <Loading text={t('loading')} fullScreen />
       </div>
     );
   }
@@ -167,7 +169,7 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ErrorMessage message={error || 'Profile not found'} onRetry={fetchProfile} />
+          <ErrorMessage message={error || t('profileNotFound')} onRetry={fetchProfile} />
         </div>
       </div>
     );
@@ -184,7 +186,7 @@ export default function ProfilePage() {
           <div className="flex items-center gap-3">
             <Sparkles className="w-8 h-8 text-pink-500" />
             <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
-              My Cute Profile ✨
+              {t('title')}
             </h1>
           </div>
           <Button
@@ -193,7 +195,7 @@ export default function ProfilePage() {
             className="gap-2 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 border-0"
           >
             <Edit className="w-4 h-4" />
-            Edit Profile
+            {t('editProfile')}
           </Button>
         </div>
 
@@ -246,19 +248,19 @@ export default function ProfilePage() {
                   <span>{profile.email}</span>
                   {profile.email_verified && (
                     <Badge variant="success" size="sm" className="ml-1">
-                      ✓
+                      {t('verified')}
                     </Badge>
                   )}
                 </div>
                 {profile.location && (
                   <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-purple-100">
                     <MapPin className="w-4 h-4 text-purple-500" />
-                    <span>{profile.location}</span>
+                    <span>{t('near', { station: profile.location })}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-blue-100">
                   <Calendar className="w-4 h-4 text-blue-500" />
-                  <span>Joined {formatDate(profile.created_at)}</span>
+                  <span>{t('joined', { date: formatDate(profile.created_at) })}</span>
                 </div>
               </div>
 
@@ -266,7 +268,7 @@ export default function ProfilePage() {
               {profile.sport_preferences && profile.sport_preferences.length > 0 && (
                 <div className="mt-4">
                   <p className="text-sm font-semibold text-purple-600 mb-2 flex items-center gap-2">
-                    <span>🏃‍♀️</span> Favorite Sports
+                    <span>🏃‍♀️</span> {t('favoriteSports')}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {profile.sport_preferences.map((sport: string) => (
@@ -289,9 +291,9 @@ export default function ProfilePage() {
           <Card padding="lg" className="mb-6 bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200">
             <div className="flex items-center gap-3 mb-4">
               <Trophy className="w-6 h-6 text-yellow-600" />
-              <h3 className="text-2xl font-bold text-yellow-800">Achievements ⭐</h3>
+              <h3 className="text-2xl font-bold text-yellow-800">{t('achievements.title')}</h3>
             </div>
-            <p className="text-sm text-yellow-700 mb-4">Collect badges by being awesome! かわいい~ ✨</p>
+            <p className="text-sm text-yellow-700 mb-4">{t('achievements.subtitle')}</p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {achievements.map((achievement, index) => (

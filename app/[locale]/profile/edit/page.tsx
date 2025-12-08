@@ -11,10 +11,12 @@ import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import AvatarUpload from '@/app/components/profile/AvatarUpload';
 import { csrfPatch } from '@/lib/csrfClient';
+import { useTranslations } from 'next-intl';
 
 export default function ProfileEditPage() {
   const router = useRouter();
   const { user, refreshProfile } = useAuth();
+  const t = useTranslations('profile');
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -112,8 +114,8 @@ export default function ProfileEditPage() {
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-8">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage
-            title="Please log in"
-            message="You need to be logged in to edit your profile"
+            title={t('pleaseLogin')}
+            message={t('needLogin')}
           />
         </div>
       </div>
@@ -123,7 +125,7 @@ export default function ProfileEditPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-        <Loading text="Loading your cute profile... ✨" fullScreen />
+        <Loading text={t('edit.loading')} fullScreen />
       </div>
     );
   }
@@ -144,7 +146,7 @@ export default function ProfileEditPage() {
           <div className="flex items-center gap-3">
             <Sparkles className="w-8 h-8 text-pink-500" />
             <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
-              Edit Profile ✨
+              {t('edit.title')}
             </h1>
           </div>
         </div>
@@ -162,7 +164,7 @@ export default function ProfileEditPage() {
             {success && (
               <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl text-green-800 text-sm flex items-center gap-2 animate-pulse">
                 <span>✨</span>
-                Profile updated successfully! Redirecting...
+                {t('edit.success')}
               </div>
             )}
 
@@ -186,14 +188,14 @@ export default function ProfileEditPage() {
             <div className="space-y-5">
               <div>
                 <label className="text-sm font-semibold text-purple-600 mb-2 block flex items-center gap-2">
-                  <span>👤</span> Username
+                  <span>👤</span> {t('edit.username')}
                 </label>
                 <Input
                   name="username"
                   type="text"
                   value={formData.username}
                   onChange={handleChange}
-                  placeholder="your-username"
+                  placeholder={t('edit.usernamePlaceholder')}
                   fullWidth
                   className="border-2 border-pink-100 focus:border-purple-400 rounded-2xl"
                 />
@@ -201,14 +203,14 @@ export default function ProfileEditPage() {
 
               <div>
                 <label className="text-sm font-semibold text-purple-600 mb-2 block flex items-center gap-2">
-                  <span>✨</span> Display Name
+                  <span>✨</span> {t('edit.displayName')}
                 </label>
                 <Input
                   name="display_name"
                   type="text"
                   value={formData.display_name}
                   onChange={handleChange}
-                  placeholder="Your Cute Name"
+                  placeholder={t('edit.displayNamePlaceholder')}
                   fullWidth
                   className="border-2 border-pink-100 focus:border-purple-400 rounded-2xl"
                 />
@@ -216,13 +218,13 @@ export default function ProfileEditPage() {
 
               <div>
                 <label className="text-sm font-semibold text-purple-600 mb-2 block flex items-center gap-2">
-                  <span>💭</span> Bio
+                  <span>💭</span> {t('edit.bio')}
                 </label>
                 <textarea
                   name="bio"
                   value={formData.bio}
                   onChange={handleChange}
-                  placeholder="Tell us about yourself... ✨"
+                  placeholder={t('edit.bioPlaceholder')}
                   rows={4}
                   className="px-4 py-3 border-2 border-pink-100 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 w-full bg-white"
                 />
@@ -230,14 +232,14 @@ export default function ProfileEditPage() {
 
               <div>
                 <label className="text-sm font-semibold text-purple-600 mb-2 block flex items-center gap-2">
-                  <span>📍</span> Location
+                  <span>📍</span> {t('edit.location')}
                 </label>
                 <Input
                   name="location"
                   type="text"
                   value={formData.location}
                   onChange={handleChange}
-                  placeholder="e.g., Shibuya, Tokyo 🗼"
+                  placeholder={t('edit.locationPlaceholder')}
                   fullWidth
                   className="border-2 border-pink-100 focus:border-purple-400 rounded-2xl"
                 />
@@ -246,7 +248,7 @@ export default function ProfileEditPage() {
               {/* Super Cute Sport Selection */}
               <div>
                 <label className="text-sm font-semibold text-purple-600 mb-3 block flex items-center gap-2">
-                  <span>🏃‍♀️</span> Favorite Sports
+                  <span>🏃‍♀️</span> {t('edit.favoriteSports')}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   {sports.map((sport) => (
@@ -267,7 +269,7 @@ export default function ProfileEditPage() {
                   ))}
                 </div>
                 <p className="text-xs text-purple-500 mt-2 text-center">
-                  Select your favorite sports! The more, the better~ 💪
+                  {t('edit.selectSports')}
                 </p>
               </div>
             </div>
@@ -281,7 +283,7 @@ export default function ProfileEditPage() {
                 fullWidth
                 className="border-2 border-purple-200 text-purple-600 hover:bg-purple-50 rounded-2xl"
               >
-                Cancel
+                {t('edit.cancel')}
               </Button>
               <Button
                 type="submit"
@@ -291,7 +293,7 @@ export default function ProfileEditPage() {
                 className="gap-2 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 border-0 rounded-2xl shadow-lg"
               >
                 <Save className="w-4 h-4" />
-                {saving ? 'Saving...' : 'Save Changes'} ✨
+                {saving ? t('edit.saving') : t('edit.saveChanges')}
               </Button>
             </div>
           </form>
@@ -300,7 +302,7 @@ export default function ProfileEditPage() {
         {/* Cute Motivational Text */}
         <div className="mt-6 text-center">
           <p className="text-sm text-purple-500">
-            Make your profile shine! ✨ かわいい~ 🌸
+            {t('edit.motivational')}
           </p>
         </div>
       </div>
