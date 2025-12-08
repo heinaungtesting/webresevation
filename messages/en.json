@@ -47,6 +47,43 @@
       "title": "Ready to Get Started?",
       "subtitle": "Join our community and find your next game today",
       "createAccount": "Create Free Account"
+    },
+    "greeting": {
+      "morning": "Good Morning",
+      "afternoon": "Good Afternoon",
+      "evening": "Good Evening"
+    },
+    "readyForGame": "Ready for your next game?",
+    "searchPlaceholder": "Search sports, venues...",
+    "createSession": "Create Session",
+    "filters": {
+      "all": "All",
+      "today": "Today",
+      "weekend": "This Weekend"
+    },
+    "happeningNow": "Happening Now",
+    "seeAll": "See all",
+    "forYou": "For You",
+    "mapView": "Map View",
+    "listView": "List View",
+    "loading": "Loading sessions...",
+    "tryAgain": "Try Again",
+    "refresh": "Refresh",
+    "failedToLoad": "Failed to load sessions",
+    "emptyState": {
+      "createSession": {
+        "title": "Create a Session",
+        "description": "Be the first to host a game. Set the time, place, and let others join you."
+      },
+      "exploreVenues": {
+        "title": "Explore Venues",
+        "description": "Discover sport centers near you"
+      },
+      "noMatches": "No matches found",
+      "noResults": "No results for \"{query}\"",
+      "noSessionsForFilter": "No {filter} sessions available right now",
+      "checkBackSoon": "Check back soon for new games",
+      "clearFilters": "Clear filters"
     }
   },
   "sessions": {
@@ -107,6 +144,7 @@
     "backToSessions": "Back to Sessions",
     "description": "Description",
     "noDescription": "No description provided.",
+    "location": "Location",
     "whosGoing": "Who's Going ({count})",
     "player": "Player {number}",
     "joinSession": "Join this session",
@@ -115,6 +153,10 @@
     "openChatRoom": "Open Chat Room",
     "sessionFull": "This session is full",
     "free": "Free to join • No payment required",
+    "openInGoogleMaps": "Open in Google Maps",
+    "getDirections": "Get Directions",
+    "viewLocationOnMap": "View Location on Map",
+    "mapInstructions": "Click buttons above to open in Google Maps for full map view and directions",
     "rules": {
       "title": "Session Rules",
       "respectful": "Be respectful to all players",

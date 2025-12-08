@@ -46,6 +46,43 @@
       "title": "始める準備はできましたか？",
       "subtitle": "コミュニティに参加して、次のゲームを見つけよう",
       "createAccount": "無料アカウントを作成"
+    },
+    "greeting": {
+      "morning": "おはようございます",
+      "afternoon": "こんにちは",
+      "evening": "こんばんは"
+    },
+    "readyForGame": "次のゲームの準備はできましたか？",
+    "searchPlaceholder": "スポーツや施設を検索...",
+    "createSession": "セッション作成",
+    "filters": {
+      "all": "すべて",
+      "today": "今日",
+      "weekend": "今週末"
+    },
+    "happeningNow": "開催中",
+    "seeAll": "すべて見る",
+    "forYou": "おすすめ",
+    "mapView": "マップ表示",
+    "listView": "リスト表示",
+    "loading": "セッションを読み込み中...",
+    "tryAgain": "再試行",
+    "refresh": "更新",
+    "failedToLoad": "セッションの読み込みに失敗しました",
+    "emptyState": {
+      "createSession": {
+        "title": "セッションを作成",
+        "description": "最初のホストになってゲームを企画しましょう。時間と場所を設定して、他の人を招待しよう。"
+      },
+      "exploreVenues": {
+        "title": "施設を探す",
+        "description": "近くのスポーツセンターを見つけよう"
+      },
+      "noMatches": "一致する結果がありません",
+      "noResults": "「{query}」の検索結果はありません",
+      "noSessionsForFilter": "現在、{filter}のセッションはありません",
+      "checkBackSoon": "新しいゲームをまたチェックしてください",
+      "clearFilters": "フィルターをクリア"
     }
   },
   "sessions": {
@@ -106,6 +143,7 @@
     "backToSessions": "セッション一覧に戻る",
     "description": "詳細",
     "noDescription": "説明がありません。",
+    "location": "場所",
     "whosGoing": "参加者 ({count})",
     "player": "プレイヤー{number}",
     "joinSession": "このセッションに参加",
@@ -114,6 +152,10 @@
     "openChatRoom": "チャットルームを開く",
     "sessionFull": "このセッションは満員です",
     "free": "無料参加 • お支払い不要",
+    "openInGoogleMaps": "Google マップで開く",
+    "getDirections": "ルートを検索",
+    "viewLocationOnMap": "地図で場所を表示",
+    "mapInstructions": "上のボタンをクリックしてGoogle マップで地図全体とルートを表示します",
     "rules": {
       "title": "セッションルール",
       "respectful": "すべてのプレイヤーに敬意を払う",
