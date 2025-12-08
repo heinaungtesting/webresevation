@@ -53,7 +53,6 @@ export default function LoginPage() {
       const searchParams = new URLSearchParams(window.location.search);
       const redirectTo = searchParams.get('redirectTo') || '/';
       router.push(redirectTo);
-      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred. Please try again.');
     } finally {
