@@ -216,5 +216,67 @@
     "edit": "編集",
     "close": "閉じる",
     "back": "戻る"
+  },
+  "profile": {
+    "title": "かわいいプロフィール ✨",
+    "editProfile": "プロフィール編集",
+    "loading": "あなたのかわいいプロフィールを読み込み中... ✨",
+    "pleaseLogin": "ログインしてください",
+    "needLogin": "プロフィールを表示するにはログインが必要です",
+    "profileNotFound": "プロフィールが見つかりません",
+    "verified": "確認済み",
+    "favoriteSports": "好きなスポーツ",
+    "joined": "{date}に参加",
+    "near": "{station}近く",
+    "achievements": {
+      "title": "実績 ⭐",
+      "subtitle": "素晴らしいプレーでバッジを集めよう！かわいい~ ✨",
+      "firstStep": {
+        "title": "最初の一歩",
+        "description": "初めてのセッションに参加！"
+      },
+      "regularPlayer": {
+        "title": "常連プレイヤー",
+        "description": "10回のセッションに参加"
+      },
+      "superStar": {
+        "title": "スーパースター",
+        "description": "すごい！50回以上のセッション"
+      },
+      "perfectAttendance": {
+        "title": "皆勤賞",
+        "description": "信頼度100%！"
+      },
+      "sportEnthusiast": {
+        "title": "スポーツ愛好家",
+        "description": "5種類以上のスポーツをプレー"
+      },
+      "hostMaster": {
+        "title": "ホストマスター",
+        "description": "10回以上のセッションを作成"
+      },
+      "locked": "ロック解除まであと{count}セッション"
+    },
+    "edit": {
+      "title": "プロフィール編集 ✨",
+      "loading": "あなたのかわいいプロフィールを読み込み中... ✨",
+      "username": "ユーザー名",
+      "displayName": "表示名",
+      "bio": "自己紹介",
+      "location": "場所",
+      "favoriteSports": "好きなスポーツ",
+      "usernamePlaceholder": "your-username",
+      "displayNamePlaceholder": "あなたのかわいい名前",
+      "bioPlaceholder": "自己紹介を書いてください... ✨",
+      "locationPlaceholder": "例：渋谷、東京 🗼",
+      "selectSports": "好きなスポーツを選んでね！たくさん選ぼう~ 💪",
+      "cancel": "キャンセル",
+      "saveChanges": "変更を保存",
+      "saving": "保存中...",
+      "success": "プロフィールを更新しました！リダイレクト中...",
+      "motivational": "プロフィールを輝かせよう！✨ かわいい~ 🌸",
+      "avatarInfo": "JPEG、PNG、WebP、またはGIF。最大5MB。",
+      "removePhoto": "写真を削除"
+    }
   }
 }
