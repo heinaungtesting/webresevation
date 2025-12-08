@@ -15,11 +15,13 @@ import AttendanceTracker from '@/app/components/sessions/AttendanceTracker';
 import ReportModal from '@/app/components/ReportModal';
 import StudentBadge from '@/app/components/ui/StudentBadge';
 import { csrfPost, csrfDelete } from '@/lib/csrfClient';
+import { useTranslations } from 'next-intl';
 
 export default function SessionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const t = useTranslations('sessionDetail');
   const [session, setSession] = useState<Session | null>(null);
   const [isAttending, setIsAttending] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -290,7 +292,7 @@ export default function SessionDetailPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                   <div className="flex items-center gap-2">
                     <MapPin className="w-5 h-5 text-gray-600" />
-                    <h2 className="text-xl font-semibold">Location</h2>
+                    <h2 className="text-xl font-semibold">{t('location')}</h2>
                   </div>
                 </div>
 
@@ -325,7 +327,7 @@ export default function SessionDetailPage() {
                       className="flex-1 flex items-center justify-center bg-white hover:bg-gray-50"
                     >
                       <ExternalLink className="w-4 h-4 mr-2" />
-                      Open in Google Maps
+                      {t('openInGoogleMaps')}
                     </Button>
                     <Button
                       variant="primary"
@@ -337,7 +339,7 @@ export default function SessionDetailPage() {
                       className="flex-1 flex items-center justify-center"
                     >
                       <Navigation className="w-4 h-4 mr-2" />
-                      Get Directions
+                      {t('getDirections')}
                     </Button>
                   </div>
                 </div>
@@ -348,9 +350,9 @@ export default function SessionDetailPage() {
                     <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3">
                       <MapPin className="w-8 h-8 text-blue-600" />
                     </div>
-                    <p className="text-slate-700 font-medium mb-1">View Location on Map</p>
+                    <p className="text-slate-700 font-medium mb-1">{t('viewLocationOnMap')}</p>
                     <p className="text-sm text-slate-500 max-w-xs">
-                      Click buttons above to open in Google Maps for full map view and directions
+                      {t('mapInstructions')}
                     </p>
                   </div>
                   {/* Decorative grid pattern */}
