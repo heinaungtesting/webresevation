@@ -14,6 +14,7 @@ import FavoriteButton from '@/app/components/sessions/FavoriteButton';
 import AttendanceTracker from '@/app/components/sessions/AttendanceTracker';
 import ReportModal from '@/app/components/ReportModal';
 import StudentBadge from '@/app/components/ui/StudentBadge';
+import SessionMap from '@/app/components/SessionMap';
 import { csrfPost, csrfDelete } from '@/lib/csrfClient';
 
 export default function SessionDetailPage() {
@@ -283,6 +284,17 @@ export default function SessionDetailPage() {
                 {session.description_en || 'No description provided.'}
               </p>
             </Card>
+
+            {/* Map Section */}
+            {session.sport_center?.latitude && session.sport_center?.longitude && (
+              <Card padding="lg">
+                <div className="flex items-center gap-2 mb-4">
+                  <MapPin className="w-5 h-5 text-gray-600" />
+                  <h2 className="text-xl font-semibold">Location</h2>
+                </div>
+                <SessionMap sessions={[session]} />
+              </Card>
+            )}
 
             {/* Attendees Section */}
             <Card padding="lg">
