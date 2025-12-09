@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useAuth } from '@/app/contexts/AuthContext';
 import SessionCard from '@/app/components/SessionCard';
@@ -26,6 +27,9 @@ interface MySessionsData {
 export default function MySessionsPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
+  const t = useTranslations('mySessions');
   const [data, setData] = useState<MySessionsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -34,9 +38,9 @@ export default function MySessionsPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login?redirectTo=/my-sessions');
+      router.push(`/${locale}/login?redirectTo=/${locale}/my-sessions`);
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, locale]);
 
   useEffect(() => {
     if (user) {
@@ -67,7 +71,7 @@ export default function MySessionsPage() {
         total: (upcomingData.pagination?.totalCount || 0) + (pastData.pagination?.totalCount || 0),
       });
     } catch (err) {
-      setError('Failed to load your sessions');
+      setError(t('failedToLoad'));
       console.error(err);
       // Set empty data to prevent undefined errors
       setData({
@@ -81,7 +85,7 @@ export default function MySessionsPage() {
   };
 
   const handleCancelAttendance = async (sessionId: string) => {
-    if (!confirm('Are you sure you want to cancel your attendance?')) {
+    if (!confirm(t('confirmCancel'))) {
       return;
     }
 
@@ -96,7 +100,7 @@ export default function MySessionsPage() {
       // Refresh the sessions list
       await fetchMySessions();
     } catch (err) {
-      alert('Failed to cancel attendance. Please try again.');
+      alert(t('failedToCancel'));
       console.error(err);
     } finally {
       setCancellingId(null);
@@ -129,19 +133,19 @@ export default function MySessionsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                My Sessions
+                {t('title')}
               </h1>
               <p className="text-gray-600">
-                View and manage your sports sessions
+                {t('subtitle')}
               </p>
             </div>
             <Button
               variant="primary"
-              onClick={() => router.push('/my-sessions/created')}
+              onClick={() => router.push(`/${locale}/my-sessions/created`)}
               className="gap-2"
             >
               <Plus className="w-4 h-4" />
-              My Created Sessions
+              {t('myCreatedSessions')}
             </Button>
           </div>
         </div>
@@ -154,7 +158,7 @@ export default function MySessionsPage() {
                 <Calendar className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Upcoming Sessions</p>
+                <p className="text-sm text-gray-600">{t('upcomingSessions')}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {data?.upcoming.length || 0}
                 </p>
@@ -168,7 +172,7 @@ export default function MySessionsPage() {
                 <History className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Past Sessions</p>
+                <p className="text-sm text-gray-600">{t('pastSessions')}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {data?.past.length || 0}
                 </p>
@@ -182,7 +186,7 @@ export default function MySessionsPage() {
                 <TrendingUp className="w-6 h-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total Sessions</p>
+                <p className="text-sm text-gray-600">{t('totalSessions')}</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {data?.total || 0}
                 </p>
@@ -202,7 +206,7 @@ export default function MySessionsPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
-                Upcoming ({data?.upcoming.length || 0})
+                {t('upcoming')} ({data?.upcoming.length || 0})
               </button>
               <button
                 onClick={() => setActiveTab('past')}
@@ -211,7 +215,7 @@ export default function MySessionsPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
               >
-                Past ({data?.past.length || 0})
+                {t('past')} ({data?.past.length || 0})
               </button>
             </nav>
           </div>
@@ -244,10 +248,10 @@ export default function MySessionsPage() {
                       {cancellingId === attendedSession.session.id ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Cancelling...
+                          {t('canceling')}
                         </>
                       ) : (
-                        'Cancel Attendance'
+                        t('cancelAttendance')
                       )}
                     </Button>
                   </div>
@@ -256,7 +260,7 @@ export default function MySessionsPage() {
                 {/* Badge for Past Sessions */}
                 {activeTab === 'past' && (
                   <div className="absolute top-4 right-4">
-                    <Badge variant="default">Completed</Badge>
+                    <Badge variant="default">{t('completed')}</Badge>
                   </div>
                 )}
               </div>
@@ -270,17 +274,17 @@ export default function MySessionsPage() {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 {activeTab === 'upcoming'
-                  ? 'No Upcoming Sessions'
-                  : 'No Past Sessions'}
+                  ? t('noUpcoming')
+                  : t('noPast')}
               </h3>
               <p className="text-gray-600 mb-6">
                 {activeTab === 'upcoming'
-                  ? "You haven't signed up for any sessions yet."
-                  : "You haven't attended any sessions yet."}
+                  ? t('noUpcomingDescription')
+                  : t('noPastDescription')}
               </p>
               {activeTab === 'upcoming' && (
-                <Link href="/sessions">
-                  <Button variant="primary">Browse Sessions</Button>
+                <Link href={`/${locale}/sessions`}>
+                  <Button variant="primary">{t('browseSessions')}</Button>
                 </Link>
               )}
             </div>

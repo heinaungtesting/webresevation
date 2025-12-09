@@ -205,6 +205,7 @@
   "mySessions": {
     "title": "My Sessions",
     "subtitle": "View and manage your sports sessions",
+    "myCreatedSessions": "My Created Sessions",
     "upcomingSessions": "Upcoming Sessions",
     "pastSessions": "Past Sessions",
     "totalSessions": "Total Sessions",
@@ -218,7 +219,9 @@
     "cancelAttendance": "Cancel Attendance",
     "canceling": "Canceling...",
     "completed": "Completed",
-    "confirmCancel": "Are you sure you want to cancel your attendance?"
+    "confirmCancel": "Are you sure you want to cancel your attendance?",
+    "failedToLoad": "Failed to load your sessions",
+    "failedToCancel": "Failed to cancel attendance. Please try again."
   },
   "auth": {
     "login": {

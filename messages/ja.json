@@ -204,6 +204,7 @@
   "mySessions": {
     "title": "参加予定",
     "subtitle": "スポーツセッションを表示・管理",
+    "myCreatedSessions": "作成したセッション",
     "upcomingSessions": "今後のセッション",
     "pastSessions": "過去のセッション",
     "totalSessions": "合計セッション",
@@ -217,7 +218,9 @@
     "cancelAttendance": "参加をキャンセル",
     "canceling": "キャンセル中...",
     "completed": "完了",
-    "confirmCancel": "本当に参加をキャンセルしますか？"
+    "confirmCancel": "本当に参加をキャンセルしますか？",
+    "failedToLoad": "セッションの読み込みに失敗しました",
+    "failedToCancel": "参加のキャンセルに失敗しました。もう一度お試しください。"
   },
   "auth": {
     "login": {
