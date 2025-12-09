@@ -504,5 +504,88 @@
         "description": "データの取り扱いについて"
       }
     }
+  },
+  "editSession": {
+    "title": "セッションを編集",
+    "subtitle": "セッション詳細を更新",
+    "loading": "セッションを読み込み中...",
+    "pleaseLogin": "ログインしてください",
+    "needLogin": "セッションを編集するにはログインが必要です",
+    "sessionDetails": "セッション詳細",
+    "sportCenter": "スポーツセンター",
+    "selectSportCenter": "スポーツセンターを選択...",
+    "sportType": "スポーツ種目",
+    "skillLevel": "スキルレベル",
+    "date": "日付",
+    "time": "時間",
+    "duration": "時間",
+    "maxParticipants": "最大参加者数（任意）",
+    "maxParticipantsPlaceholder": "空白の場合は無制限",
+    "descriptionEn": "説明（英語）",
+    "descriptionJa": "説明（日本語）",
+    "descriptionEnPlaceholder": "Describe your session in English...",
+    "descriptionJaPlaceholder": "セッションを日本語で説明してください...",
+    "cancel": "キャンセル",
+    "updateButton": "セッションを更新",
+    "updating": "更新中...",
+    "errors": {
+      "selectSportCenter": "スポーツセンターを選択してください",
+      "dateRequired": "日付は必須です",
+      "dateMustBeFuture": "日付は未来の日付である必要があります",
+      "timeRequired": "時間は必須です",
+      "minParticipants": "最低2名の参加者が必要です",
+      "failedToFetch": "セッションデータの読み込みに失敗しました",
+      "sessionNotFound": "セッションが見つかりません",
+      "failedToUpdate": "セッションの更新に失敗しました。もう一度お試しください。",
+      "failedToFetchCenters": "スポーツセンターの取得に失敗しました"
+    }
+  },
+  "favorites": {
+    "title": "お気に入り",
+    "subtitle": "保存したセッション",
+    "pleaseLogin": "ログインしてください",
+    "needLogin": "お気に入りを表示するにはログインが必要です",
+    "loading": "お気に入りを読み込み中...",
+    "noFavorites": "お気に入りはまだありません",
+    "noFavoritesDescription": "まだセッションを保存していません。セッションを閲覧してハートアイコンをクリックして保存しましょう！",
+    "browseSessions": "セッションを見る",
+    "failedToLoad": "お気に入りの読み込みに失敗しました"
+  },
+  "notifications": {
+    "title": "通知",
+    "pleaseLogin": "ログインしてください",
+    "needLogin": "通知を表示するにはログインが必要です",
+    "loading": "通知を読み込み中...",
+    "noNotifications": "通知はありません",
+    "noNotificationsDescription": "すべて確認済みです！新しい通知がここに表示されます。",
+    "markAsRead": "既読にする",
+    "markAllAsRead": "すべて既読にする",
+    "deleteNotification": "削除",
+    "deleteAll": "すべて削除",
+    "confirmDeleteAll": "本当にすべての通知を削除しますか？",
+    "failedToLoad": "通知の読み込みに失敗しました",
+    "failedToMarkRead": "既読にできませんでした",
+    "failedToDelete": "通知の削除に失敗しました",
+    "types": {
+      "sessionJoined": "があなたのセッションに参加しました",
+      "sessionLeft": "があなたのセッションから退出しました",
+      "sessionReminder": "セッションのリマインダー",
+      "sessionCancelled": "セッションがキャンセルされました",
+      "newMessage": "新しいメッセージ",
+      "newReview": "新しいレビュー"
+    }
+  },
+  "verifyEmail": {
+    "title": "メールを確認してください",
+    "sentTo": "確認リンクを送信しました",
+    "checkInbox": "受信トレイを確認",
+    "clickLink": "メール内の確認リンクをクリックして、アカウントを有効化してください。",
+    "didntReceive": "メールが届きませんでしたか？",
+    "checkSpam": "迷惑メールフォルダを確認してください",
+    "correctEmail": "正しいメールアドレスを入力したか確認してください",
+    "waitMinutes": "数分待って受信トレイを更新してください",
+    "backToLogin": "ログインに戻る",
+    "alreadyVerified": "すでに確認済みですか？",
+    "login": "ログイン"
   }
 }

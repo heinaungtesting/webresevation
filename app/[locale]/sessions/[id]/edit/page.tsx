@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { ArrowLeft, Calendar, Clock } from 'lucide-react';
 import Button from '@/app/components/ui/Button';
@@ -16,7 +17,10 @@ export default function EditSessionPage() {
   const router = useRouter();
   const params = useParams();
   const sessionId = params.id as string;
+  const locale = params.locale as string;
   const { user } = useAuth();
+  const t = useTranslations('editSession');
+  const tSessions = useTranslations('sessions');
   const [sportCenters, setSportCenters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -37,27 +41,27 @@ export default function EditSessionPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const sports = [
-    { value: 'badminton', label: 'Badminton' },
-    { value: 'basketball', label: 'Basketball' },
-    { value: 'volleyball', label: 'Volleyball' },
-    { value: 'tennis', label: 'Tennis' },
-    { value: 'soccer', label: 'Soccer' },
-    { value: 'futsal', label: 'Futsal' },
-    { value: 'table-tennis', label: 'Table Tennis' },
+    { value: 'badminton', label: tSessions('badminton') },
+    { value: 'basketball', label: tSessions('basketball') },
+    { value: 'volleyball', label: tSessions('volleyball') },
+    { value: 'tennis', label: tSessions('tennis') },
+    { value: 'soccer', label: tSessions('soccer') },
+    { value: 'futsal', label: tSessions('futsal') },
+    { value: 'table-tennis', label: tSessions('tableTennis') },
   ];
 
   const skillLevels = [
-    { value: 'beginner', label: 'Beginner' },
-    { value: 'intermediate', label: 'Intermediate' },
-    { value: 'advanced', label: 'Advanced' },
+    { value: 'beginner', label: tSessions('beginner') },
+    { value: 'intermediate', label: tSessions('intermediate') },
+    { value: 'advanced', label: tSessions('advanced') },
   ];
 
   const durations = [
-    { value: '60', label: '1 hour' },
-    { value: '90', label: '1.5 hours' },
-    { value: '120', label: '2 hours' },
-    { value: '150', label: '2.5 hours' },
-    { value: '180', label: '3 hours' },
+    { value: '60', label: tSessions('oneHour') },
+    { value: '90', label: tSessions('onePointFiveHours') },
+    { value: '120', label: tSessions('twoHours') },
+    { value: '150', label: tSessions('twoPointFiveHours') },
+    { value: '180', label: tSessions('threeHours') },
   ];
 
   useEffect(() => {
@@ -74,12 +78,12 @@ export default function EditSessionPage() {
         fetch(`/api/sessions/${sessionId}`),
       ]);
 
-      if (!centersResponse.ok) throw new Error('Failed to fetch sport centers');
+      if (!centersResponse.ok) throw new Error(t('errors.failedToFetchCenters'));
       if (!sessionResponse.ok) {
         if (sessionResponse.status === 404) {
-          throw new Error('Session not found');
+          throw new Error(t('errors.sessionNotFound'));
         }
-        throw new Error('Failed to fetch session');
+        throw new Error(t('errors.failedToFetch'));
       }
 
       const centers = await centersResponse.json();
@@ -105,7 +109,7 @@ export default function EditSessionPage() {
       });
     } catch (err: any) {
       console.error('Error fetching data:', err);
-      setError(err.message || 'Failed to load session data');
+      setError(err.message || t('errors.failedToFetch'));
     } finally {
       setLoading(false);
     }
@@ -123,21 +127,21 @@ export default function EditSessionPage() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.sport_center_id) {
-      newErrors.sport_center_id = 'Please select a sport center';
+      newErrors.sport_center_id = t('errors.selectSportCenter');
     }
     if (!formData.date) {
-      newErrors.date = 'Date is required';
+      newErrors.date = t('errors.dateRequired');
     } else {
       const selectedDate = new Date(formData.date + 'T' + formData.time);
       if (selectedDate < new Date()) {
-        newErrors.date = 'Date must be in the future';
+        newErrors.date = t('errors.dateMustBeFuture');
       }
     }
     if (!formData.time) {
-      newErrors.time = 'Time is required';
+      newErrors.time = t('errors.timeRequired');
     }
     if (formData.max_participants && parseInt(formData.max_participants) < 2) {
-      newErrors.max_participants = 'Must be at least 2 participants';
+      newErrors.max_participants = t('errors.minParticipants');
     }
 
     setErrors(newErrors);
@@ -169,10 +173,10 @@ export default function EditSessionPage() {
       });
 
       // Success! Redirect to created sessions page
-      router.push('/my-sessions/created');
+      router.push(`/${locale}/my-sessions/created`);
     } catch (err: any) {
       console.error('Error updating session:', err);
-      setError(err.message || 'Failed to update session. Please try again.');
+      setError(err.message || t('errors.failedToUpdate'));
     } finally {
       setSubmitting(false);
     }
@@ -183,8 +187,8 @@ export default function EditSessionPage() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage
-            title="Please log in"
-            message="You need to be logged in to edit sessions"
+            title={t('pleaseLogin')}
+            message={t('needLogin')}
           />
         </div>
       </div>
@@ -194,7 +198,7 @@ export default function EditSessionPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Loading text="Loading session..." fullScreen />
+        <Loading text={t('loading')} fullScreen />
       </div>
     );
   }
@@ -219,14 +223,14 @@ export default function EditSessionPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push('/my-sessions/created')}
+            onClick={() => router.push(`/${locale}/my-sessions/created`)}
             className="p-2"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Edit Session</h1>
-            <p className="text-gray-600">Update session details</p>
+            <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
+            <p className="text-gray-600">{t('subtitle')}</p>
           </div>
         </div>
 
@@ -241,13 +245,13 @@ export default function EditSessionPage() {
             {/* Session Details */}
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Session Details
+                {t('sessionDetails')}
               </h2>
 
               <div className="space-y-4">
                 {/* Sport Center */}
                 <Select
-                  label="Sport Center"
+                  label={t('sportCenter')}
                   name="sport_center_id"
                   value={formData.sport_center_id}
                   onChange={handleChange}
@@ -255,7 +259,7 @@ export default function EditSessionPage() {
                   fullWidth
                   required
                   options={[
-                    { value: '', label: 'Select a sport center...' },
+                    { value: '', label: t('selectSportCenter') },
                     ...sportCenters.map((center) => ({
                       value: center.id,
                       label: `${center.name_en} - ${center.address_en}`,
@@ -266,7 +270,7 @@ export default function EditSessionPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Sport Type */}
                   <Select
-                    label="Sport Type"
+                    label={t('sportType')}
                     name="sport_type"
                     value={formData.sport_type}
                     onChange={handleChange}
@@ -277,7 +281,7 @@ export default function EditSessionPage() {
 
                   {/* Skill Level */}
                   <Select
-                    label="Skill Level"
+                    label={t('skillLevel')}
                     name="skill_level"
                     value={formData.skill_level}
                     onChange={handleChange}
@@ -291,7 +295,7 @@ export default function EditSessionPage() {
                   {/* Date */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Date <span className="text-red-500">*</span>
+                      {t('date')} <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -313,7 +317,7 @@ export default function EditSessionPage() {
                   {/* Time */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Time <span className="text-red-500">*</span>
+                      {t('time')} <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -335,7 +339,7 @@ export default function EditSessionPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Duration */}
                   <Select
-                    label="Duration"
+                    label={t('duration')}
                     name="duration_minutes"
                     value={formData.duration_minutes}
                     onChange={handleChange}
@@ -346,12 +350,12 @@ export default function EditSessionPage() {
 
                   {/* Max Participants */}
                   <Input
-                    label="Maximum Participants (Optional)"
+                    label={t('maxParticipants')}
                     name="max_participants"
                     type="number"
                     value={formData.max_participants}
                     onChange={handleChange}
-                    placeholder="Leave empty for unlimited"
+                    placeholder={t('maxParticipantsPlaceholder')}
                     error={errors.max_participants}
                     fullWidth
                     min="2"
@@ -361,14 +365,14 @@ export default function EditSessionPage() {
                 {/* Description (English) */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description (English)
+                    {t('descriptionEn')}
                   </label>
                   <textarea
                     name="description_en"
                     value={formData.description_en}
                     onChange={handleChange}
                     rows={3}
-                    placeholder="Describe your session in English..."
+                    placeholder={t('descriptionEnPlaceholder')}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   />
                 </div>
@@ -376,14 +380,14 @@ export default function EditSessionPage() {
                 {/* Description (Japanese) */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description (Japanese)
+                    {t('descriptionJa')}
                   </label>
                   <textarea
                     name="description_ja"
                     value={formData.description_ja}
                     onChange={handleChange}
                     rows={3}
-                    placeholder="セッションを日本語で説明してください..."
+                    placeholder={t('descriptionJaPlaceholder')}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   />
                 </div>
@@ -395,10 +399,10 @@ export default function EditSessionPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push('/my-sessions/created')}
+                onClick={() => router.push(`/${locale}/my-sessions/created`)}
                 fullWidth
               >
-                Cancel
+                {t('cancel')}
               </Button>
               <Button
                 type="submit"
@@ -406,7 +410,7 @@ export default function EditSessionPage() {
                 loading={submitting}
                 fullWidth
               >
-                Update Session
+                {submitting ? t('updating') : t('updateButton')}
               </Button>
             </div>
           </form>

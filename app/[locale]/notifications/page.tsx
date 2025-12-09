@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/app/contexts/AuthContext';
 import {
   Bell,
@@ -34,7 +35,10 @@ interface Notification {
 
 export default function NotificationsPage() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
   const { user } = useAuth();
+  const t = useTranslations('notifications');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -53,7 +57,7 @@ export default function NotificationsPage() {
       setNotifications(data.notifications);
     } catch (err) {
       console.error('Error fetching notifications:', err);
-      setError('Failed to load notifications');
+      setError(t('failedToLoad'));
     } finally {
       setLoading(false);
     }
@@ -108,7 +112,7 @@ export default function NotificationsPage() {
   };
 
   const handleClearAll = async () => {
-    if (!confirm('Are you sure you want to delete all notifications?')) return;
+    if (!confirm(t('confirmDeleteAll'))) return;
 
     try {
       await csrfDelete('/api/users/me/notifications?all=true');
@@ -132,8 +136,8 @@ export default function NotificationsPage() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage
-            title="Please log in"
-            message="You need to be logged in to view notifications"
+            title={t('pleaseLogin')}
+            message={t('needLogin')}
           />
         </div>
       </div>
@@ -143,7 +147,7 @@ export default function NotificationsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Loading text="Loading notifications..." fullScreen />
+        <Loading text={t('loading')} fullScreen />
       </div>
     );
   }
@@ -165,7 +169,7 @@ export default function NotificationsPage() {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
               {unreadCount > 0 && (
                 <p className="text-sm text-gray-500">{unreadCount} unread</p>
               )}
@@ -179,7 +183,7 @@ export default function NotificationsPage() {
                 onClick={() => handleMarkAsRead()}
               >
                 <CheckCheck className="w-4 h-4 mr-1" />
-                Mark all read
+                {t('markAllAsRead')}
               </Button>
             )}
             {notifications.length > 0 && (
@@ -190,7 +194,7 @@ export default function NotificationsPage() {
                 className="text-red-600 hover:text-red-700"
               >
                 <Trash2 className="w-4 h-4 mr-1" />
-                Clear all
+                {t('deleteAll')}
               </Button>
             )}
           </div>
@@ -207,11 +211,10 @@ export default function NotificationsPage() {
           <Card padding="lg" className="text-center">
             <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              No notifications
+              {t('noNotifications')}
             </h2>
             <p className="text-gray-500">
-              You don't have any notifications yet. They'll appear here when you
-              get them.
+              {t('noNotificationsDescription')}
             </p>
           </Card>
         ) : (
@@ -263,7 +266,7 @@ export default function NotificationsPage() {
                           handleMarkAsRead([notification.id]);
                         }}
                         className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded"
-                        title="Mark as read"
+                        title={t('markAsRead')}
                       >
                         <Check className="w-4 h-4" />
                       </button>
@@ -274,7 +277,7 @@ export default function NotificationsPage() {
                         handleDelete(notification.id);
                       }}
                       className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-100 rounded"
-                      title="Delete"
+                      title={t('deleteNotification')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

@@ -1,5 +1,7 @@
 import { memo } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Session, SportType, SkillLevel } from '@/types';
 import Badge from './ui/Badge';
 import Button from './ui/Button';
@@ -25,15 +27,22 @@ const sportConfig: Record<SportType, { icon: string; gradient: string }> = {
   other: { icon: '🏃', gradient: 'from-slate-500 to-slate-600' },
 };
 
-const skillConfig: Record<SkillLevel, { color: 'success' | 'warning' | 'info'; label: string }> = {
-  beginner: { color: 'success', label: 'Beginner' },
-  intermediate: { color: 'warning', label: 'Intermediate' },
-  advanced: { color: 'info', label: 'Advanced' },
+const getSkillConfig = (level: SkillLevel, label: string): { color: 'success' | 'warning' | 'info'; label: string } => {
+  const colorMap: Record<SkillLevel, 'success' | 'warning' | 'info'> = {
+    beginner: 'success',
+    intermediate: 'warning',
+    advanced: 'info',
+  };
+  return { color: colorMap[level], label };
 };
 
 function SessionCard({ session }: SessionCardProps) {
+  const params = useParams();
+  const locale = params.locale as string;
+  const t = useTranslations('sessions');
+
   const sport = sportConfig[session.sport_type] || sportConfig.other;
-  const skill = skillConfig[session.skill_level];
+  const skill = getSkillConfig(session.skill_level, t(session.skill_level));
   const isFull = Boolean(session.max_participants && session.current_participants >= session.max_participants);
 
   // Calculate participation percentage
@@ -73,11 +82,11 @@ function SessionCard({ session }: SessionCardProps) {
           <div className="flex items-center gap-1">
             {isFull ? (
               <Badge variant="danger" size="sm" className="animate-pulse">
-                Full
+                {t('full')}
               </Badge>
             ) : spotsLeft && spotsLeft <= 3 ? (
               <Badge variant="warning" size="sm" className="text-amber-700 bg-amber-50 border-amber-200">
-                {spotsLeft === 1 ? '1 spot left!' : `${spotsLeft} spots left`}
+                {t('spots', { count: spotsLeft })}
               </Badge>
             ) : null}
             <FavoriteButton sessionId={session.id} size="sm" />
@@ -123,7 +132,7 @@ function SessionCard({ session }: SessionCardProps) {
               <div className="flex items-center justify-between mb-1">
                 <span className="font-medium text-sm">
                   {session.current_participants}
-                  {session.max_participants && ` / ${session.max_participants}`} going
+                  {session.max_participants && ` / ${session.max_participants}`} {t('going')}
                 </span>
                 {session.max_participants && (
                   <span className="text-xs text-slate-500">
@@ -169,14 +178,14 @@ function SessionCard({ session }: SessionCardProps) {
 
         {/* Action buttons */}
         <div className="flex gap-2 pt-3 border-t border-slate-100">
-          <Link href={`/sessions/${session.id}`} className="flex-1">
+          <Link href={`/${locale}/sessions/${session.id}`} className="flex-1">
             <Button variant="outline" fullWidth size="sm" className="group/btn min-h-[44px]">
-              Details
+              {t('viewDetails')}
               <ArrowRight className="w-3.5 h-3.5 ml-1 opacity-0 -translate-x-2 group-hover/btn:opacity-100 group-hover/btn:translate-x-0 transition-all" />
             </Button>
           </Link>
           {isFull ? (
-            <Link href={`/sessions/${session.id}?waitlist=true`} className="flex-1">
+            <Link href={`/${locale}/sessions/${session.id}?waitlist=true`} className="flex-1">
               <Button
                 variant="outline"
                 size="sm"
@@ -188,14 +197,14 @@ function SessionCard({ session }: SessionCardProps) {
               </Button>
             </Link>
           ) : (
-            <Link href={`/sessions/${session.id}`} className="flex-1">
+            <Link href={`/${locale}/sessions/${session.id}`} className="flex-1">
               <Button
                 variant="gradient"
                 size="sm"
                 fullWidth
                 className="min-h-[44px]"
               >
-                Join
+                {t('imGoing')}
               </Button>
             </Link>
           )}

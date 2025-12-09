@@ -505,5 +505,88 @@
         "description": "How we handle your data"
       }
     }
+  },
+  "editSession": {
+    "title": "Edit Session",
+    "subtitle": "Update session details",
+    "loading": "Loading session...",
+    "pleaseLogin": "Please log in",
+    "needLogin": "You need to be logged in to edit sessions",
+    "sessionDetails": "Session Details",
+    "sportCenter": "Sport Center",
+    "selectSportCenter": "Select a sport center...",
+    "sportType": "Sport Type",
+    "skillLevel": "Skill Level",
+    "date": "Date",
+    "time": "Time",
+    "duration": "Duration",
+    "maxParticipants": "Maximum Participants (Optional)",
+    "maxParticipantsPlaceholder": "Leave empty for unlimited",
+    "descriptionEn": "Description (English)",
+    "descriptionJa": "Description (Japanese)",
+    "descriptionEnPlaceholder": "Describe your session in English...",
+    "descriptionJaPlaceholder": "セッションを日本語で説明してください...",
+    "cancel": "Cancel",
+    "updateButton": "Update Session",
+    "updating": "Updating...",
+    "errors": {
+      "selectSportCenter": "Please select a sport center",
+      "dateRequired": "Date is required",
+      "dateMustBeFuture": "Date must be in the future",
+      "timeRequired": "Time is required",
+      "minParticipants": "Must be at least 2 participants",
+      "failedToFetch": "Failed to load session data",
+      "sessionNotFound": "Session not found",
+      "failedToUpdate": "Failed to update session. Please try again.",
+      "failedToFetchCenters": "Failed to fetch sport centers"
+    }
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "subtitle": "Sessions you've saved for later",
+    "pleaseLogin": "Please log in",
+    "needLogin": "You need to be logged in to view your favorites",
+    "loading": "Loading favorites...",
+    "noFavorites": "No favorites yet",
+    "noFavoritesDescription": "You haven't saved any sessions yet. Start by browsing sessions and clicking the heart icon!",
+    "browseSessions": "Browse Sessions",
+    "failedToLoad": "Failed to load favorites"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "pleaseLogin": "Please log in",
+    "needLogin": "You need to be logged in to view notifications",
+    "loading": "Loading notifications...",
+    "noNotifications": "No notifications",
+    "noNotificationsDescription": "You're all caught up! New notifications will appear here.",
+    "markAsRead": "Mark as Read",
+    "markAllAsRead": "Mark All as Read",
+    "deleteNotification": "Delete",
+    "deleteAll": "Delete All",
+    "confirmDeleteAll": "Are you sure you want to delete all notifications?",
+    "failedToLoad": "Failed to load notifications",
+    "failedToMarkRead": "Failed to mark as read",
+    "failedToDelete": "Failed to delete notification",
+    "types": {
+      "sessionJoined": "joined your session",
+      "sessionLeft": "left your session",
+      "sessionReminder": "Session reminder",
+      "sessionCancelled": "Session cancelled",
+      "newMessage": "New message",
+      "newReview": "New review"
+    }
+  },
+  "verifyEmail": {
+    "title": "Check Your Email",
+    "sentTo": "We've sent a verification link to",
+    "checkInbox": "Check your inbox",
+    "clickLink": "Click the verification link in the email to activate your account.",
+    "didntReceive": "Didn't receive the email?",
+    "checkSpam": "Check your spam or junk folder",
+    "correctEmail": "Make sure you entered the correct email address",
+    "waitMinutes": "Wait a few minutes and refresh your inbox",
+    "backToLogin": "Back to Login",
+    "alreadyVerified": "Already verified?",
+    "login": "Log in"
   }
 }
