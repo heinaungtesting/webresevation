@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { ArrowLeft, Calendar, Clock, Users, MapPin, Flame, Coffee, GraduationCap, Languages } from 'lucide-react';
 import Button from '@/app/components/ui/Button';
@@ -15,6 +16,10 @@ import { csrfPost } from '@/lib/csrfClient';
 
 export default function CreateSessionPage() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
+  const t = useTranslations('sessions');
+  const tCommon = useTranslations('common');
   const { user } = useAuth();
   const [sportCenters, setSportCenters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,41 +44,45 @@ export default function CreateSessionPage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const sports = [
-    { value: 'badminton', label: 'Badminton' },
-    { value: 'basketball', label: 'Basketball' },
-    { value: 'volleyball', label: 'Volleyball' },
-    { value: 'tennis', label: 'Tennis' },
-    { value: 'soccer', label: 'Soccer' },
-    { value: 'futsal', label: 'Futsal' },
-    { value: 'table-tennis', label: 'Table Tennis' },
-  ];
+  const sports = useMemo(() => [
+    { value: 'badminton', label: t('badminton') },
+    { value: 'basketball', label: t('basketball') },
+    { value: 'volleyball', label: t('volleyball') },
+    { value: 'tennis', label: t('tennis') },
+    { value: 'soccer', label: t('soccer') },
+    { value: 'futsal', label: t('futsal') },
+    { value: 'table-tennis', label: t('tableTennis') },
+  ], [t]);
 
-  const skillLevels = [
-    { value: 'beginner', label: 'Beginner' },
-    { value: 'intermediate', label: 'Intermediate' },
-    { value: 'advanced', label: 'Advanced' },
-  ];
+  const skillLevels = useMemo(() => [
+    { value: 'beginner', label: t('beginner') },
+    { value: 'intermediate', label: t('intermediate') },
+    { value: 'advanced', label: t('advanced') },
+  ], [t]);
 
-  const durations = [
-    { value: '60', label: '1 hour' },
-    { value: '90', label: '1.5 hours' },
-    { value: '120', label: '2 hours' },
-    { value: '150', label: '2.5 hours' },
-    { value: '180', label: '3 hours' },
-  ];
+  const durations = useMemo(() => [
+    { value: '60', label: t('oneHour') },
+    { value: '90', label: t('onePointFiveHours') },
+    { value: '120', label: t('twoHours') },
+    { value: '150', label: t('twoPointFiveHours') },
+    { value: '180', label: t('threeHours') },
+  ], [t]);
 
-  const vibes = [
-    { value: 'COMPETITIVE', label: 'Competitive - Serious, skill-focused play' },
-    { value: 'CASUAL', label: 'Casual - Relaxed, social games' },
-    { value: 'ACADEMY', label: 'Academy - Learning/teaching focused' },
-    { value: 'LANGUAGE_EXCHANGE', label: 'Language Exchange - Practice language while playing' },
-  ];
+  const vibes = useMemo(() => [
+    { value: 'COMPETITIVE', label: t('vibeCompetitive') },
+    { value: 'CASUAL', label: t('vibeCasual') },
+    { value: 'ACADEMY', label: t('vibeAcademy') },
+    { value: 'LANGUAGE_EXCHANGE', label: t('vibeLanguageExchange') },
+  ], [t]);
 
-  const languages = getLanguageOptions().map((l) => ({
-    value: l.value,
-    label: `${l.flag} ${l.label}`,
-  }));
+  const languages = useMemo(() => {
+    const languageOptions = getLanguageOptions();
+    if (!Array.isArray(languageOptions)) return [];
+    return languageOptions.map((l) => ({
+      value: l.value,
+      label: `${l.flag} ${l.label}`,
+    }));
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -112,21 +121,21 @@ export default function CreateSessionPage() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.sport_center_id) {
-      newErrors.sport_center_id = 'Please select a sport center';
+      newErrors.sport_center_id = t('pleaseSelectSportCenter');
     }
     if (!formData.date) {
-      newErrors.date = 'Date is required';
+      newErrors.date = t('dateRequired');
     } else {
       const selectedDate = new Date(formData.date + 'T' + (formData.time || '00:00'));
       if (selectedDate < new Date()) {
-        newErrors.date = 'Date must be in the future';
+        newErrors.date = t('dateMustBeFuture');
       }
     }
     if (!formData.time) {
-      newErrors.time = 'Time is required';
+      newErrors.time = t('timeRequired');
     }
     if (formData.max_participants && parseInt(formData.max_participants) < 2) {
-      newErrors.max_participants = 'Must allow at least 2 participants';
+      newErrors.max_participants = t('mustAllow2Participants');
     }
 
     setErrors(newErrors);
@@ -161,7 +170,7 @@ export default function CreateSessionPage() {
         vibe: formData.vibe,
       });
 
-      router.push(`/sessions/${session.id}`);
+      router.push(`/${locale}/sessions/${session.id}`);
     } catch (err: any) {
       console.error('Error creating session:', err);
       setError(err.message || 'Failed to create session');
@@ -175,8 +184,8 @@ export default function CreateSessionPage() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage
-            title="Please log in"
-            message="You need to be logged in to create a session"
+            title={t('pleaseLogIn')}
+            message={t('needLoginToCreate')}
           />
         </div>
       </div>
@@ -186,7 +195,7 @@ export default function CreateSessionPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Loading text="Loading..." fullScreen />
+        <Loading text={tCommon('loading')} fullScreen />
       </div>
     );
   }
@@ -196,8 +205,8 @@ export default function CreateSessionPage() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage
-            title="No sport centers available"
-            message="There are currently no sport centers in the system. Please contact support."
+            title={t('noSportCentersAvailable')}
+            message={t('noSportCentersMessage')}
           />
         </div>
       </div>
@@ -215,12 +224,12 @@ export default function CreateSessionPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push('/sessions')}
+            onClick={() => router.push(`/${locale}/sessions`)}
             className="p-2"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-3xl font-bold text-gray-900">Create New Session</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('createTitle')}</h1>
         </div>
 
         <Card padding="lg">
@@ -233,22 +242,24 @@ export default function CreateSessionPage() {
 
             {/* Sport Center */}
             <Select
-              label="Sport Center"
+              label={t('sportCenter')}
               name="sport_center_id"
               value={formData.sport_center_id}
               onChange={handleChange}
               required
               fullWidth
               error={errors.sport_center_id}
-              options={sportCenters.map((center) => ({
+              options={Array.isArray(sportCenters) ? sportCenters.map((center) => ({
                 value: center.id,
-                label: `${center.name_en} - ${center.address_en}`,
-              }))}
+                label: locale === 'ja' && center.name_ja
+                  ? `${center.name_ja} - ${center.address_ja || center.address_en}`
+                  : `${center.name_en} - ${center.address_en}`,
+              })) : []}
             />
 
             {/* Sport Type */}
             <Select
-              label="Sport Type"
+              label={t('sportType')}
               name="sport_type"
               value={formData.sport_type}
               onChange={handleChange}
@@ -259,7 +270,7 @@ export default function CreateSessionPage() {
 
             {/* Skill Level */}
             <Select
-              label="Skill Level"
+              label={t('skillLevel')}
               name="skill_level"
               value={formData.skill_level}
               onChange={handleChange}
@@ -270,7 +281,7 @@ export default function CreateSessionPage() {
 
             {/* Session Vibe */}
             <Select
-              label="Session Vibe"
+              label={t('sessionVibe')}
               name="vibe"
               value={formData.vibe}
               onChange={handleChange}
@@ -283,11 +294,11 @@ export default function CreateSessionPage() {
             <div className="space-y-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
               <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                 <Languages className="w-4 h-4" />
-                Language Settings
+                {t('languageSettings')}
               </h3>
 
               <Select
-                label="Primary Language"
+                label={t('primaryLanguage')}
                 name="primary_language"
                 value={formData.primary_language}
                 onChange={handleChange}
@@ -305,9 +316,9 @@ export default function CreateSessionPage() {
                   className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <div>
-                  <span className="text-sm font-medium text-gray-700">English Friendly</span>
+                  <span className="text-sm font-medium text-gray-700">{t('englishFriendly')}</span>
                   <p className="text-xs text-gray-500">
-                    Check this if English speakers are welcome even if the primary language is different
+                    {t('englishFriendlyDesc')}
                   </p>
                 </div>
               </label>
@@ -317,7 +328,7 @@ export default function CreateSessionPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-gray-700">
-                  Date <span className="text-red-600">*</span>
+                  {t('date')} <span className="text-red-600">*</span>
                 </label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -338,7 +349,7 @@ export default function CreateSessionPage() {
 
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-gray-700">
-                  Time <span className="text-red-600">*</span>
+                  {t('time')} <span className="text-red-600">*</span>
                 </label>
                 <div className="relative">
                   <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -359,7 +370,7 @@ export default function CreateSessionPage() {
 
             {/* Duration */}
             <Select
-              label="Duration"
+              label={t('duration')}
               name="duration_minutes"
               value={formData.duration_minutes}
               onChange={handleChange}
@@ -370,7 +381,7 @@ export default function CreateSessionPage() {
 
             {/* Max Participants */}
             <Input
-              label="Maximum Participants (optional)"
+              label={t('maxParticipantsOptional')}
               name="max_participants"
               type="number"
               value={formData.max_participants}
@@ -384,13 +395,13 @@ export default function CreateSessionPage() {
             {/* Description (English) */}
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium text-gray-700">
-                Description (English)
+                {t('descriptionEn')}
               </label>
               <textarea
                 name="description_en"
                 value={formData.description_en}
                 onChange={handleChange}
-                placeholder="Describe your session in English..."
+                placeholder={t('descriptionEnPlaceholder')}
                 rows={3}
                 className="px-4 py-3 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-full"
               />
@@ -399,13 +410,13 @@ export default function CreateSessionPage() {
             {/* Description (Japanese) */}
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium text-gray-700">
-                Description (Japanese)
+                {t('descriptionJa')}
               </label>
               <textarea
                 name="description_ja"
                 value={formData.description_ja}
                 onChange={handleChange}
-                placeholder="日本語でセッションを説明してください..."
+                placeholder={t('descriptionJaPlaceholder')}
                 rows={3}
                 className="px-4 py-3 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-full"
               />
@@ -414,8 +425,7 @@ export default function CreateSessionPage() {
             {/* Info Box */}
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> Once you create a session, other users will be able to see it and join.
-                You'll automatically be added as a participant.
+                <strong>{t('infoNote')}</strong> {t('infoMessage')}
               </p>
             </div>
 
@@ -424,10 +434,10 @@ export default function CreateSessionPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push('/sessions')}
+                onClick={() => router.push(`/${locale}/sessions`)}
                 fullWidth
               >
-                Cancel
+                {tCommon('cancel')}
               </Button>
               <Button
                 type="submit"
@@ -435,7 +445,7 @@ export default function CreateSessionPage() {
                 loading={submitting}
                 fullWidth
               >
-                Create Session
+                {t('createButton')}
               </Button>
             </div>
           </form>

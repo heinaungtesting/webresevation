@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/app/contexts/AuthContext';
 import SessionCard from '@/app/components/SessionCard';
 import { Session } from '@/types';
@@ -13,6 +14,9 @@ import { Search, Filter, Plus, RefreshCw, Calendar } from 'lucide-react';
 
 export default function SessionsPage() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
+  const t = useTranslations('browseSessions');
   const { user } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +52,7 @@ export default function SessionsPage() {
       setSessions(data);
     } catch (err: any) {
       console.error('Error fetching sessions:', err);
-      setError(err.message || 'Failed to load sessions');
+      setError(err.message || t('failedToLoad'));
     } finally {
       setLoading(false);
     }
@@ -74,21 +78,21 @@ export default function SessionsPage() {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
             <h1 className="text-3xl font-bold text-gray-900">
-              Browse Sessions
+              {t('title')}
             </h1>
             {user && (
               <Button
                 variant="primary"
-                onClick={() => router.push('/sessions/create')}
+                onClick={() => router.push(`/${locale}/sessions/create`)}
                 className="gap-2"
               >
                 <Plus className="w-4 h-4" />
-                Create Session
+                {t('createSession')}
               </Button>
             )}
           </div>
           <p className="text-gray-600">
-            Find and join sports sessions near you
+            {t('subtitle')}
           </p>
         </div>
 
@@ -97,7 +101,7 @@ export default function SessionsPage() {
           <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
             <div className="flex-grow">
               <Input
-                placeholder="Search by sport or location..."
+                placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 fullWidth
@@ -106,7 +110,7 @@ export default function SessionsPage() {
             <div className="flex gap-2">
               <Button type="submit" variant="primary" className="gap-2">
                 <Search className="w-4 h-4" />
-                Search
+                {t('search')}
               </Button>
               <Button
                 type="button"
@@ -114,7 +118,7 @@ export default function SessionsPage() {
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <Filter className="w-4 h-4 mr-2" />
-                Filters
+                {t('filters')}
               </Button>
             </div>
           </form>
@@ -123,31 +127,31 @@ export default function SessionsPage() {
             <div className="mt-4 pt-4 border-t space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Select
-                  label="Sport Type"
+                  label={t('sportType')}
                   value={sportFilter}
                   onChange={(e) => setSportFilter(e.target.value)}
                   fullWidth
                   options={[
-                    { value: 'all', label: 'All Sports' },
-                    { value: 'badminton', label: 'Badminton' },
-                    { value: 'basketball', label: 'Basketball' },
-                    { value: 'volleyball', label: 'Volleyball' },
-                    { value: 'tennis', label: 'Tennis' },
-                    { value: 'soccer', label: 'Soccer' },
-                    { value: 'futsal', label: 'Futsal' },
-                    { value: 'table-tennis', label: 'Table Tennis' },
+                    { value: 'all', label: t('allSports') },
+                    { value: 'badminton', label: t('sports.badminton') },
+                    { value: 'basketball', label: t('sports.basketball') },
+                    { value: 'volleyball', label: t('sports.volleyball') },
+                    { value: 'tennis', label: t('sports.tennis') },
+                    { value: 'soccer', label: t('sports.soccer') },
+                    { value: 'futsal', label: t('sports.futsal') },
+                    { value: 'table-tennis', label: t('sports.tableTennis') },
                   ]}
                 />
                 <Select
-                  label="Skill Level"
+                  label={t('skillLevel')}
                   value={skillFilter}
                   onChange={(e) => setSkillFilter(e.target.value)}
                   fullWidth
                   options={[
-                    { value: 'all', label: 'All Levels' },
-                    { value: 'beginner', label: 'Beginner' },
-                    { value: 'intermediate', label: 'Intermediate' },
-                    { value: 'advanced', label: 'Advanced' },
+                    { value: 'all', label: t('allLevels') },
+                    { value: 'beginner', label: t('skillLevels.beginner') },
+                    { value: 'intermediate', label: t('skillLevels.intermediate') },
+                    { value: 'advanced', label: t('skillLevels.advanced') },
                   ]}
                 />
               </div>
@@ -157,7 +161,7 @@ export default function SessionsPage() {
                 <div className="flex flex-col gap-1">
                   <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    From Date
+                    {t('fromDate')}
                   </label>
                   <input
                     type="date"
@@ -170,7 +174,7 @@ export default function SessionsPage() {
                 <div className="flex flex-col gap-1">
                   <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    To Date
+                    {t('toDate')}
                   </label>
                   <input
                     type="date"
@@ -191,7 +195,7 @@ export default function SessionsPage() {
                     size="sm"
                     onClick={clearFilters}
                   >
-                    Clear All Filters
+                    {t('clearAllFilters')}
                   </Button>
                 </div>
               )}
@@ -211,7 +215,7 @@ export default function SessionsPage() {
                 className="gap-2"
               >
                 <RefreshCw className="w-4 h-4" />
-                Retry
+                {t('retry')}
               </Button>
             </div>
           </div>
@@ -220,13 +224,13 @@ export default function SessionsPage() {
         {/* Loading State */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loading text="Loading sessions..." />
+            <Loading text={t('loading')} />
           </div>
         ) : (
           <>
             {/* Results */}
             <div className="mb-4 text-gray-600">
-              {sessions.length} session{sessions.length !== 1 ? 's' : ''} found
+              {t(sessions.length === 1 ? 'sessionsFound' : 'sessionsFoundPlural', { count: sessions.length })}
             </div>
 
             {/* Sessions Grid */}
@@ -239,14 +243,14 @@ export default function SessionsPage() {
             {sessions.length === 0 && !error && (
               <div className="text-center py-12">
                 <p className="text-gray-500 text-lg">
-                  No sessions found matching your criteria
+                  {t('noSessionsFound')}
                 </p>
                 <Button
                   variant="outline"
                   className="mt-4"
                   onClick={clearFilters}
                 >
-                  Clear Filters
+                  {t('clearFilters')}
                 </Button>
               </div>
             )}

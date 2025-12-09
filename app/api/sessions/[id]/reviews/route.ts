@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
+import { createReviewSchema, validateRequestBody } from '@/lib/validations';
 
 // GET /api/sessions/[id]/reviews - Get all reviews for a session
 export async function GET(
@@ -26,7 +27,7 @@ export async function GET(
     });
 
     // Calculate average rating
-    const totalRating = reviews.reduce((sum: number, review: any) => sum + review.rating, 0);
+    const totalRating = reviews.reduce((sum: number, review: { rating: number }) => sum + review.rating, 0);
     const averageRating = reviews.length > 0 ? totalRating / reviews.length : 0;
 
     return NextResponse.json({
@@ -35,7 +36,6 @@ export async function GET(
       totalReviews: reviews.length,
     });
   } catch (error) {
-    console.error('Error fetching reviews:', error);
     return NextResponse.json(
       { error: 'Failed to fetch reviews' },
       { status: 500 }
@@ -60,15 +60,17 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { rating, comment } = body;
 
-    // Validate rating
-    if (!rating || rating < 1 || rating > 5) {
+    // Validate input with Zod
+    const validation = validateRequestBody(createReviewSchema, body);
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Rating must be between 1 and 5' },
+        { error: validation.error },
         { status: 400 }
       );
     }
+
+    const { rating, comment } = validation.data;
 
     // Check if session exists
     const session = await prisma.session.findUnique({
@@ -134,8 +136,8 @@ export async function POST(
       data: {
         user_id: user.id,
         session_id: id,
-        rating: parseInt(rating),
-        comment: comment || null,
+        rating,
+        comment,
       },
       include: {
         user: {
@@ -151,7 +153,6 @@ export async function POST(
 
     return NextResponse.json(review, { status: 201 });
   } catch (error) {
-    console.error('Error creating review:', error);
     return NextResponse.json(
       { error: 'Failed to create review' },
       { status: 500 }

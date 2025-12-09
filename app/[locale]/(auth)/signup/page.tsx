@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Button from '@/app/components/ui/Button';
 import Input from '@/app/components/ui/Input';
 import Select from '@/app/components/ui/Select';
@@ -11,6 +12,10 @@ import { csrfPost } from '@/lib/csrfClient';
 
 export default function SignupPage() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
+  const t = useTranslations('auth.signup');
+  const tBranding = useTranslations('branding');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -38,23 +43,23 @@ export default function SignupPage() {
     const newErrors: Record<string, string> = {};
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('errors.emailRequired');
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
+      newErrors.email = t('errors.emailInvalid');
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = t('errors.passwordRequired');
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = t('errors.passwordLength');
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = t('errors.passwordMismatch');
     }
 
     if (!formData.agreeToTerms) {
-      newErrors.agreeToTerms = 'You must agree to the Terms and Privacy Policy';
+      newErrors.agreeToTerms = t('errors.agreeToTerms');
     }
 
     setErrors(newErrors);
@@ -78,9 +83,9 @@ export default function SignupPage() {
       });
 
       // Redirect to verification success page
-      router.push('/verify-email?email=' + encodeURIComponent(formData.email));
+      router.push(`/${locale}/verify-email?email=` + encodeURIComponent(formData.email));
     } catch (err) {
-      setErrors({ email: err instanceof Error ? err.message : 'An error occurred. Please try again.' });
+      setErrors({ email: err instanceof Error ? err.message : t('errors.genericError') });
     } finally {
       setLoading(false);
     }
@@ -98,10 +103,10 @@ export default function SignupPage() {
     if (/\d/.test(password)) strength++;
     if (/[^a-zA-Z0-9]/.test(password)) strength++;
 
-    if (strength <= 2) return { strength, label: 'Weak', color: 'bg-red-500' };
-    if (strength <= 3) return { strength, label: 'Fair', color: 'bg-yellow-500' };
-    if (strength <= 4) return { strength, label: 'Good', color: 'bg-blue-500' };
-    return { strength, label: 'Strong', color: 'bg-green-500' };
+    if (strength <= 2) return { strength, label: t('weak'), color: 'bg-red-500' };
+    if (strength <= 3) return { strength, label: t('fair'), color: 'bg-yellow-500' };
+    if (strength <= 4) return { strength, label: t('good'), color: 'bg-blue-500' };
+    return { strength, label: t('strong'), color: 'bg-green-500' };
   };
 
   const passwordStrength = getPasswordStrength();
@@ -118,10 +123,10 @@ export default function SignupPage() {
         <div className="relative z-10 flex flex-col justify-center px-16 text-white">
           <div className="mb-12">
             <h1 className="text-5xl font-bold mb-4 tracking-tight">
-              Join SportsMatch
+              {t('joinTitle')}
             </h1>
             <p className="text-xl text-white/90 font-light">
-              Your sports community awaits
+              {t('joinSubtitle')}
             </p>
           </div>
 
@@ -132,9 +137,9 @@ export default function SignupPage() {
                 <Users className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-1">Connect Instantly</h3>
+                <h3 className="font-semibold text-lg mb-1">{t('features.connectInstantly.title')}</h3>
                 <p className="text-white/80 text-sm">
-                  Join thousands of players and find your perfect match
+                  {t('features.connectInstantly.description')}
                 </p>
               </div>
             </div>
@@ -144,9 +149,9 @@ export default function SignupPage() {
                 <Calendar className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-1">Easy Booking</h3>
+                <h3 className="font-semibold text-lg mb-1">{t('features.easyBooking.title')}</h3>
                 <p className="text-white/80 text-sm">
-                  Reserve courts and organize games in just a few clicks
+                  {t('features.easyBooking.description')}
                 </p>
               </div>
             </div>
@@ -156,9 +161,9 @@ export default function SignupPage() {
                 <TrendingUp className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-1">Level Up</h3>
+                <h3 className="font-semibold text-lg mb-1">{t('features.levelUp.title')}</h3>
                 <p className="text-white/80 text-sm">
-                  Track your progress and compete with players at your level
+                  {t('features.levelUp.description')}
                 </p>
               </div>
             </div>
@@ -168,15 +173,15 @@ export default function SignupPage() {
             <div className="flex items-center gap-8">
               <div>
                 <div className="text-3xl font-bold">5,000+</div>
-                <div className="text-white/70 text-sm">Active Players</div>
+                <div className="text-white/70 text-sm">{t('stats.activePlayers')}</div>
               </div>
               <div>
                 <div className="text-3xl font-bold">50+</div>
-                <div className="text-white/70 text-sm">Sport Centers</div>
+                <div className="text-white/70 text-sm">{t('stats.sportCenters')}</div>
               </div>
               <div>
                 <div className="text-3xl font-bold">1,000+</div>
-                <div className="text-white/70 text-sm">Games/Week</div>
+                <div className="text-white/70 text-sm">{t('stats.gamesWeek')}</div>
               </div>
             </div>
           </div>
@@ -189,18 +194,18 @@ export default function SignupPage() {
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <h1 className="text-3xl font-bold text-gradient-ocean mb-2">
-              SportsMatch Tokyo
+              {tBranding('appName')}
             </h1>
-            <p className="text-slate-600">Join your sports community</p>
+            <p className="text-slate-600">{t('mobileSubtitle')}</p>
           </div>
 
           <div className="bg-white rounded-3xl shadow-large p-8 sm:p-10">
             <div className="mb-8">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-                Create Account
+                {t('title')}
               </h2>
               <p className="text-slate-600">
-                Start your sports journey today
+                {t('subtitleShort')}
               </p>
             </div>
 
@@ -213,10 +218,10 @@ export default function SignupPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <Input
-                label="Email"
+                label={t('email')}
                 type="email"
                 name="email"
-                placeholder="you@example.com"
+                placeholder={t('emailPlaceholder')}
                 value={formData.email}
                 onChange={handleChange}
                 error={errors.email}
@@ -227,10 +232,10 @@ export default function SignupPage() {
 
               <div>
                 <Input
-                  label="Password"
+                  label={t('password')}
                   type="password"
                   name="password"
-                  placeholder="••••••••"
+                  placeholder={t('passwordPlaceholder')}
                   value={formData.password}
                   onChange={handleChange}
                   error={errors.password}
@@ -242,7 +247,7 @@ export default function SignupPage() {
                 {formData.password && (
                   <div className="mt-2">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-slate-600">Password strength</span>
+                      <span className="text-xs text-slate-600">{t('passwordStrength')}</span>
                       <span className={`text-xs font-semibold ${passwordStrength.strength <= 2 ? 'text-red-600' :
                         passwordStrength.strength <= 3 ? 'text-yellow-600' :
                           passwordStrength.strength <= 4 ? 'text-blue-600' :
@@ -262,10 +267,10 @@ export default function SignupPage() {
               </div>
 
               <Input
-                label="Confirm Password"
+                label={t('confirmPassword')}
                 type="password"
                 name="confirmPassword"
-                placeholder="••••••••"
+                placeholder={t('confirmPasswordPlaceholder')}
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 error={errors.confirmPassword}
@@ -275,13 +280,13 @@ export default function SignupPage() {
               />
 
               <Select
-                label="Preferred Language"
+                label={t('language')}
                 name="language"
                 value={formData.language}
                 onChange={handleChange}
                 options={[
-                  { value: 'en', label: 'English' },
-                  { value: 'ja', label: '日本語' },
+                  { value: 'en', label: t('english') },
+                  { value: 'ja', label: t('japanese') },
                 ]}
                 fullWidth
               />
@@ -297,21 +302,21 @@ export default function SignupPage() {
                     className="mt-1 w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
                   />
                   <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">
-                    I agree to the{' '}
+                    {t('agreeToTermsCheckbox')}{' '}
                     <Link
-                      href="/terms"
+                      href={`/${locale}/terms`}
                       className="text-primary-600 hover:text-primary-700 font-medium underline"
                       target="_blank"
                     >
-                      Terms of Service
+                      {t('termsOfService')}
                     </Link>
-                    {' '}and{' '}
+                    {' '}{t('and')}{' '}
                     <Link
-                      href="/privacy"
+                      href={`/${locale}/privacy`}
                       className="text-primary-600 hover:text-primary-700 font-medium underline"
                       target="_blank"
                     >
-                      Privacy Policy
+                      {t('privacyPolicy')}
                     </Link>
                   </span>
                 </label>
@@ -332,15 +337,15 @@ export default function SignupPage() {
                 className="mt-6"
               >
                 <Zap className="w-4 h-4 mr-2" />
-                Create Account
+                {t('createAccountButton')}
               </Button>
             </form>
 
             <div className="mt-8 text-center">
               <p className="text-sm text-slate-600">
-                Already have an account?{' '}
-                <Link href="/login" className="text-primary-600 hover:text-primary-700 font-semibold transition-colors">
-                  Log in
+                {t('haveAccount')}{' '}
+                <Link href={`/${locale}/login`} className="text-primary-600 hover:text-primary-700 font-semibold transition-colors">
+                  {t('loginLink')}
                 </Link>
               </p>
             </div>
@@ -348,10 +353,10 @@ export default function SignupPage() {
 
           {/* Footer */}
           <p className="mt-8 text-center text-xs text-slate-500">
-            By signing up, you agree to our{' '}
-            <Link href="/terms" className="underline hover:text-slate-700">Terms</Link>
-            {' '}and{' '}
-            <Link href="/privacy" className="underline hover:text-slate-700">Privacy Policy</Link>
+            {t('termsAgree')}{' '}
+            <Link href={`/${locale}/terms`} className="underline hover:text-slate-700">{t('terms')}</Link>
+            {' '}{t('and')}{' '}
+            <Link href={`/${locale}/privacy`} className="underline hover:text-slate-700">{t('privacyPolicy')}</Link>
           </p>
         </div>
       </div>

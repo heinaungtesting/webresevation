@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/app/contexts/AuthContext';
 import SessionCard from '@/app/components/SessionCard';
 import Loading from '@/app/components/ui/Loading';
@@ -11,7 +12,10 @@ import { Heart, ArrowLeft } from 'lucide-react';
 
 export default function FavoritesPage() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
   const { user } = useAuth();
+  const t = useTranslations('favorites');
   const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -32,7 +36,7 @@ export default function FavoritesPage() {
       setFavorites(data);
     } catch (err: any) {
       console.error('Error fetching favorites:', err);
-      setError(err.message || 'Failed to load favorites');
+      setError(err.message || t('failedToLoad'));
     } finally {
       setLoading(false);
     }
@@ -43,8 +47,8 @@ export default function FavoritesPage() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage
-            title="Please log in"
-            message="You need to be logged in to view your favorites"
+            title={t('pleaseLogin')}
+            message={t('needLogin')}
           />
         </div>
       </div>
@@ -67,18 +71,18 @@ export default function FavoritesPage() {
             </Button>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
               <Heart className="w-8 h-8 text-red-500" />
-              My Favorites
+              {t('title')}
             </h1>
           </div>
           <p className="text-gray-600 ml-12">
-            Sessions you've saved for later
+            {t('subtitle')}
           </p>
         </div>
 
         {/* Content */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loading text="Loading favorites..." />
+            <Loading text={t('loading')} />
           </div>
         ) : error ? (
           <ErrorMessage message={error} onRetry={fetchFavorites} />
@@ -86,16 +90,16 @@ export default function FavoritesPage() {
           <div className="text-center py-12">
             <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No favorites yet
+              {t('noFavorites')}
             </h3>
             <p className="text-gray-600 mb-6">
-              Save sessions you're interested in by clicking the heart icon
+              {t('noFavoritesDescription')}
             </p>
             <Button
               variant="primary"
-              onClick={() => router.push('/sessions')}
+              onClick={() => router.push(`/${locale}/sessions`)}
             >
-              Browse Sessions
+              {t('browseSessions')}
             </Button>
           </div>
         ) : (

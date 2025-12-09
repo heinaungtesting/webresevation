@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/app/contexts/AuthContext';
 import {
   Calendar,
@@ -48,6 +49,10 @@ interface Session {
 
 export default function MyCreatedSessionsPage() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
+  const t = useTranslations('createdSessions');
+  const tMySessions = useTranslations('mySessions');
   const { user } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,14 +75,14 @@ export default function MyCreatedSessionsPage() {
       setSessions(data);
     } catch (err: any) {
       console.error('Error fetching created sessions:', err);
-      setError(err.message || 'Failed to load your created sessions');
+      setError(err.message || t('failedToLoad'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancelSession = async (sessionId: string, sportType: string) => {
-    if (!confirm(`Are you sure you want to cancel this ${sportType} session? All participants will be notified.`)) {
+    if (!confirm(t('confirmCancelSession', { sportType }))) {
       return;
     }
 
@@ -87,7 +92,7 @@ export default function MyCreatedSessionsPage() {
       // Refresh the list
       await fetchCreatedSessions();
     } catch (err: any) {
-      alert(err.message || 'Failed to cancel session');
+      alert(err.message || t('failedToCancel'));
     }
   };
 
@@ -96,8 +101,8 @@ export default function MyCreatedSessionsPage() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage
-            title="Please log in"
-            message="You need to be logged in to view your created sessions"
+            title={t('pleaseLogin')}
+            message={t('needLogin')}
           />
         </div>
       </div>
@@ -107,7 +112,7 @@ export default function MyCreatedSessionsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Loading text="Loading your created sessions..." fullScreen />
+        <Loading text={t('loading')} fullScreen />
       </div>
     );
   }
@@ -124,22 +129,22 @@ export default function MyCreatedSessionsPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push('/my-sessions')}
+            onClick={() => router.push(`/${locale}/my-sessions`)}
             className="p-2"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900">My Created Sessions</h1>
-            <p className="text-gray-600">Manage sessions you've organized</p>
+            <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
+            <p className="text-gray-600">{t('subtitle')}</p>
           </div>
           <Button
             variant="primary"
-            onClick={() => router.push('/sessions/create')}
+            onClick={() => router.push(`/${locale}/sessions/create`)}
             className="gap-2"
           >
             <Plus className="w-4 h-4" />
-            Create New Session
+            {t('createNewSession')}
           </Button>
         </div>
 
@@ -152,15 +157,15 @@ export default function MyCreatedSessionsPage() {
         {/* Statistics */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <Card padding="md">
-            <p className="text-sm text-gray-600 mb-1">Total Created</p>
+            <p className="text-sm text-gray-600 mb-1">{t('totalCreated')}</p>
             <p className="text-3xl font-bold text-gray-900">{sessions.length}</p>
           </Card>
           <Card padding="md">
-            <p className="text-sm text-gray-600 mb-1">Upcoming</p>
+            <p className="text-sm text-gray-600 mb-1">{tMySessions('upcoming')}</p>
             <p className="text-3xl font-bold text-green-600">{upcomingSessions.length}</p>
           </Card>
           <Card padding="md">
-            <p className="text-sm text-gray-600 mb-1">Past</p>
+            <p className="text-sm text-gray-600 mb-1">{tMySessions('past')}</p>
             <p className="text-3xl font-bold text-gray-600">{pastSessions.length}</p>
           </Card>
         </div>
@@ -169,7 +174,7 @@ export default function MyCreatedSessionsPage() {
         {upcomingSessions.length > 0 && (
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Upcoming Sessions
+              {tMySessions('upcomingSessions')}
             </h2>
             <div className="grid grid-cols-1 gap-4">
               {upcomingSessions.map((session) => (
@@ -184,7 +189,7 @@ export default function MyCreatedSessionsPage() {
                         <Badge variant="info">
                           <Users className="w-3 h-3 mr-1" />
                           {session.current_participants}
-                          {session.max_participants ? `/${session.max_participants}` : ''} going
+                          {session.max_participants ? `/${session.max_participants}` : ''} {t('going')}
                         </Badge>
                       </div>
 
@@ -199,7 +204,7 @@ export default function MyCreatedSessionsPage() {
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Clock className="w-4 h-4" />
-                          {formatTime(session.date_time)} ({session.duration_minutes} minutes)
+                          {formatTime(session.date_time)} ({session.duration_minutes} {t('minutes')})
                         </div>
                       </div>
 
@@ -214,11 +219,11 @@ export default function MyCreatedSessionsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => router.push(`/sessions/${session.id}/edit`)}
+                        onClick={() => router.push(`/${locale}/sessions/${session.id}/edit`)}
                         className="gap-2"
                       >
                         <Edit className="w-4 h-4" />
-                        Edit
+                        {t('edit')}
                       </Button>
                       <Button
                         variant="outline"
@@ -227,7 +232,7 @@ export default function MyCreatedSessionsPage() {
                         className="gap-2 text-red-600 hover:bg-red-50"
                       >
                         <Trash2 className="w-4 h-4" />
-                        Cancel
+                        {t('cancel')}
                       </Button>
                     </div>
                   </div>
@@ -241,7 +246,7 @@ export default function MyCreatedSessionsPage() {
         {pastSessions.length > 0 && (
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Past Sessions
+              {tMySessions('pastSessions')}
             </h2>
             <div className="grid grid-cols-1 gap-4">
               {pastSessions.map((session) => (

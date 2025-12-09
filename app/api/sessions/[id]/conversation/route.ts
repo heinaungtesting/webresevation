@@ -80,7 +80,7 @@ export async function GET(
           type: 'session',
           session_id: sessionId,
           participants: {
-            create: sessionParticipants.map((p) => ({
+            create: sessionParticipants.map((p: { user_id: string }) => ({
               user_id: p.user_id,
             })),
           },
@@ -116,7 +116,7 @@ export async function GET(
     } else {
       // Conversation exists, make sure current user is a participant
       const isParticipant = conversation.participants.some(
-        (p) => p.user_id === user.id
+        (p: { user_id: string }) => p.user_id === user.id
       );
 
       if (!isParticipant) {

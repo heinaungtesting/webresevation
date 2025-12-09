@@ -140,7 +140,32 @@
     "hours_other": "{count} hours",
     "minutes_one": "{count} minute",
     "minutes_other": "{count} minutes",
-    "minParticipants": "Minimum 2 participants"
+    "minParticipants": "Minimum 2 participants",
+    "vibeCompetitive": "Competitive - Serious, skill-focused play",
+    "vibeCasual": "Casual - Relaxed, social games",
+    "vibeAcademy": "Academy - Learning/teaching focused",
+    "vibeLanguageExchange": "Language Exchange - Practice language while playing",
+    "sessionVibe": "Session Vibe",
+    "languageSettings": "Language Settings",
+    "primaryLanguage": "Primary Language",
+    "englishFriendly": "English Friendly",
+    "englishFriendlyDesc": "Check this if English speakers are welcome even if the primary language is different",
+    "oneHour": "1 hour",
+    "onePointFiveHours": "1.5 hours",
+    "twoHours": "2 hours",
+    "twoPointFiveHours": "2.5 hours",
+    "threeHours": "3 hours",
+    "pleaseSelectSportCenter": "Please select a sport center",
+    "dateRequired": "Date is required",
+    "dateMustBeFuture": "Date must be in the future",
+    "timeRequired": "Time is required",
+    "mustAllow2Participants": "Must allow at least 2 participants",
+    "pleaseLogIn": "Please log in",
+    "needLoginToCreate": "You need to be logged in to create a session",
+    "noSportCentersAvailable": "No sport centers available",
+    "noSportCentersMessage": "There are currently no sport centers in the system. Please contact support.",
+    "infoNote": "Note:",
+    "infoMessage": "Once you create a session, other users will be able to see it and join. You'll automatically be added as a participant."
   },
   "sessionDetail": {
     "backToSessions": "Back to Sessions",
@@ -180,6 +205,7 @@
   "mySessions": {
     "title": "My Sessions",
     "subtitle": "View and manage your sports sessions",
+    "myCreatedSessions": "My Created Sessions",
     "upcomingSessions": "Upcoming Sessions",
     "pastSessions": "Past Sessions",
     "totalSessions": "Total Sessions",
@@ -193,12 +219,69 @@
     "cancelAttendance": "Cancel Attendance",
     "canceling": "Canceling...",
     "completed": "Completed",
-    "confirmCancel": "Are you sure you want to cancel your attendance?"
+    "confirmCancel": "Are you sure you want to cancel your attendance?",
+    "failedToLoad": "Failed to load your sessions",
+    "failedToCancel": "Failed to cancel attendance. Please try again."
+  },
+  "createdSessions": {
+    "title": "My Created Sessions",
+    "subtitle": "Manage sessions you've organized",
+    "pleaseLogin": "Please log in",
+    "needLogin": "You need to be logged in to view your created sessions",
+    "loading": "Loading your created sessions...",
+    "createNewSession": "Create New Session",
+    "totalCreated": "Total Created",
+    "going": "going",
+    "minutes": "minutes",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "noSessions": "No Sessions Created",
+    "noSessionsDescription": "You haven't created any sessions yet. Start by creating your first session!",
+    "confirmCancelSession": "Are you sure you want to cancel this {sportType} session? All participants will be notified.",
+    "failedToLoad": "Failed to load your created sessions",
+    "failedToCancel": "Failed to cancel session"
+  },
+  "browseSessions": {
+    "title": "Browse Sessions",
+    "subtitle": "Find and join sports sessions near you",
+    "createSession": "Create Session",
+    "searchPlaceholder": "Search by sport or location...",
+    "search": "Search",
+    "filters": "Filters",
+    "sportType": "Sport Type",
+    "allSports": "All Sports",
+    "skillLevel": "Skill Level",
+    "allLevels": "All Levels",
+    "fromDate": "From Date",
+    "toDate": "To Date",
+    "clearAllFilters": "Clear All Filters",
+    "clearFilters": "Clear Filters",
+    "retry": "Retry",
+    "loading": "Loading sessions...",
+    "sessionsFound": "{count} session found",
+    "sessionsFoundPlural": "{count} sessions found",
+    "noSessionsFound": "No sessions found matching your criteria",
+    "failedToLoad": "Failed to load sessions",
+    "sports": {
+      "badminton": "Badminton",
+      "basketball": "Basketball",
+      "volleyball": "Volleyball",
+      "tennis": "Tennis",
+      "soccer": "Soccer",
+      "futsal": "Futsal",
+      "tableTennis": "Table Tennis"
+    },
+    "skillLevels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    }
   },
   "auth": {
     "login": {
       "title": "Welcome Back",
       "subtitle": "Log in to your SportsMatch account",
+      "subtitleShort": "Log in to continue your journey",
       "email": "Email",
       "password": "Password",
       "emailPlaceholder": "you@example.com",
@@ -207,11 +290,22 @@
       "loginButton": "Log In",
       "loggingIn": "Logging in...",
       "noAccount": "Don't have an account?",
-      "signUpLink": "Sign up"
+      "signUpLink": "Sign up for free",
+      "continueWithGoogle": "Continue with Google",
+      "continueWithGithub": "Continue with GitHub",
+      "orContinueWith": "Or continue with email",
+      "byAgreeing": "By continuing, you agree to our",
+      "and": "and",
+      "terms": "Terms",
+      "privacyPolicy": "Privacy Policy"
     },
     "signup": {
       "title": "Create Account",
       "subtitle": "Join SportsMatch Tokyo and find your game",
+      "subtitleShort": "Start your sports journey today",
+      "mobileSubtitle": "Join your sports community",
+      "joinTitle": "Join SportsMatch",
+      "joinSubtitle": "Your sports community awaits",
       "email": "Email",
       "password": "Password",
       "confirmPassword": "Confirm Password",
@@ -219,22 +313,51 @@
       "english": "English",
       "japanese": "日本語 (Japanese)",
       "emailPlaceholder": "you@example.com",
-      "passwordPlaceholder": "At least 8 characters",
-      "confirmPasswordPlaceholder": "Re-enter your password",
+      "passwordPlaceholder": "••••••••",
+      "confirmPasswordPlaceholder": "••••••••",
+      "passwordStrength": "Password strength",
+      "weak": "Weak",
+      "fair": "Fair",
+      "good": "Good",
+      "strong": "Strong",
+      "agreeToTermsCheckbox": "I agree to the",
       "termsAgree": "By signing up, you agree to our",
       "termsOfService": "Terms of Service",
       "and": "and",
       "privacyPolicy": "Privacy Policy",
+      "terms": "Terms",
+      "createAccountButton": "Create Account",
       "signUpButton": "Sign Up",
       "signingUp": "Creating account...",
       "haveAccount": "Already have an account?",
       "loginLink": "Log in",
+      "features": {
+        "connectInstantly": {
+          "title": "Connect Instantly",
+          "description": "Join thousands of players and find your perfect match"
+        },
+        "easyBooking": {
+          "title": "Easy Booking",
+          "description": "Reserve courts and organize games in just a few clicks"
+        },
+        "levelUp": {
+          "title": "Level Up",
+          "description": "Track your progress and compete with players at your level"
+        }
+      },
+      "stats": {
+        "activePlayers": "Active Players",
+        "sportCenters": "Sport Centers",
+        "gamesWeek": "Games/Week"
+      },
       "errors": {
         "emailRequired": "Email is required",
         "emailInvalid": "Invalid email format",
         "passwordRequired": "Password is required",
         "passwordLength": "Password must be at least 8 characters",
-        "passwordMismatch": "Passwords do not match"
+        "passwordMismatch": "Passwords do not match",
+        "agreeToTerms": "You must agree to the Terms and Privacy Policy",
+        "genericError": "An error occurred. Please try again."
       }
     },
     "verify": {
@@ -250,6 +373,26 @@
       "alreadyVerified": "Already verified?",
       "loginHere": "Log in"
     }
+  },
+  "branding": {
+    "appName": "SportsMatch Tokyo",
+    "tagline": "Connect. Play. Compete.",
+    "features": {
+      "findTeam": {
+        "title": "Find Your Team",
+        "description": "Connect with players at your skill level and join games near you"
+      },
+      "bookSessions": {
+        "title": "Book Sessions",
+        "description": "Reserve courts and organize games at top sports centers in Tokyo"
+      },
+      "trackProgress": {
+        "title": "Track Progress",
+        "description": "Monitor your stats, improve your game, and climb the leaderboards"
+      }
+    },
+    "joinPlayers": "Join",
+    "activePlayers": "active players in Tokyo"
   },
   "common": {
     "loading": "Loading...",
@@ -323,5 +466,129 @@
       "avatarInfo": "JPEG, PNG, WebP, or GIF. Max 5MB.",
       "removePhoto": "Remove Photo"
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "loading": "Loading settings...",
+    "pleaseLogin": "Please log in",
+    "needLogin": "You need to be logged in to access settings",
+    "updateSuccess": "Settings updated successfully!",
+    "updateError": "Failed to update settings",
+    "loadError": "Failed to load settings",
+    "language": {
+      "title": "Language & Region",
+      "label": "Preferred Language",
+      "english": "English",
+      "japanese": "日本語 (Japanese)",
+      "description": "This will change the language of the entire application."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "email": {
+        "title": "Email Notifications",
+        "description": "Receive session reminders and updates via email"
+      },
+      "push": {
+        "title": "Push Notifications",
+        "description": "Receive instant notifications for messages and sessions"
+      }
+    },
+    "saveButton": "Save Settings",
+    "legal": {
+      "title": "Legal",
+      "terms": {
+        "title": "Terms of Service",
+        "description": "Our rules and guidelines"
+      },
+      "privacy": {
+        "title": "Privacy Policy",
+        "description": "How we handle your data"
+      }
+    }
+  },
+  "editSession": {
+    "title": "Edit Session",
+    "subtitle": "Update session details",
+    "loading": "Loading session...",
+    "pleaseLogin": "Please log in",
+    "needLogin": "You need to be logged in to edit sessions",
+    "sessionDetails": "Session Details",
+    "sportCenter": "Sport Center",
+    "selectSportCenter": "Select a sport center...",
+    "sportType": "Sport Type",
+    "skillLevel": "Skill Level",
+    "date": "Date",
+    "time": "Time",
+    "duration": "Duration",
+    "maxParticipants": "Maximum Participants (Optional)",
+    "maxParticipantsPlaceholder": "Leave empty for unlimited",
+    "descriptionEn": "Description (English)",
+    "descriptionJa": "Description (Japanese)",
+    "descriptionEnPlaceholder": "Describe your session in English...",
+    "descriptionJaPlaceholder": "セッションを日本語で説明してください...",
+    "cancel": "Cancel",
+    "updateButton": "Update Session",
+    "updating": "Updating...",
+    "errors": {
+      "selectSportCenter": "Please select a sport center",
+      "dateRequired": "Date is required",
+      "dateMustBeFuture": "Date must be in the future",
+      "timeRequired": "Time is required",
+      "minParticipants": "Must be at least 2 participants",
+      "failedToFetch": "Failed to load session data",
+      "sessionNotFound": "Session not found",
+      "failedToUpdate": "Failed to update session. Please try again.",
+      "failedToFetchCenters": "Failed to fetch sport centers"
+    }
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "subtitle": "Sessions you've saved for later",
+    "pleaseLogin": "Please log in",
+    "needLogin": "You need to be logged in to view your favorites",
+    "loading": "Loading favorites...",
+    "noFavorites": "No favorites yet",
+    "noFavoritesDescription": "You haven't saved any sessions yet. Start by browsing sessions and clicking the heart icon!",
+    "browseSessions": "Browse Sessions",
+    "failedToLoad": "Failed to load favorites"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "pleaseLogin": "Please log in",
+    "needLogin": "You need to be logged in to view notifications",
+    "loading": "Loading notifications...",
+    "noNotifications": "No notifications",
+    "noNotificationsDescription": "You're all caught up! New notifications will appear here.",
+    "markAsRead": "Mark as Read",
+    "markAllAsRead": "Mark All as Read",
+    "deleteNotification": "Delete",
+    "deleteAll": "Delete All",
+    "confirmDeleteAll": "Are you sure you want to delete all notifications?",
+    "failedToLoad": "Failed to load notifications",
+    "failedToMarkRead": "Failed to mark as read",
+    "failedToDelete": "Failed to delete notification",
+    "error": "Error",
+    "unreadCount": "{count} unread",
+    "types": {
+      "sessionJoined": "joined your session",
+      "sessionLeft": "left your session",
+      "sessionReminder": "Session reminder",
+      "sessionCancelled": "Session cancelled",
+      "newMessage": "New message",
+      "newReview": "New review"
+    }
+  },
+  "verifyEmail": {
+    "title": "Check Your Email",
+    "sentTo": "We've sent a verification link to",
+    "checkInbox": "Check your inbox",
+    "clickLink": "Click the verification link in the email to activate your account.",
+    "didntReceive": "Didn't receive the email?",
+    "checkSpam": "Check your spam or junk folder",
+    "correctEmail": "Make sure you entered the correct email address",
+    "waitMinutes": "Wait a few minutes and refresh your inbox",
+    "backToLogin": "Back to Login",
+    "alreadyVerified": "Already verified?",
+    "login": "Log in"
   }
 }
