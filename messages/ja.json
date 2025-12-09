@@ -222,6 +222,24 @@
     "failedToLoad": "セッションの読み込みに失敗しました",
     "failedToCancel": "参加のキャンセルに失敗しました。もう一度お試しください。"
   },
+  "createdSessions": {
+    "title": "作成したセッション",
+    "subtitle": "主催したセッションを管理",
+    "pleaseLogin": "ログインしてください",
+    "needLogin": "作成したセッションを表示するにはログインが必要です",
+    "loading": "作成したセッションを読み込み中...",
+    "createNewSession": "新しいセッションを作成",
+    "totalCreated": "作成済み",
+    "going": "人参加",
+    "minutes": "分",
+    "edit": "編集",
+    "cancel": "キャンセル",
+    "noSessions": "作成したセッションはありません",
+    "noSessionsDescription": "まだセッションを作成していません。最初のセッションを作成しましょう！",
+    "confirmCancelSession": "本当にこの{sportType}セッションをキャンセルしますか？すべての参加者に通知されます。",
+    "failedToLoad": "作成したセッションの読み込みに失敗しました",
+    "failedToCancel": "セッションのキャンセルに失敗しました"
+  },
   "auth": {
     "login": {
       "title": "おかえりなさい",

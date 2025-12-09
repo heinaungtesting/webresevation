@@ -223,6 +223,24 @@
     "failedToLoad": "Failed to load your sessions",
     "failedToCancel": "Failed to cancel attendance. Please try again."
   },
+  "createdSessions": {
+    "title": "My Created Sessions",
+    "subtitle": "Manage sessions you've organized",
+    "pleaseLogin": "Please log in",
+    "needLogin": "You need to be logged in to view your created sessions",
+    "loading": "Loading your created sessions...",
+    "createNewSession": "Create New Session",
+    "totalCreated": "Total Created",
+    "going": "going",
+    "minutes": "minutes",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "noSessions": "No Sessions Created",
+    "noSessionsDescription": "You haven't created any sessions yet. Start by creating your first session!",
+    "confirmCancelSession": "Are you sure you want to cancel this {sportType} session? All participants will be notified.",
+    "failedToLoad": "Failed to load your created sessions",
+    "failedToCancel": "Failed to cancel session"
+  },
   "auth": {
     "login": {
       "title": "Welcome Back",
