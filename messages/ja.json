@@ -223,6 +223,7 @@
     "login": {
       "title": "おかえりなさい",
       "subtitle": "SportsMatchアカウントにログイン",
+      "subtitleShort": "ログインして続ける",
       "email": "メールアドレス",
       "password": "パスワード",
       "emailPlaceholder": "you@example.com",
@@ -231,7 +232,14 @@
       "loginButton": "ログイン",
       "loggingIn": "ログイン中...",
       "noAccount": "アカウントをお持ちでないですか？",
-      "signUpLink": "新規登録"
+      "signUpLink": "無料で登録",
+      "continueWithGoogle": "Googleで続ける",
+      "continueWithGithub": "GitHubで続ける",
+      "orContinueWith": "またはメールアドレスで続ける",
+      "byAgreeing": "続けることで、以下に同意したことになります",
+      "and": "および",
+      "terms": "利用規約",
+      "privacyPolicy": "プライバシーポリシー"
     },
     "signup": {
       "title": "アカウント作成",
@@ -274,6 +282,26 @@
       "alreadyVerified": "すでに確認済みですか？",
       "loginHere": "ログイン"
     }
+  },
+  "branding": {
+    "appName": "SportsMatch Tokyo",
+    "tagline": "つながる。プレーする。競う。",
+    "features": {
+      "findTeam": {
+        "title": "チームを見つける",
+        "description": "あなたのスキルレベルに合ったプレイヤーとつながり、近くのゲームに参加しよう"
+      },
+      "bookSessions": {
+        "title": "セッションを予約",
+        "description": "東京のトップスポーツセンターでコートを予約し、ゲームを企画しよう"
+      },
+      "trackProgress": {
+        "title": "進捗を追跡",
+        "description": "統計をモニターし、ゲームを改善し、リーダーボードを登ろう"
+      }
+    },
+    "joinPlayers": "参加する",
+    "activePlayers": "東京のアクティブプレイヤー"
   },
   "common": {
     "loading": "読み込み中...",

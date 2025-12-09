@@ -224,6 +224,7 @@
     "login": {
       "title": "Welcome Back",
       "subtitle": "Log in to your SportsMatch account",
+      "subtitleShort": "Log in to continue your journey",
       "email": "Email",
       "password": "Password",
       "emailPlaceholder": "you@example.com",
@@ -232,7 +233,14 @@
       "loginButton": "Log In",
       "loggingIn": "Logging in...",
       "noAccount": "Don't have an account?",
-      "signUpLink": "Sign up"
+      "signUpLink": "Sign up for free",
+      "continueWithGoogle": "Continue with Google",
+      "continueWithGithub": "Continue with GitHub",
+      "orContinueWith": "Or continue with email",
+      "byAgreeing": "By continuing, you agree to our",
+      "and": "and",
+      "terms": "Terms",
+      "privacyPolicy": "Privacy Policy"
     },
     "signup": {
       "title": "Create Account",
@@ -275,6 +283,26 @@
       "alreadyVerified": "Already verified?",
       "loginHere": "Log in"
     }
+  },
+  "branding": {
+    "appName": "SportsMatch Tokyo",
+    "tagline": "Connect. Play. Compete.",
+    "features": {
+      "findTeam": {
+        "title": "Find Your Team",
+        "description": "Connect with players at your skill level and join games near you"
+      },
+      "bookSessions": {
+        "title": "Book Sessions",
+        "description": "Reserve courts and organize games at top sports centers in Tokyo"
+      },
+      "trackProgress": {
+        "title": "Track Progress",
+        "description": "Monitor your stats, improve your game, and climb the leaderboards"
+      }
+    },
+    "joinPlayers": "Join",
+    "activePlayers": "active players in Tokyo"
   },
   "common": {
     "loading": "Loading...",

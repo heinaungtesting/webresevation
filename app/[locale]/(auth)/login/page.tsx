@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Button from '@/app/components/ui/Button';
 import Input from '@/app/components/ui/Input';
 import { AlertCircle, Zap, Users, Calendar, TrendingUp } from 'lucide-react';
@@ -12,6 +13,10 @@ import { getAppUrl } from '@/lib/env';
 
 export default function LoginPage() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
+  const t = useTranslations('auth.login');
+  const tBranding = useTranslations('branding');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -73,10 +78,10 @@ export default function LoginPage() {
         <div className="relative z-10 flex flex-col justify-center px-16 text-white">
           <div className="mb-12">
             <h1 className="text-5xl font-bold mb-4 tracking-tight">
-              SportsMatch Tokyo
+              {tBranding('appName')}
             </h1>
             <p className="text-xl text-white/90 font-light">
-              Connect. Play. Compete.
+              {tBranding('tagline')}
             </p>
           </div>
 
@@ -87,9 +92,9 @@ export default function LoginPage() {
                 <Users className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-1">Find Your Team</h3>
+                <h3 className="font-semibold text-lg mb-1">{tBranding('features.findTeam.title')}</h3>
                 <p className="text-white/80 text-sm">
-                  Connect with players at your skill level and join games near you
+                  {tBranding('features.findTeam.description')}
                 </p>
               </div>
             </div>
@@ -99,9 +104,9 @@ export default function LoginPage() {
                 <Calendar className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-1">Book Sessions</h3>
+                <h3 className="font-semibold text-lg mb-1">{tBranding('features.bookSessions.title')}</h3>
                 <p className="text-white/80 text-sm">
-                  Reserve courts and organize games at top sports centers in Tokyo
+                  {tBranding('features.bookSessions.description')}
                 </p>
               </div>
             </div>
@@ -111,9 +116,9 @@ export default function LoginPage() {
                 <TrendingUp className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-1">Track Progress</h3>
+                <h3 className="font-semibold text-lg mb-1">{tBranding('features.trackProgress.title')}</h3>
                 <p className="text-white/80 text-sm">
-                  Monitor your stats, improve your game, and climb the leaderboards
+                  {tBranding('features.trackProgress.description')}
                 </p>
               </div>
             </div>
@@ -121,7 +126,7 @@ export default function LoginPage() {
 
           <div className="mt-12 pt-8 border-t border-white/20">
             <p className="text-white/70 text-sm">
-              Join <span className="font-semibold text-white">5,000+</span> active players in Tokyo
+              {tBranding('joinPlayers')} <span className="font-semibold text-white">5,000+</span> {tBranding('activePlayers')}
             </p>
           </div>
         </div>
@@ -133,18 +138,18 @@ export default function LoginPage() {
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <h1 className="text-3xl font-bold text-gradient-ocean mb-2">
-              SportsMatch Tokyo
+              {tBranding('appName')}
             </h1>
-            <p className="text-slate-600">Connect. Play. Compete.</p>
+            <p className="text-slate-600">{tBranding('tagline')}</p>
           </div>
 
           <div className="bg-white rounded-3xl shadow-large p-8 sm:p-10">
             <div className="mb-8">
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
-                Welcome Back
+                {t('title')}
               </h2>
               <p className="text-slate-600">
-                Log in to continue your journey
+                {t('subtitleShort')}
               </p>
             </div>
 
@@ -186,7 +191,7 @@ export default function LoginPage() {
                   </svg>
                 )}
                 <span className="text-sm font-semibold text-slate-700 group-hover:text-slate-900">
-                  Continue with Google
+                  {t('continueWithGoogle')}
                 </span>
               </button>
 
@@ -208,7 +213,7 @@ export default function LoginPage() {
                   </svg>
                 )}
                 <span className="text-sm font-semibold text-slate-700 group-hover:text-slate-900">
-                  Continue with GitHub
+                  {t('continueWithGithub')}
                 </span>
               </button>
             </div>
@@ -219,16 +224,16 @@ export default function LoginPage() {
                 <div className="w-full border-t border-slate-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-3 bg-white text-slate-500 font-medium">Or continue with email</span>
+                <span className="px-3 bg-white text-slate-500 font-medium">{t('orContinueWith')}</span>
               </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <Input
-                label="Email"
+                label={t('email')}
                 type="email"
                 name="email"
-                placeholder="you@example.com"
+                placeholder={t('emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -238,10 +243,10 @@ export default function LoginPage() {
               />
 
               <Input
-                label="Password"
+                label={t('password')}
                 type="password"
                 name="password"
-                placeholder="••••••••"
+                placeholder={t('passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -252,10 +257,10 @@ export default function LoginPage() {
 
               <div className="flex items-center justify-between text-sm">
                 <Link
-                  href="/forgot-password"
+                  href={`/${locale}/forgot-password`}
                   className="text-primary-600 hover:text-primary-700 font-medium transition-colors"
                 >
-                  Forgot password?
+                  {t('forgotPassword')}
                 </Link>
               </div>
 
@@ -269,15 +274,15 @@ export default function LoginPage() {
                 data-testid="login-button"
               >
                 <Zap className="w-4 h-4 mr-2" />
-                Log In
+                {t('loginButton')}
               </Button>
             </form>
 
             <div className="mt-8 text-center">
               <p className="text-sm text-slate-600">
-                Don't have an account?{' '}
-                <Link href="/signup" className="text-primary-600 hover:text-primary-700 font-semibold transition-colors">
-                  Sign up for free
+                {t('noAccount')}{' '}
+                <Link href={`/${locale}/signup`} className="text-primary-600 hover:text-primary-700 font-semibold transition-colors">
+                  {t('signUpLink')}
                 </Link>
               </p>
             </div>
@@ -285,10 +290,10 @@ export default function LoginPage() {
 
           {/* Footer */}
           <p className="mt-8 text-center text-xs text-slate-500">
-            By continuing, you agree to our{' '}
-            <Link href="/terms" className="underline hover:text-slate-700">Terms</Link>
-            {' '}and{' '}
-            <Link href="/privacy" className="underline hover:text-slate-700">Privacy Policy</Link>
+            {t('byAgreeing')}{' '}
+            <Link href={`/${locale}/terms`} className="underline hover:text-slate-700">{t('terms')}</Link>
+            {' '}{t('and')}{' '}
+            <Link href={`/${locale}/privacy`} className="underline hover:text-slate-700">{t('privacyPolicy')}</Link>
           </p>
         </div>
       </div>
