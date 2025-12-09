@@ -241,6 +241,42 @@
     "failedToLoad": "Failed to load your created sessions",
     "failedToCancel": "Failed to cancel session"
   },
+  "browseSessions": {
+    "title": "Browse Sessions",
+    "subtitle": "Find and join sports sessions near you",
+    "createSession": "Create Session",
+    "searchPlaceholder": "Search by sport or location...",
+    "search": "Search",
+    "filters": "Filters",
+    "sportType": "Sport Type",
+    "allSports": "All Sports",
+    "skillLevel": "Skill Level",
+    "allLevels": "All Levels",
+    "fromDate": "From Date",
+    "toDate": "To Date",
+    "clearAllFilters": "Clear All Filters",
+    "clearFilters": "Clear Filters",
+    "retry": "Retry",
+    "loading": "Loading sessions...",
+    "sessionsFound": "{count} session found",
+    "sessionsFoundPlural": "{count} sessions found",
+    "noSessionsFound": "No sessions found matching your criteria",
+    "failedToLoad": "Failed to load sessions",
+    "sports": {
+      "badminton": "Badminton",
+      "basketball": "Basketball",
+      "volleyball": "Volleyball",
+      "tennis": "Tennis",
+      "soccer": "Soccer",
+      "futsal": "Futsal",
+      "tableTennis": "Table Tennis"
+    },
+    "skillLevels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    }
+  },
   "auth": {
     "login": {
       "title": "Welcome Back",

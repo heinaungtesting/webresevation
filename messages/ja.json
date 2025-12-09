@@ -240,6 +240,42 @@
     "failedToLoad": "作成したセッションの読み込みに失敗しました",
     "failedToCancel": "セッションのキャンセルに失敗しました"
   },
+  "browseSessions": {
+    "title": "セッションを探す",
+    "subtitle": "近くのスポーツセッションを見つけて参加しよう",
+    "createSession": "セッションを作成",
+    "searchPlaceholder": "スポーツや場所で検索...",
+    "search": "検索",
+    "filters": "フィルター",
+    "sportType": "スポーツ種目",
+    "allSports": "すべてのスポーツ",
+    "skillLevel": "スキルレベル",
+    "allLevels": "すべてのレベル",
+    "fromDate": "開始日",
+    "toDate": "終了日",
+    "clearAllFilters": "すべてのフィルターをクリア",
+    "clearFilters": "フィルターをクリア",
+    "retry": "再試行",
+    "loading": "セッションを読み込み中...",
+    "sessionsFound": "{count}件のセッションが見つかりました",
+    "sessionsFoundPlural": "{count}件のセッションが見つかりました",
+    "noSessionsFound": "条件に一致するセッションが見つかりませんでした",
+    "failedToLoad": "セッションの読み込みに失敗しました",
+    "sports": {
+      "badminton": "バドミントン",
+      "basketball": "バスケットボール",
+      "volleyball": "バレーボール",
+      "tennis": "テニス",
+      "soccer": "サッカー",
+      "futsal": "フットサル",
+      "tableTennis": "卓球"
+    },
+    "skillLevels": {
+      "beginner": "初心者",
+      "intermediate": "中級者",
+      "advanced": "上級者"
+    }
+  },
   "auth": {
     "login": {
       "title": "おかえりなさい",
