@@ -25,8 +25,8 @@ export async function GET() {
       select: { session_id: true },
     });
 
-    return NextResponse.json({ 
-      sessionIds: favorites.map(f => f.session_id) 
+    return NextResponse.json({
+      sessionIds: favorites.map((f: { session_id: string }) => f.session_id)
     });
   } catch (error) {
     console.error('Error fetching favorite IDs:', error);
