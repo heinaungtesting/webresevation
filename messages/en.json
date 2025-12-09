@@ -567,6 +567,8 @@
     "failedToLoad": "Failed to load notifications",
     "failedToMarkRead": "Failed to mark as read",
     "failedToDelete": "Failed to delete notification",
+    "error": "Error",
+    "unreadCount": "{count} unread",
     "types": {
       "sessionJoined": "joined your session",
       "sessionLeft": "left your session",

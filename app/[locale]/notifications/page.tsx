@@ -171,7 +171,7 @@ export default function NotificationsPage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
               {unreadCount > 0 && (
-                <p className="text-sm text-gray-500">{unreadCount} unread</p>
+                <p className="text-sm text-gray-500">{t('unreadCount', { count: unreadCount })}</p>
               )}
             </div>
           </div>
@@ -202,7 +202,7 @@ export default function NotificationsPage() {
 
         {error && (
           <div className="mb-6">
-            <ErrorMessage title="Error" message={error} />
+            <ErrorMessage title={t('error')} message={error} />
           </div>
         )}
 

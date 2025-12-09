@@ -566,6 +566,8 @@
     "failedToLoad": "通知の読み込みに失敗しました",
     "failedToMarkRead": "既読にできませんでした",
     "failedToDelete": "通知の削除に失敗しました",
+    "error": "エラー",
+    "unreadCount": "{count}件の未読",
     "types": {
       "sessionJoined": "があなたのセッションに参加しました",
       "sessionLeft": "があなたのセッションから退出しました",
