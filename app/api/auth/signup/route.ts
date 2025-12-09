@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { sendWelcomeEmail } from '@/lib/email';
 import { authRateLimiter, createRateLimitHeaders } from '@/lib/rate-limit';
+import { signupSchema, validateRequestBody } from '@/lib/validations';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,32 +26,25 @@ export async function POST(request: Request) {
   }
 
   try {
+    const body = await request.json();
+
+    // Validate input with Zod
+    const validation = validateRequestBody(signupSchema, body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 }
+      );
+    }
+
     const {
       email,
       password,
-      language = 'en',
-      // Language exchange fields (optional)
+      language,
       native_language,
       target_language,
       language_level,
-    } = await request.json();
-
-    // Validate input
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate language_level if provided
-    const validLanguageLevels = ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'NATIVE'];
-    if (language_level && !validLanguageLevels.includes(language_level)) {
-      return NextResponse.json(
-        { error: 'Invalid language level. Must be one of: BEGINNER, INTERMEDIATE, ADVANCED, NATIVE' },
-        { status: 400 }
-      );
-    }
+    } = validation.data;
 
     // Create Supabase client
     const supabase = await createClient();
@@ -91,21 +85,16 @@ export async function POST(request: Request) {
         sendWelcomeEmail(
           data.user.email!,
           data.user.email!.split('@')[0] // Use email username as default name
-        ).catch((err) => {
-          console.error('Failed to send welcome email:', err);
-          // Don't fail signup if email fails
+        ).catch(() => {
+          // Email failure is non-critical, don't block signup
         });
       } catch (dbError) {
-        console.error('Database error:', dbError);
-
         // CRITICAL: Clean up Supabase auth user to prevent ghost user state
         // This prevents users from existing in Supabase Auth but not in the database
         try {
           const adminClient = createAdminClient();
           await adminClient.auth.admin.deleteUser(data.user.id);
-          console.log(`Cleaned up Supabase auth user ${data.user.id} after database error`);
         } catch (cleanupError) {
-          console.error('Failed to cleanup Supabase auth user:', cleanupError);
           // Log for manual cleanup if automatic cleanup fails
         }
 
@@ -127,7 +116,6 @@ export async function POST(request: Request) {
       }
     );
   } catch (error) {
-    console.error('Signup error:', error);
     return NextResponse.json(
       { error: 'An error occurred during signup' },
       { status: 500 }

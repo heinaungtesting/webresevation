@@ -51,7 +51,6 @@ export async function GET(
 
     return NextResponse.json(sessionWithCount);
   } catch (error) {
-    console.error('Error fetching session:', error);
     return NextResponse.json(
       { error: 'Failed to fetch session' },
       { status: 500 }
@@ -126,14 +125,14 @@ export async function DELETE(
             sportCenter: existingSession.sport_center.name_en,
           }
         ).catch((err) => {
-          console.error('Failed to send session cancellation email:', err);
+          
         });
       }
     });
 
     return NextResponse.json({ message: 'Session cancelled successfully' });
   } catch (error) {
-    console.error('Error deleting session:', error);
+    
     return NextResponse.json(
       { error: 'Failed to delete session' },
       { status: 500 }
@@ -235,7 +234,7 @@ export async function PATCH(
               newDateTime,
             }
           ).catch((err) => {
-            console.error('Failed to send session update email:', err);
+            
           });
         }
       });
@@ -243,7 +242,7 @@ export async function PATCH(
 
     return NextResponse.json(updatedSession);
   } catch (error) {
-    console.error('Error updating session:', error);
+    
     return NextResponse.json(
       { error: 'Failed to update session' },
       { status: 500 }
