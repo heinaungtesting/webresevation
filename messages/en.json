@@ -245,6 +245,10 @@
     "signup": {
       "title": "Create Account",
       "subtitle": "Join SportsMatch Tokyo and find your game",
+      "subtitleShort": "Start your sports journey today",
+      "mobileSubtitle": "Join your sports community",
+      "joinTitle": "Join SportsMatch",
+      "joinSubtitle": "Your sports community awaits",
       "email": "Email",
       "password": "Password",
       "confirmPassword": "Confirm Password",
@@ -252,22 +256,51 @@
       "english": "English",
       "japanese": "日本語 (Japanese)",
       "emailPlaceholder": "you@example.com",
-      "passwordPlaceholder": "At least 8 characters",
-      "confirmPasswordPlaceholder": "Re-enter your password",
+      "passwordPlaceholder": "••••••••",
+      "confirmPasswordPlaceholder": "••••••••",
+      "passwordStrength": "Password strength",
+      "weak": "Weak",
+      "fair": "Fair",
+      "good": "Good",
+      "strong": "Strong",
+      "agreeToTermsCheckbox": "I agree to the",
       "termsAgree": "By signing up, you agree to our",
       "termsOfService": "Terms of Service",
       "and": "and",
       "privacyPolicy": "Privacy Policy",
+      "terms": "Terms",
+      "createAccountButton": "Create Account",
       "signUpButton": "Sign Up",
       "signingUp": "Creating account...",
       "haveAccount": "Already have an account?",
       "loginLink": "Log in",
+      "features": {
+        "connectInstantly": {
+          "title": "Connect Instantly",
+          "description": "Join thousands of players and find your perfect match"
+        },
+        "easyBooking": {
+          "title": "Easy Booking",
+          "description": "Reserve courts and organize games in just a few clicks"
+        },
+        "levelUp": {
+          "title": "Level Up",
+          "description": "Track your progress and compete with players at your level"
+        }
+      },
+      "stats": {
+        "activePlayers": "Active Players",
+        "sportCenters": "Sport Centers",
+        "gamesWeek": "Games/Week"
+      },
       "errors": {
         "emailRequired": "Email is required",
         "emailInvalid": "Invalid email format",
         "passwordRequired": "Password is required",
         "passwordLength": "Password must be at least 8 characters",
-        "passwordMismatch": "Passwords do not match"
+        "passwordMismatch": "Passwords do not match",
+        "agreeToTerms": "You must agree to the Terms and Privacy Policy",
+        "genericError": "An error occurred. Please try again."
       }
     },
     "verify": {
@@ -375,6 +408,45 @@
       "motivational": "Make your profile shine! ✨ かわいい~ 🌸",
       "avatarInfo": "JPEG, PNG, WebP, or GIF. Max 5MB.",
       "removePhoto": "Remove Photo"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "loading": "Loading settings...",
+    "pleaseLogin": "Please log in",
+    "needLogin": "You need to be logged in to access settings",
+    "updateSuccess": "Settings updated successfully!",
+    "updateError": "Failed to update settings",
+    "loadError": "Failed to load settings",
+    "language": {
+      "title": "Language & Region",
+      "label": "Preferred Language",
+      "english": "English",
+      "japanese": "日本語 (Japanese)",
+      "description": "This will change the language of the entire application."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "email": {
+        "title": "Email Notifications",
+        "description": "Receive session reminders and updates via email"
+      },
+      "push": {
+        "title": "Push Notifications",
+        "description": "Receive instant notifications for messages and sessions"
+      }
+    },
+    "saveButton": "Save Settings",
+    "legal": {
+      "title": "Legal",
+      "terms": {
+        "title": "Terms of Service",
+        "description": "Our rules and guidelines"
+      },
+      "privacy": {
+        "title": "Privacy Policy",
+        "description": "How we handle your data"
+      }
     }
   }
 }

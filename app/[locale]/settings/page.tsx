@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { Bell, Globe, Save, FileText, Shield, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
@@ -14,6 +15,9 @@ import { csrfPatch } from '@/lib/csrfClient';
 
 export default function SettingsPage() {
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string;
+  const t = useTranslations('settings');
   const { user } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +50,7 @@ export default function SettingsPage() {
       });
     } catch (err) {
       console.error('Error fetching profile:', err);
-      setError('Failed to load settings');
+      setError(t('loadError'));
     } finally {
       setLoading(false);
     }
@@ -77,7 +81,7 @@ export default function SettingsPage() {
       }
     } catch (err: any) {
       console.error('Error updating settings:', err);
-      setError(err.message || 'Failed to update settings');
+      setError(err.message || t('updateError'));
     } finally {
       setSaving(false);
     }
@@ -88,8 +92,8 @@ export default function SettingsPage() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage
-            title="Please log in"
-            message="You need to be logged in to access settings"
+            title={t('pleaseLogin')}
+            message={t('needLogin')}
           />
         </div>
       </div>
@@ -99,7 +103,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Loading text="Loading settings..." fullScreen />
+        <Loading text={t('loading')} fullScreen />
       </div>
     );
   }
@@ -108,7 +112,7 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Settings</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">{t('title')}</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
@@ -119,7 +123,7 @@ export default function SettingsPage() {
 
           {success && (
             <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">
-              Settings updated successfully!
+              {t('updateSuccess')}
             </div>
           )}
 
@@ -131,22 +135,22 @@ export default function SettingsPage() {
               </div>
               <div className="flex-1">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Language & Region
+                  {t('language.title')}
                 </h2>
                 <Select
-                  label="Preferred Language"
+                  label={t('language.label')}
                   value={settings.language_preference}
                   onChange={(e) =>
                     handleChange('language_preference', e.target.value)
                   }
                   fullWidth
                   options={[
-                    { value: 'en', label: 'English' },
-                    { value: 'ja', label: '日本語 (Japanese)' },
+                    { value: 'en', label: t('language.english') },
+                    { value: 'ja', label: t('language.japanese') },
                   ]}
                 />
                 <p className="text-sm text-gray-600 mt-2">
-                  This will change the language of the entire application.
+                  {t('language.description')}
                 </p>
               </div>
             </div>
@@ -160,16 +164,16 @@ export default function SettingsPage() {
               </div>
               <div className="flex-1">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Notifications
+                  {t('notifications.title')}
                 </h2>
                 <div className="space-y-4">
                   <label className="flex items-center justify-between cursor-pointer">
                     <div>
                       <p className="font-medium text-gray-900">
-                        Email Notifications
+                        {t('notifications.email.title')}
                       </p>
                       <p className="text-sm text-gray-600">
-                        Receive session reminders and updates via email
+                        {t('notifications.email.description')}
                       </p>
                     </div>
                     <div className="relative">
@@ -189,10 +193,10 @@ export default function SettingsPage() {
                   <label className="flex items-center justify-between cursor-pointer">
                     <div>
                       <p className="font-medium text-gray-900">
-                        Push Notifications
+                        {t('notifications.push.title')}
                       </p>
                       <p className="text-sm text-gray-600">
-                        Receive instant notifications for messages and sessions
+                        {t('notifications.push.description')}
                       </p>
                     </div>
                     <div className="relative">
@@ -222,17 +226,17 @@ export default function SettingsPage() {
               className="gap-2"
             >
               <Save className="w-4 h-4" />
-              Save Settings
+              {t('saveButton')}
             </Button>
           </div>
         </form>
 
         {/* Legal Section */}
         <div className="mt-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Legal</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('legal.title')}</h2>
           <Card padding="none">
             <Link
-              href="/terms"
+              href={`/${locale}/terms`}
               className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 group"
             >
               <div className="flex items-center gap-3">
@@ -241,10 +245,10 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
-                    Terms of Service
+                    {t('legal.terms.title')}
                   </p>
                   <p className="text-sm text-gray-500">
-                    Our rules and guidelines
+                    {t('legal.terms.description')}
                   </p>
                 </div>
               </div>
@@ -252,7 +256,7 @@ export default function SettingsPage() {
             </Link>
 
             <Link
-              href="/privacy"
+              href={`/${locale}/privacy`}
               className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors group"
             >
               <div className="flex items-center gap-3">
@@ -261,10 +265,10 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <p className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
-                    Privacy Policy
+                    {t('legal.privacy.title')}
                   </p>
                   <p className="text-sm text-gray-500">
-                    How we handle your data
+                    {t('legal.privacy.description')}
                   </p>
                 </div>
               </div>

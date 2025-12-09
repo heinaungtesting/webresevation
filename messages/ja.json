@@ -244,6 +244,10 @@
     "signup": {
       "title": "アカウント作成",
       "subtitle": "SportsMatch Tokyoに参加してゲームを見つけよう",
+      "subtitleShort": "今日からスポーツの旅を始めましょう",
+      "mobileSubtitle": "スポーツコミュニティに参加しよう",
+      "joinTitle": "SportsMatchに参加",
+      "joinSubtitle": "あなたのスポーツコミュニティが待っています",
       "email": "メールアドレス",
       "password": "パスワード",
       "confirmPassword": "パスワード確認",
@@ -251,22 +255,51 @@
       "english": "English (英語)",
       "japanese": "日本語",
       "emailPlaceholder": "you@example.com",
-      "passwordPlaceholder": "8文字以上",
-      "confirmPasswordPlaceholder": "パスワードを再入力",
+      "passwordPlaceholder": "••••••••",
+      "confirmPasswordPlaceholder": "••••••••",
+      "passwordStrength": "パスワード強度",
+      "weak": "弱い",
+      "fair": "普通",
+      "good": "良い",
+      "strong": "強い",
+      "agreeToTermsCheckbox": "以下に同意します",
       "termsAgree": "登録することで、以下に同意したことになります",
       "termsOfService": "利用規約",
       "and": "および",
       "privacyPolicy": "プライバシーポリシー",
+      "terms": "利用規約",
+      "createAccountButton": "アカウント作成",
       "signUpButton": "登録",
       "signingUp": "アカウント作成中...",
       "haveAccount": "すでにアカウントをお持ちですか？",
       "loginLink": "ログイン",
+      "features": {
+        "connectInstantly": {
+          "title": "すぐに繋がる",
+          "description": "何千人ものプレイヤーと繋がり、完璧なマッチを見つけましょう"
+        },
+        "easyBooking": {
+          "title": "簡単予約",
+          "description": "数クリックでコート予約とゲーム開催ができます"
+        },
+        "levelUp": {
+          "title": "レベルアップ",
+          "description": "進捗を追跡し、同レベルのプレイヤーと競い合いましょう"
+        }
+      },
+      "stats": {
+        "activePlayers": "アクティブプレイヤー",
+        "sportCenters": "スポーツセンター",
+        "gamesWeek": "週間ゲーム数"
+      },
       "errors": {
         "emailRequired": "メールアドレスは必須です",
         "emailInvalid": "メールアドレスの形式が正しくありません",
         "passwordRequired": "パスワードは必須です",
         "passwordLength": "パスワードは8文字以上である必要があります",
-        "passwordMismatch": "パスワードが一致しません"
+        "passwordMismatch": "パスワードが一致しません",
+        "agreeToTerms": "利用規約とプライバシーポリシーに同意する必要があります",
+        "genericError": "エラーが発生しました。もう一度お試しください。"
       }
     },
     "verify": {
@@ -374,6 +407,45 @@
       "motivational": "プロフィールを輝かせよう！✨ かわいい~ 🌸",
       "avatarInfo": "JPEG、PNG、WebP、またはGIF。最大5MB。",
       "removePhoto": "写真を削除"
+    }
+  },
+  "settings": {
+    "title": "設定",
+    "loading": "設定を読み込み中...",
+    "pleaseLogin": "ログインしてください",
+    "needLogin": "設定にアクセスするにはログインが必要です",
+    "updateSuccess": "設定を正常に更新しました！",
+    "updateError": "設定の更新に失敗しました",
+    "loadError": "設定の読み込みに失敗しました",
+    "language": {
+      "title": "言語と地域",
+      "label": "優先言語",
+      "english": "English (英語)",
+      "japanese": "日本語",
+      "description": "アプリケーション全体の言語が変更されます。"
+    },
+    "notifications": {
+      "title": "通知",
+      "email": {
+        "title": "メール通知",
+        "description": "セッションのリマインダーと更新情報をメールで受け取る"
+      },
+      "push": {
+        "title": "プッシュ通知",
+        "description": "メッセージやセッションの即時通知を受け取る"
+      }
+    },
+    "saveButton": "設定を保存",
+    "legal": {
+      "title": "法的情報",
+      "terms": {
+        "title": "利用規約",
+        "description": "規則とガイドライン"
+      },
+      "privacy": {
+        "title": "プライバシーポリシー",
+        "description": "データの取り扱いについて"
+      }
     }
   }
 }
