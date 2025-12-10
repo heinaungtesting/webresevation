@@ -64,17 +64,24 @@ webresevation/
 │   │   ├── (auth)/          # Authentication pages (grouped route)
 │   │   ├── admin/           # Admin dashboard
 │   │   ├── sessions/        # Session pages
-│   │   └── my-sessions/     # User's sessions
+│   │   ├── my-sessions/     # User's sessions
+│   │   ├── profile/         # User profile
+│   │   ├── messages/        # Messages/chat
+│   │   └── notifications/   # Notifications
 │   ├── api/                 # API routes
 │   │   ├── auth/            # Authentication endpoints
 │   │   ├── sessions/        # Session CRUD
-│   │   ├── messages/        # Chat messages
-│   │   └── admin/           # Admin endpoints
-│   ├── components/          # React components
+│   │   ├── conversations/   # Chat/messaging
+│   │   ├── admin/           # Admin endpoints
+│   │   └── users/           # User management
+│   ├── components/          # React components (app-level)
 │   │   ├── ui/              # Reusable UI components
 │   │   ├── sessions/        # Session-specific components
-│   │   └── chat/            # Chat components
-│   └── contexts/            # React contexts
+│   │   ├── chat/            # Chat components
+│   │   └── layout/          # Layout components
+│   ├── contexts/            # React contexts
+│   ├── hooks/               # Custom React hooks
+│   └── providers/           # React providers
 ├── lib/                     # Utilities and configurations
 │   ├── prisma.ts            # Prisma client
 │   ├── supabase/            # Supabase utilities
@@ -84,7 +91,7 @@ webresevation/
 ├── prisma/                  # Database schema and migrations
 │   ├── schema.prisma        # Database schema
 │   └── migrations/          # Migration files
-├── tests/                   # Test files
+├── tests/                   # Unit test files
 ├── e2e/                     # E2E tests (Playwright)
 └── types/                   # TypeScript type definitions
 ```
