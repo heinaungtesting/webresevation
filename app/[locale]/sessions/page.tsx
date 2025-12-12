@@ -48,8 +48,8 @@ export default function SessionsPage() {
       const response = await fetch(`/api/sessions?${params}`);
       if (!response.ok) throw new Error('Failed to fetch sessions');
 
-      const data = await response.json();
-      setSessions(data);
+      const result = await response.json();
+      setSessions(result.data || []);
     } catch (err: any) {
       console.error('Error fetching sessions:', err);
       setError(err.message || t('failedToLoad'));
