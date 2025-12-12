@@ -17,7 +17,6 @@ export default function LanguageSwitcher() {
     const pathWithoutLocale = pathname.replace(`/${locale}`, '');
     // Navigate to the new locale
     router.push(`/${newLocale}${pathWithoutLocale}`);
-    router.refresh();
     setIsOpen(false);
   };
 

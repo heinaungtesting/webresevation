@@ -2,12 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Button from '@/app/components/ui/Button';
-import ChatBox from '@/app/components/chat/ChatBox';
 import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
+
+const ChatBox = dynamic(() => import('@/app/components/chat/ChatBox'), {
+  loading: () => <Loading text="Loading chat..." />,
+});
 
 export default function ConversationPage() {
   const router = useRouter();

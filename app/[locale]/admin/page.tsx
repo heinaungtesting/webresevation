@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/app/contexts/AuthContext';
 import {
   Users,
@@ -32,7 +32,6 @@ interface AdminStats {
 }
 
 export default function AdminDashboardPage() {
-  const router = useRouter();
   const { user } = useAuth();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -153,41 +152,41 @@ export default function AdminDashboardPage() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <button
-            onClick={() => router.push('/admin/users')}
-            className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left"
+          <Link
+            href="/admin/users"
+            className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left block"
           >
             <Users className="w-6 h-6 text-blue-600 mb-2" />
             <h3 className="font-semibold text-gray-900">Manage Users</h3>
             <p className="text-sm text-gray-600">View and manage user accounts</p>
-          </button>
+          </Link>
 
-          <button
-            onClick={() => router.push('/admin/sport-centers')}
-            className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all text-left"
+          <Link
+            href="/admin/sport-centers"
+            className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-purple-300 hover:shadow-md transition-all text-left block"
           >
             <MapPin className="w-6 h-6 text-purple-600 mb-2" />
             <h3 className="font-semibold text-gray-900">Sport Centers</h3>
             <p className="text-sm text-gray-600">Add and edit sport centers</p>
-          </button>
+          </Link>
 
-          <button
-            onClick={() => router.push('/sessions')}
-            className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-green-300 hover:shadow-md transition-all text-left"
+          <Link
+            href="/sessions"
+            className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-green-300 hover:shadow-md transition-all text-left block"
           >
             <Calendar className="w-6 h-6 text-green-600 mb-2" />
             <h3 className="font-semibold text-gray-900">View Sessions</h3>
             <p className="text-sm text-gray-600">Browse all sessions</p>
-          </button>
+          </Link>
 
-          <button
-            onClick={() => router.push('/profile')}
-            className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all text-left"
+          <Link
+            href="/profile"
+            className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all text-left block"
           >
             <TrendingUp className="w-6 h-6 text-gray-600 mb-2" />
             <h3 className="font-semibold text-gray-900">My Profile</h3>
             <p className="text-sm text-gray-600">View your admin profile</p>
-          </button>
+          </Link>
         </div>
 
         {/* Statistics Cards */}
