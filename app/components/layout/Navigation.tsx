@@ -139,7 +139,7 @@ export default function Navigation() {
                       <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white shadow-large border border-slate-100 py-2 animate-scaleIn origin-top-right z-50">
                         <div className="px-4 py-2 border-b border-slate-100">
                           <p className="text-sm font-medium text-slate-900 truncate">{displayName}</p>
-                          <p className="text-xs text-slate-500">Manage your account</p>
+                          <p className="text-xs text-slate-500">{t('manageAccount')}</p>
                         </div>
 
                         <div className="py-1">

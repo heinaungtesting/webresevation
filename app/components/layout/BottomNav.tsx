@@ -2,26 +2,28 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Home, Search, Ticket, User, Plus } from 'lucide-react';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 interface NavItem {
   href: string;
   icon: React.ComponentType<any>;
-  label: string;
+  labelKey: string;
   requiresAuth?: boolean;
 }
 
 const navItems: NavItem[] = [
-  { href: '/', icon: Home, label: 'Home' },
-  { href: '/sessions', icon: Search, label: 'Explore' },
-  { href: '/my-sessions', icon: Ticket, label: 'My Sessions', requiresAuth: true },
-  { href: '/profile', icon: User, label: 'Profile', requiresAuth: true },
+  { href: '/', icon: Home, labelKey: 'home' },
+  { href: '/sessions', icon: Search, labelKey: 'explore' },
+  { href: '/my-sessions', icon: Ticket, labelKey: 'mySessions', requiresAuth: true },
+  { href: '/profile', icon: User, labelKey: 'profile', requiresAuth: true },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const t = useTranslations('nav');
 
   // Extract locale from pathname
   const pathParts = pathname.split('/');
@@ -90,7 +92,7 @@ export default function BottomNav() {
                     text-[10px] font-semibold transition-all duration-300
                     ${active ? 'text-primary-600 translate-y-0.5' : 'group-hover:text-slate-600'}
                   `}>
-                    {item.label}
+                    {t(item.labelKey as any)}
                   </span>
                 </Link>
               );
@@ -107,7 +109,7 @@ export default function BottomNav() {
                 <div className="group-hover:scale-110 group-active:scale-95 transition-transform duration-300">
                   <User className="w-6 h-6" suppressHydrationWarning />
                 </div>
-                <span className="text-[10px] font-semibold group-hover:text-slate-600 transition-colors">Login</span>
+                <span className="text-[10px] font-semibold group-hover:text-slate-600 transition-colors">{t('login')}</span>
               </Link>
             )}
           </div>

@@ -10,17 +10,21 @@
     "admin": "Admin",
     "login": "Login",
     "signUp": "Sign Up",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "manageAccount": "Manage your account",
+    "explore": "Explore"
   },
   "messages": {
     "title": "Messages",
+    "subtitle": "Your conversations and chats",
     "noMessages": "No messages yet",
     "startConversation": "Start a conversation with other players or join a session chat",
     "loadingConversations": "Loading conversations...",
     "loadingMessages": "Loading messages...",
     "typeMessage": "Type a message...",
-    "send": "Send"
-
+    "send": "Send",
+    "loginRequired": "Please log in",
+    "loginRequiredDesc": "You need to be logged in to view your messages"
   },
   "home": {
     "hero": {
