@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { locales } from '@/i18n';
 import Navigation from '@/app/components/layout/Navigation';
 import BottomNav from '@/app/components/layout/BottomNav';
+import PageTransition from '@/app/components/layout/PageTransition';
 import { AuthProvider } from '@/app/contexts/AuthContext';
 import QueryProvider from '@/app/providers/QueryProvider';
 
@@ -34,7 +35,9 @@ export default async function LocaleLayout({
       <QueryProvider>
         <AuthProvider>
           <Navigation />
-          <main className="pt-14 md:pt-16">{children}</main>
+          <main className="pt-14 md:pt-16">
+            <PageTransition>{children}</PageTransition>
+          </main>
           <BottomNav />
         </AuthProvider>
       </QueryProvider>

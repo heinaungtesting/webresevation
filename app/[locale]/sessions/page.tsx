@@ -11,6 +11,17 @@ import Input from '@/app/components/ui/Input';
 import Button from '@/app/components/ui/Button';
 import Loading from '@/app/components/ui/Loading';
 import { Search, Filter, Plus, RefreshCw, Calendar } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
+};
 
 export default function SessionsPage() {
   const router = useRouter();
@@ -72,12 +83,12 @@ export default function SessionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-slate-50 py-4 sm:py-6 md:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
               {t('title')}
             </h1>
             {user && (
@@ -91,13 +102,13 @@ export default function SessionsPage() {
               </Button>
             )}
           </div>
-          <p className="text-gray-600">
+          <p className="text-slate-600 text-sm sm:text-base">
             {t('subtitle')}
           </p>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
           <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
             <div className="flex-grow">
               <Input
@@ -159,7 +170,7 @@ export default function SessionsPage() {
               {/* Date Range Filter */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">
-                  <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
                     {t('fromDate')}
                   </label>
@@ -168,11 +179,11 @@ export default function SessionsPage() {
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
-                    className="px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[44px] w-full"
+                    className="px-4 py-3 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 min-h-[44px] w-full"
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
                     {t('toDate')}
                   </label>
@@ -181,7 +192,7 @@ export default function SessionsPage() {
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                     min={startDate || new Date().toISOString().split('T')[0]}
-                    className="px-4 py-3 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[44px] w-full"
+                    className="px-4 py-3 border border-slate-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 min-h-[44px] w-full"
                   />
                 </div>
               </div>
@@ -205,7 +216,7 @@ export default function SessionsPage() {
 
         {/* Error State */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
             <div className="flex items-center justify-between">
               <p className="text-red-800">{error}</p>
               <Button
@@ -229,20 +240,28 @@ export default function SessionsPage() {
         ) : (
           <>
             {/* Results */}
-            <div className="mb-4 text-gray-600">
+            <div className="mb-4 text-slate-600 text-sm sm:text-base">
               {t(sessions.length === 1 ? 'sessionsFound' : 'sessionsFoundPlural', { count: sessions.length })}
             </div>
 
             {/* Sessions Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              key={`${sportFilter}-${skillFilter}-${startDate}-${endDate}`}
+            >
               {sessions.map((session) => (
-                <SessionCard key={session.id} session={session} />
+                <motion.div key={session.id} variants={cardVariants}>
+                  <SessionCard session={session} />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             {sessions.length === 0 && !error && (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">
+                <p className="text-slate-500 text-base sm:text-lg">
                   {t('noSessionsFound')}
                 </p>
                 <Button

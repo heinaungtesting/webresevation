@@ -12,6 +12,16 @@ import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import UserStats from '@/app/components/profile/UserStats';
 import { formatDate } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
+
+const sectionVariants = {
+  hidden: { opacity: 0, y: 18 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, delay: i * 0.1, ease: 'easeOut' as const },
+  }),
+};
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -147,7 +157,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-4 sm:py-6 md:py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage
             title={t('pleaseLogin')}
@@ -168,7 +178,7 @@ export default function ProfilePage() {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-4 sm:py-6 md:py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage message={error || t('profileNotFound')} onRetry={fetchProfile} />
         </div>
@@ -180,13 +190,19 @@ export default function ProfilePage() {
   const achievements = getAchievements();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-4 sm:py-6 md:py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Cute Header with Sparkles */}
-        <div className="flex items-center justify-between mb-6">
+        {/* Header with Sparkles */}
+        <motion.div
+          className="flex items-center justify-between mb-6"
+          custom={0}
+          variants={sectionVariants}
+          initial="hidden"
+          animate="visible"
+        >
           <div className="flex items-center gap-3">
-            <Sparkles className="w-8 h-8 text-pink-500" />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
+            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-pink-500" />
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
               {t('title')}
             </h1>
           </div>
@@ -196,11 +212,12 @@ export default function ProfilePage() {
             className="gap-2 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 border-0"
           >
             <Edit className="w-4 h-4" />
-            {t('editProfile')}
+            <span>{t('editProfile')}</span>
           </Button>
-        </div>
+        </motion.div>
 
-        {/* Kawaii Profile Card */}
+        {/* Profile Card */}
+        <motion.div custom={1} variants={sectionVariants} initial="hidden" animate="visible">
         <Card padding="lg" className="mb-6 bg-white/80 backdrop-blur-sm border-2 border-pink-100 shadow-xl">
           <div className="flex flex-col sm:flex-row items-start gap-6">
             {/* Cute Avatar with Glow */}
@@ -228,7 +245,7 @@ export default function ProfilePage() {
             {/* Info with Cute Styling */}
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
                   {displayName}
                 </h2>
                 <span className="text-xl">💖</span>
@@ -238,15 +255,15 @@ export default function ProfilePage() {
               )}
 
               {profile.bio && (
-                <p className="text-gray-700 mb-4 bg-gradient-to-r from-pink-50 to-purple-50 p-3 rounded-2xl border border-pink-100">
+                <p className="text-slate-700 mb-4 bg-gradient-to-r from-pink-50 to-purple-50 p-3 rounded-2xl border border-pink-100 text-sm sm:text-base">
                   {profile.bio}
                 </p>
               )}
 
-              <div className="flex flex-wrap gap-3 text-sm text-gray-600">
+              <div className="flex flex-wrap gap-2 sm:gap-3 text-sm text-slate-600">
                 <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-pink-100">
                   <Mail className="w-4 h-4 text-pink-500" />
-                  <span>{profile.email}</span>
+                  <span className="max-w-[160px] sm:max-w-none truncate">{profile.email}</span>
                   {profile.email_verified && (
                     <Badge variant="success" size="sm" className="ml-1">
                       {t('verified')}
@@ -286,13 +303,15 @@ export default function ProfilePage() {
             </div>
           </div>
         </Card>
+        </motion.div>
 
-        {/* Achievements Section - Super Kawaii! */}
+        {/* Achievements Section */}
         {achievements.length > 0 && (
+          <motion.div custom={2} variants={sectionVariants} initial="hidden" animate="visible">
           <Card padding="lg" className="mb-6 bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200">
             <div className="flex items-center gap-3 mb-4">
               <Trophy className="w-6 h-6 text-yellow-600" />
-              <h3 className="text-2xl font-bold text-yellow-800">{t('achievements.title')}</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-yellow-800">{t('achievements.title')}</h3>
             </div>
             <p className="text-sm text-yellow-700 mb-4">{t('achievements.subtitle')}</p>
 
@@ -300,19 +319,19 @@ export default function ProfilePage() {
               {achievements.map((achievement, index) => (
                 <div
                   key={index}
-                  className={`relative p-4 rounded-2xl transition-all duration-300 ${
+                  className={`relative p-3 sm:p-4 rounded-2xl transition-all duration-300 ${
                     achievement.unlocked
                       ? 'bg-white border-2 border-yellow-200 shadow-md hover:shadow-lg hover:scale-105'
-                      : 'bg-gray-50 border-2 border-dashed border-gray-300 opacity-60'
+                      : 'bg-slate-50 border-2 border-dashed border-slate-300 opacity-60'
                   }`}
                 >
-                  <div className={`w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br ${achievement.color} flex items-center justify-center text-3xl shadow-lg`}>
+                  <div className={`w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-3 rounded-full bg-gradient-to-br ${achievement.color} flex items-center justify-center text-2xl sm:text-3xl shadow-lg`}>
                     {achievement.icon}
                   </div>
-                  <h4 className={`text-sm font-bold text-center mb-1 ${achievement.unlocked ? 'text-gray-900' : 'text-gray-500'}`}>
+                  <h4 className={`text-xs sm:text-sm font-bold text-center mb-1 ${achievement.unlocked ? 'text-slate-900' : 'text-slate-500'}`}>
                     {achievement.title}
                   </h4>
-                  <p className={`text-xs text-center ${achievement.unlocked ? 'text-gray-600' : 'text-gray-400'}`}>
+                  <p className={`text-xs text-center ${achievement.unlocked ? 'text-slate-600' : 'text-slate-400'}`}>
                     {achievement.description}
                   </p>
                   {achievement.unlocked && (
@@ -324,10 +343,15 @@ export default function ProfilePage() {
               ))}
             </div>
           </Card>
+          </motion.div>
         )}
 
-        {/* Statistics with Cute Styling */}
-        {stats && <UserStats stats={stats} />}
+        {/* Statistics */}
+        {stats && (
+          <motion.div custom={3} variants={sectionVariants} initial="hidden" animate="visible">
+            <UserStats stats={stats} />
+          </motion.div>
+        )}
       </div>
     </div>
   );

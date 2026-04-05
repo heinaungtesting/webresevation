@@ -12,6 +12,16 @@ import Select from '@/app/components/ui/Select';
 import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import { csrfPatch } from '@/lib/csrfClient';
+import { motion } from 'framer-motion';
+
+const sectionVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, delay: i * 0.08, ease: 'easeOut' as const },
+  }),
+};
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -89,7 +99,7 @@ export default function SettingsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-slate-50 py-4 sm:py-6 md:py-8">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage
             title={t('pleaseLogin')}
@@ -102,39 +112,40 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-slate-50">
         <Loading text={t('loading')} fullScreen />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-slate-50 py-4 sm:py-6 md:py-8">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">{t('title')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6">{t('title')}</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">
+            <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-800 text-sm">
               {t('updateSuccess')}
             </div>
           )}
 
           {/* Language Preferences */}
+          <motion.div custom={0} variants={sectionVariants} initial="hidden" animate="visible">
           <Card padding="lg">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                 <Globe className="w-5 h-5 text-blue-600" />
               </div>
               <div className="flex-1">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                <h2 className="text-lg font-semibold text-slate-900 mb-4">
                   {t('language.title')}
                 </h2>
                 <Select
@@ -149,30 +160,32 @@ export default function SettingsPage() {
                     { value: 'ja', label: t('language.japanese') },
                   ]}
                 />
-                <p className="text-sm text-gray-600 mt-2">
+                <p className="text-sm text-slate-600 mt-2">
                   {t('language.description')}
                 </p>
               </div>
             </div>
           </Card>
+          </motion.div>
 
           {/* Notification Preferences */}
+          <motion.div custom={1} variants={sectionVariants} initial="hidden" animate="visible">
           <Card padding="lg">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
                 <Bell className="w-5 h-5 text-purple-600" />
               </div>
               <div className="flex-1">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                <h2 className="text-lg font-semibold text-slate-900 mb-4">
                   {t('notifications.title')}
                 </h2>
                 <div className="space-y-4">
                   <label className="flex items-center justify-between cursor-pointer">
                     <div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-slate-900">
                         {t('notifications.email.title')}
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-slate-600">
                         {t('notifications.email.description')}
                       </p>
                     </div>
@@ -192,10 +205,10 @@ export default function SettingsPage() {
 
                   <label className="flex items-center justify-between cursor-pointer">
                     <div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-slate-900">
                         {t('notifications.push.title')}
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-slate-600">
                         {t('notifications.push.description')}
                       </p>
                     </div>
@@ -216,9 +229,10 @@ export default function SettingsPage() {
               </div>
             </div>
           </Card>
+          </motion.div>
 
           {/* Save Button */}
-          <div className="flex justify-end">
+          <div className="flex justify-end sm:justify-end">
             <Button
               type="submit"
               variant="primary"
@@ -232,22 +246,22 @@ export default function SettingsPage() {
         </form>
 
         {/* Legal Section */}
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('legal.title')}</h2>
+        <motion.div custom={2} variants={sectionVariants} initial="hidden" animate="visible" className="mt-8">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('legal.title')}</h2>
           <Card padding="none">
             <Link
               href={`/${locale}/terms`}
-              className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 group"
+              className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors border-b border-gray-100 group"
             >
               <div className="flex items-center gap-3">
                 <div className="flex-shrink-0 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
                   <FileText className="w-5 h-5 text-slate-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
+                  <p className="font-medium text-slate-900 group-hover:text-primary-600 transition-colors">
                     {t('legal.terms.title')}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-slate-500">
                     {t('legal.terms.description')}
                   </p>
                 </div>
@@ -257,17 +271,17 @@ export default function SettingsPage() {
 
             <Link
               href={`/${locale}/privacy`}
-              className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors group"
+              className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors group"
             >
               <div className="flex items-center gap-3">
                 <div className="flex-shrink-0 w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
                   <Shield className="w-5 h-5 text-slate-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
+                  <p className="font-medium text-slate-900 group-hover:text-primary-600 transition-colors">
                     {t('legal.privacy.title')}
                   </p>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-slate-500">
                     {t('legal.privacy.description')}
                   </p>
                 </div>
@@ -275,7 +289,7 @@ export default function SettingsPage() {
               <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-primary-600 transition-colors" />
             </Link>
           </Card>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
