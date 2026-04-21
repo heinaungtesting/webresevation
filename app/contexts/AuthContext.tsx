@@ -88,8 +88,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   const signOut = async () => {
-    await csrfPost('/api/auth/logout', {});
-    await supabase.auth.signOut();
+    try {
+      await csrfPost('/api/auth/logout', {});
+    } catch (err) {
+      console.warn('API logout failed:', err);
+    }
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.warn('Supabase logout failed:', err);
+    }
     setUser(null);
     setProfile(null);
   };
