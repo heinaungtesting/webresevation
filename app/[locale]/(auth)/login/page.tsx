@@ -60,7 +60,7 @@ export default function LoginPage() {
       router.push(redirectTo);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred. Please try again.');
+      setError(t('invalidCredentials'));
     } finally {
       setLoading(false);
     }
@@ -152,13 +152,6 @@ export default function LoginPage() {
                 {t('subtitleShort')}
               </p>
             </div>
-
-            {error && (
-              <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-6 animate-fadeInDown">
-                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-800">{error}</p>
-              </div>
-            )}
 
             {/* OAuth Buttons */}
             <div className="space-y-3 mb-6">
@@ -263,6 +256,13 @@ export default function LoginPage() {
                   {t('forgotPassword')}
                 </Link>
               </div>
+
+              {error && (
+                <div role="alert" className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg animate-fade-in-down">
+                  <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-800">{error}</p>
+                </div>
+              )}
 
               <Button
                 type="submit"

@@ -17,6 +17,7 @@ export default function ProfileEditPage() {
   const router = useRouter();
   const { user, refreshProfile } = useAuth();
   const t = useTranslations('profile');
+  const tSessions = useTranslations('sessions');
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -94,6 +95,13 @@ export default function ProfileEditPage() {
     setSaving(true);
     setError('');
 
+    // Fix 4.1: Username validation
+    if (formData.username && !/^[a-zA-Z0-9_]{3,20}$/.test(formData.username)) {
+      setError(t('edit.invalidUsername'));
+      setSaving(false);
+      return;
+    }
+
     try {
       await csrfPatch('/api/users/me', formData);
 
@@ -111,7 +119,7 @@ export default function ProfileEditPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-8">
+      <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage
             title={t('pleaseLogin')}
@@ -124,52 +132,51 @@ export default function ProfileEditPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+      <div className="min-h-screen bg-gray-50">
         <Loading text={t('edit.loading')} fullScreen />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Cute Header */}
+        {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => router.push('/profile')}
-            className="p-2 hover:bg-white/50 rounded-full"
+            className="p-2"
           >
-            <ArrowLeft className="w-5 h-5 text-purple-600" />
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
           </Button>
           <div className="flex items-center gap-3">
-            <Sparkles className="w-8 h-8 text-pink-500" />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-gray-900">
               {t('edit.title')}
             </h1>
           </div>
         </div>
 
-        {/* Kawaii Form Card */}
-        <Card padding="lg" className="bg-white/80 backdrop-blur-sm border-2 border-pink-100 shadow-xl">
+        {/* Form Card */}
+        <Card padding="lg">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 rounded-2xl text-red-800 text-sm flex items-center gap-2">
-                <span>❌</span>
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" />
                 {error}
               </div>
             )}
 
             {success && (
-              <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl text-green-800 text-sm flex items-center gap-2 animate-pulse">
-                <span>✨</span>
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm flex items-center gap-2">
+                <CheckCircle className="w-4 h-4" />
                 {t('edit.success')}
               </div>
             )}
 
-            {/* Cute Avatar Upload Section */}
-            <div className="flex justify-center pb-6 border-b-2 border-dashed border-pink-200">
+            {/* Avatar Upload Section */}
+            <div className="flex justify-center pb-6 border-b border-gray-200">
               <AvatarUpload
                 currentAvatarUrl={avatarUrl}
                 displayName={formData.display_name || formData.username || profile?.email?.split('@')[0] || 'User'}
@@ -184,11 +191,11 @@ export default function ProfileEditPage() {
               />
             </div>
 
-            {/* Cute Input Fields */}
+            {/* Input Fields */}
             <div className="space-y-5">
               <div>
-                <label className="text-sm font-semibold text-purple-600 mb-2 block flex items-center gap-2">
-                  <span>👤</span> {t('edit.username')}
+                <label className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
+                  {t('edit.username')}
                 </label>
                 <Input
                   name="username"
@@ -197,13 +204,12 @@ export default function ProfileEditPage() {
                   onChange={handleChange}
                   placeholder={t('edit.usernamePlaceholder')}
                   fullWidth
-                  className="border-2 border-pink-100 focus:border-purple-400 rounded-2xl"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-purple-600 mb-2 block flex items-center gap-2">
-                  <span>✨</span> {t('edit.displayName')}
+                <label className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
+                  {t('edit.displayName')}
                 </label>
                 <Input
                   name="display_name"
@@ -212,13 +218,12 @@ export default function ProfileEditPage() {
                   onChange={handleChange}
                   placeholder={t('edit.displayNamePlaceholder')}
                   fullWidth
-                  className="border-2 border-pink-100 focus:border-purple-400 rounded-2xl"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-purple-600 mb-2 block flex items-center gap-2">
-                  <span>💭</span> {t('edit.bio')}
+                <label className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
+                  {t('edit.bio')}
                 </label>
                 <textarea
                   name="bio"
@@ -226,13 +231,13 @@ export default function ProfileEditPage() {
                   onChange={handleChange}
                   placeholder={t('edit.bioPlaceholder')}
                   rows={4}
-                  className="px-4 py-3 border-2 border-pink-100 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 w-full bg-white"
+                  className="px-4 py-3 border-2 border-gray-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 w-full bg-white"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-semibold text-purple-600 mb-2 block flex items-center gap-2">
-                  <span>📍</span> {t('edit.location')}
+                <label className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
+                  {t('edit.location')}
                 </label>
                 <Input
                   name="location"
@@ -241,14 +246,13 @@ export default function ProfileEditPage() {
                   onChange={handleChange}
                   placeholder={t('edit.locationPlaceholder')}
                   fullWidth
-                  className="border-2 border-pink-100 focus:border-purple-400 rounded-2xl"
                 />
               </div>
 
-              {/* Super Cute Sport Selection */}
+              {/* Sport Selection */}
               <div>
-                <label className="text-sm font-semibold text-purple-600 mb-3 block flex items-center gap-2">
-                  <span>🏃‍♀️</span> {t('edit.favoriteSports')}
+                <label className="text-sm font-semibold text-gray-700 mb-3 block flex items-center gap-2">
+                  {t('edit.favoriteSports')}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   {sports.map((sport) => (
@@ -256,32 +260,30 @@ export default function ProfileEditPage() {
                       key={sport.name}
                       type="button"
                       onClick={() => toggleSport(sport.name)}
-                      className={`px-4 py-3 rounded-2xl border-2 transition-all duration-200 text-sm font-medium capitalize flex items-center justify-center gap-2 ${
+                      className={`px-4 py-3 rounded-xl border-2 transition-all duration-200 text-sm font-medium capitalize flex items-center justify-center gap-2 ${
                         formData.sport_preferences.includes(sport.name)
-                          ? 'border-purple-400 bg-gradient-to-r from-pink-100 to-purple-100 text-purple-700 shadow-md transform scale-105'
-                          : 'border-pink-100 bg-white text-gray-700 hover:border-pink-300 hover:bg-pink-50'
+                          ? 'border-primary-500 bg-primary-50 text-primary-700'
+                          : 'border-white bg-white text-gray-700 hover:border-gray-200 shadow-sm'
                       }`}
                     >
                       <span className="text-xl">{sport.emoji}</span>
-                      <span>{sport.name.replace('-', ' ')}</span>
-                      {formData.sport_preferences.includes(sport.name) && <span>✨</span>}
+                      <span className="capitalize">{tSessions(sport.name)}</span>
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-purple-500 mt-2 text-center">
+                <p className="text-xs text-gray-500 mt-2 text-center">
                   {t('edit.selectSports')}
                 </p>
               </div>
             </div>
 
-            {/* Cute Action Buttons */}
+            {/* Action Buttons */}
             <div className="flex gap-4 pt-6">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => router.push('/profile')}
                 fullWidth
-                className="border-2 border-purple-200 text-purple-600 hover:bg-purple-50 rounded-2xl"
               >
                 {t('edit.cancel')}
               </Button>
@@ -290,7 +292,7 @@ export default function ProfileEditPage() {
                 variant="primary"
                 loading={saving}
                 fullWidth
-                className="gap-2 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 border-0 rounded-2xl shadow-lg"
+                className="gap-2"
               >
                 <Save className="w-4 h-4" />
                 {saving ? t('edit.saving') : t('edit.saveChanges')}
@@ -299,9 +301,8 @@ export default function ProfileEditPage() {
           </form>
         </Card>
 
-        {/* Cute Motivational Text */}
         <div className="mt-6 text-center">
-          <p className="text-sm text-purple-500">
+          <p className="text-sm text-gray-500">
             {t('edit.motivational')}
           </p>
         </div>

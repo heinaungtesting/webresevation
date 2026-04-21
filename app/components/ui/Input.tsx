@@ -19,6 +19,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           type={type}
+          data-date={type === 'date' && props.value ? props.value : undefined}
           className={cn(
             'px-4 py-3 border-2 border-slate-200 rounded-xl text-base',
             'bg-white text-slate-900 placeholder:text-slate-400',

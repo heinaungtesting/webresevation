@@ -293,7 +293,6 @@
       "forgotPassword": "パスワードをお忘れですか？",
       "loginButton": "ログイン",
       "loggingIn": "ログイン中...",
-      "invalidCredentials": "メールアドレスまたはパスワードが正しくありません",
       "noAccount": "アカウントをお持ちでないですか？",
       "signUpLink": "無料で登録",
       "continueWithGoogle": "Googleで続ける",
@@ -411,9 +410,9 @@
     "back": "戻る"
   },
   "profile": {
-    "title": "プロフィール",
+    "title": "かわいいプロフィール ✨",
     "editProfile": "プロフィール編集",
-    "loading": "プロフィールを読み込み中...",
+    "loading": "あなたのかわいいプロフィールを読み込み中... ✨",
     "pleaseLogin": "ログインしてください",
     "needLogin": "プロフィールを表示するにはログインが必要です",
     "profileNotFound": "プロフィールが見つかりません",
@@ -422,11 +421,11 @@
     "joined": "{date}に参加",
     "near": "{station}近く",
     "achievements": {
-      "title": "実績",
-      "subtitle": "素晴らしいプレーでバッジを集めよう！",
+      "title": "実績 ⭐",
+      "subtitle": "素晴らしいプレーでバッジを集めよう！かわいい~ ✨",
       "firstStep": {
         "title": "最初の一歩",
-        "description": "初めてのセッションに参加"
+        "description": "初めてのセッションに参加！"
       },
       "regularPlayer": {
         "title": "常連プレイヤー",
@@ -434,11 +433,11 @@
       },
       "superStar": {
         "title": "スーパースター",
-        "description": "50回以上のセッション"
+        "description": "すごい！50回以上のセッション"
       },
       "perfectAttendance": {
         "title": "皆勤賞",
-        "description": "信頼度100%"
+        "description": "信頼度100%！"
       },
       "sportEnthusiast": {
         "title": "スポーツ愛好家",
@@ -463,16 +462,11 @@
       "bioPlaceholder": "自己紹介を書いてください... ✨",
       "locationPlaceholder": "例：渋谷、東京 🗼",
       "selectSports": "好きなスポーツを選んでね！たくさん選ぼう~ 💪",
-      "displayNamePlaceholder": "表示名",
-      "bioPlaceholder": "自己紹介を書いてください...",
-      "locationPlaceholder": "例：渋谷、東京",
-      "selectSports": "好きなスポーツを選んでください",
       "cancel": "キャンセル",
       "saveChanges": "変更を保存",
       "saving": "保存中...",
       "success": "プロフィールを更新しました！リダイレクト中...",
-      "invalidUsername": "ユーザー名は3〜20文字で、英数字とアンダースコア(_)のみ使用可能です。",
-      "motivational": "プロフィールを充実させましょう！",
+      "motivational": "プロフィールを輝かせよう！✨ かわいい~ 🌸",
       "avatarInfo": "JPEG、PNG、WebP、またはGIF。最大5MB。",
       "removePhoto": "写真を削除"
     }

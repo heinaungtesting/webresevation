@@ -13,6 +13,7 @@ import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import { getLanguageOptions } from '@/app/components/ui/LanguageFlag';
 import { csrfPost } from '@/lib/csrfClient';
+import { toast } from 'react-hot-toast';
 
 export default function CreateSessionPage() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function CreateSessionPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [isDirty, setIsDirty] = useState(false);
 
   const [formData, setFormData] = useState({
     sport_center_id: '',
@@ -107,10 +109,26 @@ export default function CreateSessionPage() {
     }
   };
 
+  // Fix 4.3: Prevent accidental navigation if form is dirty
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty && !submitting) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty, submitting]);
+
+  // Fix 4.2: Get today's date in user's timezone formatted as YYYY-MM-DD
+  const today = new Date().toLocaleDateString('en-CA');
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     const newValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
     setFormData((prev) => ({ ...prev, [name]: newValue }));
+    setIsDirty(true);
     // Clear error for this field
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
@@ -137,6 +155,9 @@ export default function CreateSessionPage() {
     if (formData.max_participants && parseInt(formData.max_participants) < 2) {
       newErrors.max_participants = t('mustAllow2Participants');
     }
+    if (!formData.description_en && !formData.description_ja) {
+      newErrors.description_ja = 'セッションの説明を入力してください (Description is required)';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -162,8 +183,8 @@ export default function CreateSessionPage() {
         date_time: dateTime.toISOString(),
         duration_minutes: parseInt(formData.duration_minutes),
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
-        description_en: formData.description_en || null,
-        description_ja: formData.description_ja || null,
+        description_en: formData.description_en || undefined,
+        description_ja: formData.description_ja || undefined,
         // Language exchange & vibe fields
         primary_language: formData.primary_language,
         allow_english: formData.allow_english,
@@ -173,6 +194,7 @@ export default function CreateSessionPage() {
       router.push(`/${locale}/sessions/${session.id}`);
     } catch (err: any) {
       console.error('Error creating session:', err);
+      toast.error('セッションの作成に失敗しました。詳細を確認してください。');
       setError(err.message || 'Failed to create session');
     } finally {
       setSubmitting(false);
@@ -403,8 +425,11 @@ export default function CreateSessionPage() {
                 onChange={handleChange}
                 placeholder={t('descriptionEnPlaceholder')}
                 rows={3}
-                className="px-4 py-3 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-full"
+                className={`px-4 py-3 border rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-full ${errors.description_en ? 'border-red-500' : 'border-gray-300'}`}
               />
+              {errors.description_en && (
+                <span className="text-sm text-red-600">{errors.description_en}</span>
+              )}
             </div>
 
             {/* Description (Japanese) */}
@@ -418,8 +443,11 @@ export default function CreateSessionPage() {
                 onChange={handleChange}
                 placeholder={t('descriptionJaPlaceholder')}
                 rows={3}
-                className="px-4 py-3 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-full"
+                className={`px-4 py-3 border rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 w-full ${errors.description_ja ? 'border-red-500' : 'border-gray-300'}`}
               />
+              {errors.description_ja && (
+                <span className="text-sm text-red-600">{errors.description_ja}</span>
+              )}
             </div>
 
             {/* Info Box */}

@@ -25,6 +25,7 @@ export default function EditSessionPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [isDirty, setIsDirty] = useState(false);
 
   const [formData, setFormData] = useState({
     sport_center_id: '',
@@ -115,9 +116,22 @@ export default function EditSessionPage() {
     }
   };
 
+  // Fix 4.3: Prevent accidental navigation if form is dirty
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty && !submitting) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty, submitting]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setIsDirty(true);
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
@@ -213,7 +227,8 @@ export default function EditSessionPage() {
     );
   }
 
-  const minDate = new Date().toISOString().split('T')[0];
+  // Fix 4.2: Get today's date in user's timezone formatted as YYYY-MM-DD
+  const minDate = new Date().toLocaleDateString('en-CA');
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { csrfPost } from '@/lib/csrfClient';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 interface UserProfile {
   avatar_url?: string | null;
@@ -33,6 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
+  const router = useRouter();
   
   // Add a ref to track if profile was recently fetched
   const lastFetchRef = useRef<number>(0);
@@ -88,18 +91,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   const signOut = async () => {
+    let success = true;
     try {
       await csrfPost('/api/auth/logout', {});
     } catch (err) {
       console.warn('API logout failed:', err);
+      success = false;
     }
+    
     try {
       await supabase.auth.signOut();
     } catch (err) {
       console.warn('Supabase logout failed:', err);
+      success = false;
     }
+    
+    if (!success) {
+      toast.error('ログアウトに失敗しました。再試行してください。');
+      return;
+    }
+    
     setUser(null);
     setProfile(null);
+    router.push('/');
+    router.refresh();
   };
 
   const refreshProfile = async () => {

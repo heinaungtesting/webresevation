@@ -1,5 +1,6 @@
 import { Calendar, Trophy, Users, Star, Shield, AlertTriangle } from 'lucide-react';
 import Card from '../ui/Card';
+import { useTranslations } from 'next-intl';
 
 interface UserStatsProps {
   stats: {
@@ -52,34 +53,51 @@ function getReliabilityColors(score: number) {
 }
 
 export default function UserStats({ stats }: UserStatsProps) {
+  const t = useTranslations('profile.stats');
+  const tSessions = useTranslations('sessions');
   const reliabilityScore = stats.reliability_score ?? 100;
   const noShowCount = stats.no_show_count ?? 0;
+  
+  // Create getReliabilityColors inside to use t()
+  const getReliabilityColors = (score: number) => {
+    if (score >= 80) {
+      return { text: 'text-green-600', bg: 'bg-green-100', fill: 'bg-green-500', label: t('reliabilityScore.excellent') };
+    }
+    if (score >= 60) {
+      return { text: 'text-yellow-600', bg: 'bg-yellow-100', fill: 'bg-yellow-500', label: t('reliabilityScore.good') };
+    }
+    if (score >= 40) {
+      return { text: 'text-orange-600', bg: 'bg-orange-100', fill: 'bg-orange-500', label: t('reliabilityScore.fair') };
+    }
+    return { text: 'text-red-600', bg: 'bg-red-100', fill: 'bg-red-500', label: t('reliabilityScore.needsImprovement') };
+  };
+
   const reliabilityColors = getReliabilityColors(reliabilityScore);
 
   const statItems = [
     {
-      label: 'Total Sessions',
+      label: t('totalSessions'),
       value: stats.total_sessions,
       icon: Calendar,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
     },
     {
-      label: 'Upcoming',
+      label: t('upcoming'),
       value: stats.upcoming_sessions,
       icon: Trophy,
       color: 'text-green-600',
       bgColor: 'bg-green-100',
     },
     {
-      label: 'Past Sessions',
+      label: t('pastSessions'),
       value: stats.past_sessions,
       icon: Star,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
     },
     {
-      label: 'Sessions Created',
+      label: t('sessionsCreated'),
       value: stats.created_sessions,
       icon: Users,
       color: 'text-orange-600',
@@ -99,8 +117,8 @@ export default function UserStats({ stats }: UserStatsProps) {
               <Shield className={`w-6 h-6 ${reliabilityColors.text}`} />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Reliability Score</h3>
-              <p className="text-sm text-gray-500">Based on your attendance history</p>
+              <h3 className="text-lg font-semibold text-gray-900">{t('reliabilityScore.title')}</h3>
+              <p className="text-sm text-gray-500">{t('reliabilityScore.basedOn')}</p>
             </div>
           </div>
 
@@ -129,7 +147,7 @@ export default function UserStats({ stats }: UserStatsProps) {
                 <div className="flex items-center gap-2 mt-3 text-sm text-amber-600">
                   <AlertTriangle className="w-4 h-4" />
                   <span>
-                    {noShowCount} no-show{noShowCount !== 1 ? 's' : ''} recorded
+                    {noShowCount === 1 ? t('reliabilityScore.noShow_one', { count: noShowCount }) : t('reliabilityScore.noShow_other', { count: noShowCount })}
                   </span>
                 </div>
               )}
@@ -140,10 +158,10 @@ export default function UserStats({ stats }: UserStatsProps) {
           <div className="mt-4 pt-4 border-t border-gray-100">
             <p className="text-xs text-gray-500">
               {reliabilityScore >= 80
-                ? 'Great job! Your excellent attendance makes you a trusted player.'
+                ? t('reliabilityScore.tipExcellent')
                 : reliabilityScore >= 60
-                  ? 'Good attendance record. Keep showing up to maintain your score!'
-                  : 'Tip: Always attend sessions you sign up for to improve your score.'}
+                  ? t('reliabilityScore.tipGood')
+                  : t('reliabilityScore.tipImprove')}
             </p>
           </div>
         </div>
@@ -166,7 +184,7 @@ export default function UserStats({ stats }: UserStatsProps) {
       {stats.sport_breakdown && Object.keys(stats.sport_breakdown).length > 0 && (
         <Card padding="lg">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Sports Activity
+            {t('sportsActivity')}
           </h3>
           <div className="space-y-3">
             {Object.entries(stats.sport_breakdown)
@@ -174,7 +192,7 @@ export default function UserStats({ stats }: UserStatsProps) {
               .map(([sport, count]) => (
                 <div key={sport} className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700 capitalize">
-                    {sport.replace('-', ' ')}
+                    {tSessions(sport)}
                   </span>
                   <div className="flex items-center gap-3">
                     <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">

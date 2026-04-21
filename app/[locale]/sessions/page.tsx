@@ -12,6 +12,7 @@ import Button from '@/app/components/ui/Button';
 import Loading from '@/app/components/ui/Loading';
 import { Search, Filter, Plus, RefreshCw, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toArray } from '@/lib/utils/toArray';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -60,7 +61,7 @@ export default function SessionsPage() {
       if (!response.ok) throw new Error('Failed to fetch sessions');
 
       const data = await response.json();
-      setSessions(data);
+      setSessions(toArray(data));
     } catch (err: any) {
       console.error('Error fetching sessions:', err);
       setError(err.message || t('failedToLoad'));
@@ -252,14 +253,14 @@ export default function SessionsPage() {
               animate="visible"
               key={`${sportFilter}-${skillFilter}-${startDate}-${endDate}`}
             >
-              {sessions.map((session) => (
+              {toArray(sessions).map((session) => (
                 <motion.div key={session.id} variants={cardVariants}>
                   <SessionCard session={session} />
                 </motion.div>
               ))}
             </motion.div>
 
-            {sessions.length === 0 && !error && (
+            {toArray(sessions).length === 0 && !error && (
               <div className="text-center py-12">
                 <p className="text-slate-500 text-base sm:text-lg">
                   {t('noSessionsFound')}
