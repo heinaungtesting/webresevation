@@ -193,7 +193,7 @@ export default function CreateSessionPage() {
       router.push(`/${locale}/sessions/${session.id}`);
     } catch (err: any) {
       console.error('Error creating session:', err);
-      setError(err.message || 'Failed to create session');
+      setError(err.message || 'セッションの作成に失敗しました。詳細を確認してください。');
     } finally {
       setSubmitting(false);
     }

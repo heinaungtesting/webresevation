@@ -107,6 +107,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     if (!success) {
       console.error('ログアウトに失敗しました。再試行してください。');
+      if (typeof window !== 'undefined') {
+        window.alert('ログアウトに失敗しました。再試行してください。');
+      }
       return;
     }
     
