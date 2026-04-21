@@ -13,7 +13,6 @@ import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import { getLanguageOptions } from '@/app/components/ui/LanguageFlag';
 import { csrfPost } from '@/lib/csrfClient';
-import { toast } from 'react-hot-toast';
 
 export default function CreateSessionPage() {
   const router = useRouter();
@@ -194,7 +193,6 @@ export default function CreateSessionPage() {
       router.push(`/${locale}/sessions/${session.id}`);
     } catch (err: any) {
       console.error('Error creating session:', err);
-      toast.error('セッションの作成に失敗しました。詳細を確認してください。');
       setError(err.message || 'Failed to create session');
     } finally {
       setSubmitting(false);
@@ -234,9 +232,6 @@ export default function CreateSessionPage() {
       </div>
     );
   }
-
-  // Get minimum date (today) in YYYY-MM-DD format
-  const today = new Date().toISOString().split('T')[0];
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

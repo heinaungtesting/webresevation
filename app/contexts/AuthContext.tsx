@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { csrfPost } from '@/lib/csrfClient';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
 
 interface UserProfile {
   avatar_url?: string | null;
@@ -107,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     
     if (!success) {
-      toast.error('ログアウトに失敗しました。再試行してください。');
+      console.error('ログアウトに失敗しました。再試行してください。');
       return;
     }
     
