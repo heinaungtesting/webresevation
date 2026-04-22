@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Session } from '@/types';
 import SessionCard from '@/app/components/SessionCard';
@@ -14,6 +14,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
+import { toArray } from '@/lib/utils/toArray';
+import NotificationBell from '@/app/components/notifications/NotificationBell';
 
 interface HomeFeedProps {
   sessions: Session[];
@@ -55,7 +57,8 @@ async function fetchSessions(params: {
     throw new Error('Failed to fetch sessions');
   }
 
-  return response.json();
+  const data = await response.json();
+  return toArray<Session>(data);
 }
 
 export default function HomeFeed({ sessions: initialSessions, happeningNow }: HomeFeedProps) {
@@ -69,14 +72,15 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
 
   const displayName = profile?.display_name || profile?.username || user?.email?.split('@')[0] || 'there';
 
-  // Get greeting based on time of day
-  const getGreeting = (): string => {
+  // Get greeting based on time of day (Fix 4.2 - Hydration Error)
+  const [greeting, setGreeting] = useState('');
+  
+  useEffect(() => {
     const hour = new Date().getHours();
-    if (hour < 12) return t('greeting.morning');
-    if (hour < 17) return t('greeting.afternoon');
-    return t('greeting.evening');
-  };
-  const greeting = getGreeting();
+    if (hour < 12) setGreeting(t('greeting.morning'));
+    else if (hour < 17) setGreeting(t('greeting.afternoon'));
+    else setGreeting(t('greeting.evening'));
+  }, [t]);
 
   // Sport filters with translations
   const sportFilters: { id: FilterType; label: string; icon?: string }[] = [
@@ -142,7 +146,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
   });
 
   // Use initial sessions if no filters, otherwise use query data
-  const sessionsToDisplay = hasFilters ? (filteredSessions ?? []) : initialSessions;
+  const sessionsToDisplay = toArray<Session>(hasFilters ? (filteredSessions ?? []) : initialSessions);
 
   const handleFilterChange = (filter: FilterType) => {
     setActiveFilter(filter);
@@ -198,19 +202,13 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight" suppressHydrationWarning>
-                  {greeting}, <span className="text-primary-600">{displayName.split(' ')[0]}</span>
+                  {greeting ? `${greeting}, ` : ''}<span className="text-primary-600">{displayName.split(' ')[0]}</span>
                 </h1>
                 <p className="text-sm text-slate-500 font-medium">{t('readyForGame')}</p>
               </div>
               <div className="flex items-center gap-3">
                 {user && (
-                  <Link
-                    href="/notifications"
-                    className="relative p-2.5 rounded-xl hover:bg-slate-100 transition-colors group"
-                  >
-                    <Bell className="w-5 h-5 text-slate-600 group-hover:text-primary-600 transition-colors" />
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
-                  </Link>
+                  <NotificationBell />
                 )}
                 {/* Desktop Create Button */}
                 <Link href="/sessions/create" className="hidden md:block">
@@ -247,15 +245,15 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
       </header>
 
       {/* Sticky Quick Filters */}
-      <div className="sticky top-[130px] md:top-[130px] z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex gap-2 px-4 py-3 overflow-x-auto scrollbar-hide mask-linear-fade">
+      <div className="sticky top-[130px] md:top-[130px] z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm w-full">
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="flex gap-2 px-4 py-3 overflow-x-auto scrollbar-hide mask-linear-fade w-full touch-pan-x">
             {sportFilters.map((filter) => (
               <button
                 key={filter.id}
                 onClick={() => handleFilterChange(filter.id)}
                 className={cn(
-                  "flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 border",
+                  "flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 border",
                   activeFilter === filter.id
                     ? "bg-slate-900 text-white border-slate-900 shadow-md scale-105"
                     : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
@@ -265,6 +263,8 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
                 {filter.label}
               </button>
             ))}
+            {/* Spacer for mask-linear-fade to not cut off last item */}
+            <div className="w-4 flex-shrink-0" />
           </div>
         </div>
       </div>

@@ -293,7 +293,6 @@
       "forgotPassword": "Forgot password?",
       "loginButton": "Log In",
       "loggingIn": "Logging in...",
-      "invalidCredentials": "Invalid email or password",
       "noAccount": "Don't have an account?",
       "signUpLink": "Sign up for free",
       "continueWithGoogle": "Continue with Google",
@@ -411,9 +410,9 @@
     "back": "Back"
   },
   "profile": {
-    "title": "Profile",
+    "title": "My Cute Profile ✨",
     "editProfile": "Edit Profile",
-    "loading": "Loading your profile...",
+    "loading": "Loading your cute profile... ✨",
     "pleaseLogin": "Please log in",
     "needLogin": "You need to be logged in to view your profile",
     "profileNotFound": "Profile not found",
@@ -422,11 +421,11 @@
     "joined": "Joined {date}",
     "near": "Near {station}",
     "achievements": {
-      "title": "Achievements",
-      "subtitle": "Earn badges for great play!",
+      "title": "Achievements ⭐",
+      "subtitle": "Collect badges by being awesome! かわいい~ ✨",
       "firstStep": {
         "title": "First Step",
-        "description": "Joined your first session"
+        "description": "Attended your first session!"
       },
       "regularPlayer": {
         "title": "Regular Player",
@@ -434,11 +433,11 @@
       },
       "superStar": {
         "title": "Super Star",
-        "description": "50+ sessions"
+        "description": "Amazing! 50+ sessions"
       },
       "perfectAttendance": {
         "title": "Perfect Attendance",
-        "description": "100% reliability"
+        "description": "100% reliability!"
       },
       "sportEnthusiast": {
         "title": "Sport Enthusiast",
@@ -450,45 +449,24 @@
       },
       "locked": "{count} more sessions to unlock"
     },
-    "stats": {
-      "totalSessions": "Total Sessions",
-      "upcoming": "Upcoming",
-      "pastSessions": "Past Sessions",
-      "sessionsCreated": "Sessions Created",
-      "sportsActivity": "Sports Activity",
-      "reliabilityScore": {
-        "title": "Reliability Score",
-        "basedOn": "Based on attendance history",
-        "excellent": "Excellent",
-        "good": "Good",
-        "fair": "Fair",
-        "needsImprovement": "Needs Improvement",
-        "noShow_one": "{count} no-show recorded",
-        "noShow_other": "{count} no-shows recorded",
-        "tipExcellent": "Keep up the excellent attendance!",
-        "tipGood": "You're doing well—keep attending consistently.",
-        "tipImprove": "Improve your reliability by canceling early when needed."
-      }
-    },
     "edit": {
-      "title": "Edit Profile",
-      "loading": "Loading your profile...",
+      "title": "Edit Profile ✨",
+      "loading": "Loading your cute profile... ✨",
       "username": "Username",
       "displayName": "Display Name",
       "bio": "Bio",
       "location": "Location",
       "favoriteSports": "Favorite Sports",
       "usernamePlaceholder": "your-username",
-      "displayNamePlaceholder": "Your Name",
-      "bioPlaceholder": "Tell us about yourself...",
-      "locationPlaceholder": "e.g., Shibuya, Tokyo",
-      "selectSports": "Select your favorite sports!",
+      "displayNamePlaceholder": "Your Cute Name",
+      "bioPlaceholder": "Tell us about yourself... ✨",
+      "locationPlaceholder": "e.g., Shibuya, Tokyo 🗼",
+      "selectSports": "Select your favorite sports! The more, the better~ 💪",
       "cancel": "Cancel",
       "saveChanges": "Save Changes",
       "saving": "Saving...",
       "success": "Profile updated successfully! Redirecting...",
-      "invalidUsername": "Username must be 3-20 characters long and contain only letters, numbers, and underscores.",
-      "motivational": "Keep your profile updated!",
+      "motivational": "Make your profile shine! ✨ かわいい~ 🌸",
       "avatarInfo": "JPEG, PNG, WebP, or GIF. Max 5MB.",
       "removePhoto": "Remove Photo"
     }

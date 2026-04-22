@@ -1101,3 +1101,42 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
 }
+
+/* CSS Hack for Date Input format yyyy-mm-dd */
+input[type="date"] {
+  position: relative;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+  z-index: 10;
+}
+
+input[type="date"][data-date]::-webkit-datetime-edit {
+  color: transparent;
+}
+
+input[type="date"][data-date]::before {
+  content: attr(data-date);
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #0f172a;
+  pointer-events: none;
+}
+
+input[type="date"]:not([data-date])::before,
+input[type="date"][data-date=""]::before {
+  content: 'yyyy-mm-dd';
+  color: #94a3b8; /* slate-400 */
+}

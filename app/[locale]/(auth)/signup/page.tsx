@@ -225,7 +225,6 @@ export default function SignupPage() {
                 value={formData.email}
                 onChange={handleChange}
                 error={errors.email}
-                required
                 fullWidth
                 autoComplete="email"
               />
@@ -239,7 +238,6 @@ export default function SignupPage() {
                   value={formData.password}
                   onChange={handleChange}
                   error={errors.password}
-                  required
                   fullWidth
                   autoComplete="new-password"
                 />
@@ -274,7 +272,6 @@ export default function SignupPage() {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 error={errors.confirmPassword}
-                required
                 fullWidth
                 autoComplete="new-password"
               />

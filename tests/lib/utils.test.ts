@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { cn, formatDate, formatTime } from '@/lib/utils';
+import { toArray } from '@/lib/utils/toArray';
 
 describe('Utils', () => {
   describe('cn (className merger)', () => {
@@ -247,6 +248,27 @@ describe('Utils', () => {
       // Test with far future dates
       expect(() => formatDate('2099-12-31T23:59:59Z')).not.toThrow();
       expect(() => formatTime('2099-12-31T23:59:59Z')).not.toThrow();
+    });
+  });
+
+  describe('toArray', () => {
+    it('should return arrays as-is', () => {
+      const input = [{ id: 1 }, { id: 2 }];
+      expect(toArray<{ id: number }>(input)).toEqual(input);
+    });
+
+    it('should return data array when response shape is { data: [] }', () => {
+      const input = { data: [{ id: 1 }, { id: 2 }] };
+      expect(toArray<{ id: number }>(input)).toEqual(input.data);
+    });
+
+    it('should return empty array for null or undefined', () => {
+      expect(toArray<unknown>(null)).toEqual([]);
+      expect(toArray<unknown>(undefined)).toEqual([]);
+    });
+
+    it('should return empty array for unexpected object shapes', () => {
+      expect(toArray<{ id: number }>({ items: [{ id: 1 }] })).toEqual([]);
     });
   });
 });

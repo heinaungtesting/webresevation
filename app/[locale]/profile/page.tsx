@@ -11,6 +11,7 @@ import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import UserStats from '@/app/components/profile/UserStats';
 import { formatDate } from '@/lib/utils';
+import { sportIdToSessionKey } from '@/lib/utils/sportTranslation';
 import { useTranslations } from 'next-intl';
 import { motion } from 'framer-motion';
 
@@ -27,6 +28,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const { user } = useAuth();
   const t = useTranslations('profile');
+  const tSessions = useTranslations('sessions');
   const [profile, setProfile] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -157,7 +159,7 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-4 sm:py-6 md:py-8">
+      <div className="min-h-screen bg-gray-50 py-4 sm:py-6 md:py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage
             title={t('pleaseLogin')}
@@ -170,7 +172,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+      <div className="min-h-screen bg-gray-50">
         <Loading text={t('loading')} fullScreen />
       </div>
     );
@@ -178,7 +180,7 @@ export default function ProfilePage() {
 
   if (error || !profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-4 sm:py-6 md:py-8">
+      <div className="min-h-screen bg-gray-50 py-4 sm:py-6 md:py-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <ErrorMessage message={error || t('profileNotFound')} onRetry={fetchProfile} />
         </div>
@@ -190,9 +192,9 @@ export default function ProfilePage() {
   const achievements = getAchievements();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 py-4 sm:py-6 md:py-8">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-6 md:py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header with Sparkles */}
+        {/* Header */}
         <motion.div
           className="flex items-center justify-between mb-6"
           custom={0}
@@ -201,15 +203,14 @@ export default function ProfilePage() {
           animate="visible"
         >
           <div className="flex items-center gap-3">
-            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-pink-500" />
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               {t('title')}
             </h1>
           </div>
           <Button
             variant="primary"
             onClick={() => router.push('/profile/edit')}
-            className="gap-2 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 border-0"
+            className="gap-2"
           >
             <Edit className="w-4 h-4" />
             <span>{t('editProfile')}</span>
@@ -218,12 +219,11 @@ export default function ProfilePage() {
 
         {/* Profile Card */}
         <motion.div custom={1} variants={sectionVariants} initial="hidden" animate="visible">
-        <Card padding="lg" className="mb-6 bg-white/80 backdrop-blur-sm border-2 border-pink-100 shadow-xl">
+        <Card padding="lg" className="mb-6">
           <div className="flex flex-col sm:flex-row items-start gap-6">
-            {/* Cute Avatar with Glow */}
+            {/* Avatar */}
             <div className="flex-shrink-0 relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-400 to-purple-400 rounded-full blur-xl opacity-50 animate-pulse"></div>
-              <div className="relative w-28 h-28 rounded-full bg-gradient-to-br from-pink-400 via-purple-400 to-blue-400 p-1">
+              <div className="relative w-28 h-28 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 p-1">
                 <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
                   {profile.avatar_url ? (
                     <img
@@ -232,37 +232,34 @@ export default function ProfilePage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-4xl font-bold bg-gradient-to-br from-pink-500 to-purple-500 bg-clip-text text-transparent">
+                    <span className="text-4xl font-bold text-primary-500">
                       {displayName.charAt(0).toUpperCase()}
                     </span>
                   )}
                 </div>
               </div>
-              {/* Kawaii Decoration */}
-              <div className="absolute -top-2 -right-2 text-2xl animate-bounce">🌸</div>
             </div>
 
-            {/* Info with Cute Styling */}
+            {/* Info */}
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
                   {displayName}
                 </h2>
-                <span className="text-xl">💖</span>
               </div>
               {profile.username && (
-                <p className="text-purple-600 font-medium mb-3">@{profile.username}</p>
+                <p className="text-gray-500 font-medium mb-3">@{profile.username}</p>
               )}
 
               {profile.bio && (
-                <p className="text-slate-700 mb-4 bg-gradient-to-r from-pink-50 to-purple-50 p-3 rounded-2xl border border-pink-100 text-sm sm:text-base">
+                <p className="text-slate-700 mb-4 bg-gray-50 p-3 rounded-2xl border border-gray-200 text-sm sm:text-base">
                   {profile.bio}
                 </p>
               )}
 
               <div className="flex flex-wrap gap-2 sm:gap-3 text-sm text-slate-600">
-                <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-pink-100">
-                  <Mail className="w-4 h-4 text-pink-500" />
+                <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-gray-200 shadow-sm">
+                  <Mail className="w-4 h-4 text-gray-500" />
                   <span className="max-w-[160px] sm:max-w-none truncate">{profile.email}</span>
                   {profile.email_verified && (
                     <Badge variant="success" size="sm" className="ml-1">
@@ -271,30 +268,30 @@ export default function ProfilePage() {
                   )}
                 </div>
                 {profile.location && (
-                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-purple-100">
-                    <MapPin className="w-4 h-4 text-purple-500" />
+                  <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-gray-200 shadow-sm">
+                    <MapPin className="w-4 h-4 text-gray-500" />
                     <span>{t('near', { station: profile.location })}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-blue-100">
-                  <Calendar className="w-4 h-4 text-blue-500" />
+                <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-gray-200 shadow-sm">
+                  <Calendar className="w-4 h-4 text-gray-500" />
                   <span>{t('joined', { date: formatDate(profile.created_at) })}</span>
                 </div>
               </div>
 
-              {/* Cute Sport Preferences */}
+              {/* Sport Preferences */}
               {profile.sport_preferences && profile.sport_preferences.length > 0 && (
                 <div className="mt-4">
-                  <p className="text-sm font-semibold text-purple-600 mb-2 flex items-center gap-2">
-                    <span>🏃‍♀️</span> {t('favoriteSports')}
+                  <p className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                    {t('favoriteSports')}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {profile.sport_preferences.map((sport: string) => (
                       <span
                         key={sport}
-                        className="px-3 py-1 bg-gradient-to-r from-pink-100 to-purple-100 text-purple-700 rounded-full text-sm font-medium border border-purple-200"
+                        className="px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-sm font-medium border border-primary-200"
                       >
-                        {sport.replace('-', ' ')}
+                        {tSessions(sportIdToSessionKey(sport))}
                       </span>
                     ))}
                   </div>
@@ -308,12 +305,12 @@ export default function ProfilePage() {
         {/* Achievements Section */}
         {achievements.length > 0 && (
           <motion.div custom={2} variants={sectionVariants} initial="hidden" animate="visible">
-          <Card padding="lg" className="mb-6 bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200">
+          <Card padding="lg" className="mb-6">
             <div className="flex items-center gap-3 mb-4">
-              <Trophy className="w-6 h-6 text-yellow-600" />
-              <h3 className="text-xl sm:text-2xl font-bold text-yellow-800">{t('achievements.title')}</h3>
+              <Trophy className="w-6 h-6 text-yellow-500" />
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900">{t('achievements.title')}</h3>
             </div>
-            <p className="text-sm text-yellow-700 mb-4">{t('achievements.subtitle')}</p>
+            <p className="text-sm text-gray-500 mb-4">{t('achievements.subtitle')}</p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {achievements.map((achievement, index) => (
@@ -321,11 +318,11 @@ export default function ProfilePage() {
                   key={index}
                   className={`relative p-3 sm:p-4 rounded-2xl transition-all duration-300 ${
                     achievement.unlocked
-                      ? 'bg-white border-2 border-yellow-200 shadow-md hover:shadow-lg hover:scale-105'
-                      : 'bg-slate-50 border-2 border-dashed border-slate-300 opacity-60'
+                      ? 'bg-white border border-gray-200 shadow-sm hover:shadow-md'
+                      : 'bg-slate-50 border border-dashed border-slate-300 opacity-60'
                   }`}
                 >
-                  <div className={`w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-3 rounded-full bg-gradient-to-br ${achievement.color} flex items-center justify-center text-2xl sm:text-3xl shadow-lg`}>
+                  <div className={`w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-3 rounded-full bg-gradient-to-br ${achievement.color} flex items-center justify-center text-2xl sm:text-3xl shadow-sm text-white`}>
                     {achievement.icon}
                   </div>
                   <h4 className={`text-xs sm:text-sm font-bold text-center mb-1 ${achievement.unlocked ? 'text-slate-900' : 'text-slate-500'}`}>
@@ -334,11 +331,6 @@ export default function ProfilePage() {
                   <p className={`text-xs text-center ${achievement.unlocked ? 'text-slate-600' : 'text-slate-400'}`}>
                     {achievement.description}
                   </p>
-                  {achievement.unlocked && (
-                    <div className="absolute top-2 right-2">
-                      <span className="text-lg animate-bounce">✨</span>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>

@@ -11,6 +11,7 @@ import Button from '@/app/components/ui/Button';
 import Badge from '@/app/components/ui/Badge';
 import { Calendar, Clock, TrendingUp, History, Loader2, Plus } from 'lucide-react';
 import { csrfDelete } from '@/lib/csrfClient';
+import { toArray } from '@/lib/utils/toArray';
 
 interface AttendedSession {
   attendance_id: string;
@@ -66,8 +67,8 @@ export default function MySessionsPage() {
       const pastData = await pastResponse.json();
 
       setData({
-        upcoming: upcomingData.data || [],
-        past: pastData.data || [],
+        upcoming: toArray(upcomingData),
+        past: toArray(pastData),
         total: (upcomingData.pagination?.totalCount || 0) + (pastData.pagination?.totalCount || 0),
       });
     } catch (err) {

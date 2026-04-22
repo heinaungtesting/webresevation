@@ -21,6 +21,7 @@ import Loading from '@/app/components/ui/Loading';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import { formatDate, formatTime } from '@/lib/utils';
 import { csrfDelete } from '@/lib/csrfClient';
+import { toArray } from '@/lib/utils/toArray';
 
 interface Session {
   id: string;
@@ -72,7 +73,7 @@ export default function MyCreatedSessionsPage() {
       if (!response.ok) throw new Error('Failed to fetch sessions');
 
       const data = await response.json();
-      setSessions(data);
+      setSessions(toArray(data));
     } catch (err: any) {
       console.error('Error fetching created sessions:', err);
       setError(err.message || t('failedToLoad'));

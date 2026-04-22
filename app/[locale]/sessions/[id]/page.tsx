@@ -22,6 +22,7 @@ export default function SessionDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const t = useTranslations('sessionDetail');
+  const tSessions = useTranslations('sessions');
   const [session, setSession] = useState<Session | null>(null);
   const [isAttending, setIsAttending] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -223,7 +224,7 @@ export default function SessionDetailPage() {
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Sessions
+          {t('backToSessions')}
         </Button>
 
         {/* Main Content */}
@@ -240,8 +241,8 @@ export default function SessionDetailPage() {
                     </h1>
                   </div>
                   <div className="flex gap-2">
-                    <Badge variant="warning">{session.skill_level}</Badge>
-                    {isFull && <Badge variant="danger">Full</Badge>}
+                    <Badge variant="warning">{tSessions(session.skill_level)}</Badge>
+                    {isFull && <Badge variant="danger">{tSessions('full')}</Badge>}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -277,7 +278,7 @@ export default function SessionDetailPage() {
                   <div>
                     <p className="font-semibold">{formatDate(session.date_time)}</p>
                     <p className="text-sm text-gray-600">
-                      Duration: {session.duration_minutes} minutes
+                      {t('duration', { minutes: session.duration_minutes })}
                     </p>
                   </div>
                 </div>
@@ -286,12 +287,13 @@ export default function SessionDetailPage() {
                   <Users className="w-5 h-5 text-gray-600" />
                   <div>
                     <p className="font-semibold">
-                      {session.current_participants}
-                      {session.max_participants && ` / ${session.max_participants}`} participants
+                      {session.max_participants 
+                        ? t('participants', { current: session.current_participants, max: session.max_participants }) 
+                        : t('participantsNoMax', { current: session.current_participants })}
                     </p>
                     {spotsLeft !== null && spotsLeft > 0 && (
                       <p className="text-sm text-green-600">
-                        {spotsLeft} spot{spotsLeft !== 1 ? 's' : ''} left
+                        {tSessions(spotsLeft === 1 ? 'spots_one' : 'spots_other', { count: spotsLeft })}
                       </p>
                     )}
                   </div>
@@ -302,10 +304,10 @@ export default function SessionDetailPage() {
             <Card padding="lg">
               <div className="flex items-center gap-2 mb-3">
                 <Info className="w-5 h-5 text-gray-600" />
-                <h2 className="text-xl font-semibold">Description</h2>
+                <h2 className="text-xl font-semibold">{t('description')}</h2>
               </div>
-              <p className="text-gray-700 leading-relaxed">
-                {session.description_en || 'No description provided.'}
+              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                {session.description_en || t('noDescription')}
               </p>
             </Card>
 
@@ -390,7 +392,7 @@ export default function SessionDetailPage() {
             {/* Attendees Section */}
             <Card padding="lg">
               <h2 className="text-xl font-semibold mb-4">
-                Who's Going ({session.current_participants})
+                {t('whosGoing', { count: session.current_participants })}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {session.participants && session.participants.length > 0 ? (
@@ -437,7 +439,7 @@ export default function SessionDetailPage() {
                       <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-semibold">
                         {String.fromCharCode(65 + i)}
                       </div>
-                      <span className="text-sm">Player {i + 1}</span>
+                      <span className="text-sm">{t('player', { number: i + 1 })}</span>
                     </div>
                   ))
                 )}
@@ -462,13 +464,13 @@ export default function SessionDetailPage() {
           {/* Right Column - Action Card */}
           <div className="lg:col-span-1">
             <Card padding="lg" className="sticky top-4">
-              <h3 className="font-semibold text-lg mb-4">Join this session</h3>
+              <h3 className="font-semibold text-lg mb-4">{t('joinSession')}</h3>
 
               {isAttending ? (
                 <div className="space-y-3">
                   <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                     <p className="text-green-800 text-sm font-medium">
-                      ✓ You're attending this session
+                      ✓ {t('attending')}
                     </p>
                   </div>
                   <Button
@@ -480,10 +482,10 @@ export default function SessionDetailPage() {
                     {actionLoading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Canceling...
+                        {t('canceling')}
                       </>
                     ) : (
-                      'Cancel Attendance'
+                      t('cancelAttendance')
                     )}
                   </Button>
                   <Button
@@ -495,10 +497,10 @@ export default function SessionDetailPage() {
                     {actionLoading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Loading...
+                        {t('loading')}
                       </>
                     ) : (
-                      'Open Chat Room'
+                      t('openChatRoom')
                     )}
                   </Button>
                 </div>
@@ -513,10 +515,10 @@ export default function SessionDetailPage() {
                         onClick={handleAttendance}
                         disabled={actionLoading}
                       >
-                        {actionLoading ? 'Joining...' : "I'm Going!"}
+                        {actionLoading ? t('joining') : tSessions('imGoing')}
                       </Button>
                       <p className="text-xs text-gray-500 text-center">
-                        Free to join • No payment required
+                        {t('free')}
                       </p>
                     </>
                   ) : isOnWaitlist ? (
@@ -558,7 +560,7 @@ export default function SessionDetailPage() {
                     <div className="space-y-3">
                       <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                         <p className="text-red-800 text-sm font-medium">
-                          This session is full
+                          {t('sessionFull')}
                         </p>
                         {waitlistCount > 0 && (
                           <p className="text-red-600 text-xs mt-1">
@@ -595,12 +597,12 @@ export default function SessionDetailPage() {
               )}
 
               <div className="mt-6 pt-6 border-t">
-                <h4 className="font-semibold text-sm mb-2">Session Rules</h4>
+                <h4 className="font-semibold text-sm mb-2">{t('rules.title')}</h4>
                 <ul className="text-xs text-gray-600 space-y-1">
-                  <li>• Be respectful to all players</li>
-                  <li>• Arrive on time</li>
-                  <li>• Bring your own equipment</li>
-                  <li>• Cancel at least 2 hours before if you can't make it</li>
+                  <li>• {t('rules.respectful')}</li>
+                  <li>• {t('rules.onTime')}</li>
+                  <li>• {t('rules.equipment')}</li>
+                  <li>• {t('rules.cancel')}</li>
                 </ul>
               </div>
             </Card>

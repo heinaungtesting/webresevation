@@ -12,6 +12,7 @@ import Button from '@/app/components/ui/Button';
 import Loading from '@/app/components/ui/Loading';
 import { Search, Filter, Plus, RefreshCw, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toArray } from '@/lib/utils/toArray';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -60,7 +61,7 @@ export default function SessionsPage() {
       if (!response.ok) throw new Error('Failed to fetch sessions');
 
       const data = await response.json();
-      setSessions(data);
+      setSessions(toArray<Session>(data));
     } catch (err: any) {
       console.error('Error fetching sessions:', err);
       setError(err.message || t('failedToLoad'));
