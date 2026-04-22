@@ -120,7 +120,7 @@ export default function CreateSessionPage() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isDirty, submitting]);
 
-  // Fix 4.2: Get minimum allowed date in user's timezone formatted as YYYY-MM-DD
+  // Get minimum allowed date in user's timezone formatted as YYYY-MM-DD
   const minDate = new Date().toLocaleDateString('en-CA');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
