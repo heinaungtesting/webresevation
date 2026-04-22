@@ -33,6 +33,9 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const getSportTranslationKey = (sport: string) =>
+    sport.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+
   useEffect(() => {
     if (user) {
       Promise.all([fetchProfile(), fetchStats()]).catch(err => {
@@ -290,7 +293,7 @@ export default function ProfilePage() {
                         key={sport}
                         className="px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-sm font-medium border border-primary-200"
                       >
-                        {tSessions(sport)}
+                        {tSessions(getSportTranslationKey(sport))}
                       </span>
                     ))}
                   </div>

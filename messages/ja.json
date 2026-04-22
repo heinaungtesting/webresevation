@@ -450,6 +450,26 @@
       },
       "locked": "ロック解除まであと{count}セッション"
     },
+    "stats": {
+      "totalSessions": "合計セッション",
+      "upcoming": "今後",
+      "pastSessions": "過去のセッション",
+      "sessionsCreated": "作成したセッション",
+      "sportsActivity": "スポーツ別アクティビティ",
+      "reliabilityScore": {
+        "title": "信頼度スコア",
+        "basedOn": "参加履歴に基づくスコア",
+        "excellent": "優秀",
+        "good": "良好",
+        "fair": "普通",
+        "needsImprovement": "要改善",
+        "noShow_one": "無断欠席 {count} 回",
+        "noShow_other": "無断欠席 {count} 回",
+        "tipExcellent": "素晴らしい参加率を維持しています！",
+        "tipGood": "この調子で安定して参加しましょう。",
+        "tipImprove": "参加できない場合は早めにキャンセルして信頼度を上げましょう。"
+      }
+    },
     "edit": {
       "title": "プロフィール編集 ✨",
       "loading": "あなたのかわいいプロフィールを読み込み中... ✨",

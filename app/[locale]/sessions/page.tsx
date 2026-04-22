@@ -61,7 +61,7 @@ export default function SessionsPage() {
       if (!response.ok) throw new Error('Failed to fetch sessions');
 
       const data = await response.json();
-      setSessions(toArray(data));
+      setSessions(toArray<Session>(data));
     } catch (err: any) {
       console.error('Error fetching sessions:', err);
       setError(err.message || t('failedToLoad'));
@@ -253,14 +253,14 @@ export default function SessionsPage() {
               animate="visible"
               key={`${sportFilter}-${skillFilter}-${startDate}-${endDate}`}
             >
-              {toArray(sessions).map((session) => (
+              {sessions.map((session) => (
                 <motion.div key={session.id} variants={cardVariants}>
                   <SessionCard session={session} />
                 </motion.div>
               ))}
             </motion.div>
 
-            {toArray(sessions).length === 0 && !error && (
+            {sessions.length === 0 && !error && (
               <div className="text-center py-12">
                 <p className="text-slate-500 text-base sm:text-lg">
                   {t('noSessionsFound')}

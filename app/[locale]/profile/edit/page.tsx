@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { ArrowLeft, Save, Sparkles } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle, Save, Sparkles } from 'lucide-react';
 import Button from '@/app/components/ui/Button';
 import Input from '@/app/components/ui/Input';
 import Card from '@/app/components/ui/Card';

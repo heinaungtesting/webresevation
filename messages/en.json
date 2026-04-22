@@ -450,6 +450,26 @@
       },
       "locked": "{count} more sessions to unlock"
     },
+    "stats": {
+      "totalSessions": "Total Sessions",
+      "upcoming": "Upcoming",
+      "pastSessions": "Past Sessions",
+      "sessionsCreated": "Sessions Created",
+      "sportsActivity": "Sports Activity",
+      "reliabilityScore": {
+        "title": "Reliability Score",
+        "basedOn": "Based on attendance history",
+        "excellent": "Excellent",
+        "good": "Good",
+        "fair": "Fair",
+        "needsImprovement": "Needs Improvement",
+        "noShow_one": "{count} no-show recorded",
+        "noShow_other": "{count} no-shows recorded",
+        "tipExcellent": "Keep up the excellent attendance!",
+        "tipGood": "You're doing well—keep attending consistently.",
+        "tipImprove": "Improve your reliability by canceling early when needed."
+      }
+    },
     "edit": {
       "title": "Edit Profile",
       "loading": "Loading your profile...",

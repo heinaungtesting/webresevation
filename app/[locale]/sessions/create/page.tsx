@@ -120,8 +120,8 @@ export default function CreateSessionPage() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isDirty, submitting]);
 
-  // Fix 4.2: Get today's date in user's timezone formatted as YYYY-MM-DD
-  const today = new Date().toLocaleDateString('en-CA');
+  // Fix 4.2: Get minimum allowed date in user's timezone formatted as YYYY-MM-DD
+  const minDate = new Date().toLocaleDateString('en-CA');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -354,7 +354,7 @@ export default function CreateSessionPage() {
                     name="date"
                     value={formData.date}
                     onChange={handleChange}
-                    min={today}
+                    min={minDate}
                     required
                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-h-[44px]"
                   />

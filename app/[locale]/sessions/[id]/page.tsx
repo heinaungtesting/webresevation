@@ -22,6 +22,7 @@ export default function SessionDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const t = useTranslations('sessionDetail');
+  const tSessions = useTranslations('sessions');
   const [session, setSession] = useState<Session | null>(null);
   const [isAttending, setIsAttending] = useState(false);
   const [loading, setLoading] = useState(true);

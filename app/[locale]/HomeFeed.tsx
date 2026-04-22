@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Session } from '@/types';
 import SessionCard from '@/app/components/SessionCard';
@@ -58,7 +58,7 @@ async function fetchSessions(params: {
   }
 
   const data = await response.json();
-  return toArray(data);
+  return toArray<Session>(data);
 }
 
 export default function HomeFeed({ sessions: initialSessions, happeningNow }: HomeFeedProps) {
@@ -146,7 +146,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
   });
 
   // Use initial sessions if no filters, otherwise use query data
-  const sessionsToDisplay = toArray(hasFilters ? (filteredSessions ?? []) : initialSessions);
+  const sessionsToDisplay = toArray<Session>(hasFilters ? (filteredSessions ?? []) : initialSessions);
 
   const handleFilterChange = (filter: FilterType) => {
     setActiveFilter(filter);

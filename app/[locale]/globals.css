@@ -1121,11 +1121,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   z-index: 10;
 }
 
-input[type="date"]::-webkit-datetime-edit {
+input[type="date"][data-date]::-webkit-datetime-edit {
   color: transparent;
 }
 
-input[type="date"]::before {
+input[type="date"][data-date]::before {
   content: attr(data-date);
   position: absolute;
   left: 1rem;

@@ -57,6 +57,8 @@ export default function UserStats({ stats }: UserStatsProps) {
   const tSessions = useTranslations('sessions');
   const reliabilityScore = stats.reliability_score ?? 100;
   const noShowCount = stats.no_show_count ?? 0;
+  const getSportTranslationKey = (sport: string) =>
+    sport.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
   
   // Create getReliabilityColors inside to use t()
   const getReliabilityColors = (score: number) => {
@@ -192,7 +194,7 @@ export default function UserStats({ stats }: UserStatsProps) {
               .map(([sport, count]) => (
                 <div key={sport} className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700 capitalize">
-                    {tSessions(sport)}
+                    {tSessions(getSportTranslationKey(sport))}
                   </span>
                   <div className="flex items-center gap-3">
                     <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
