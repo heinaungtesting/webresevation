@@ -82,8 +82,8 @@ export default function SignupPage() {
         language: formData.language,
       });
 
-      // Redirect to verification success page
-      router.push(`/${locale}/verify-email?email=` + encodeURIComponent(formData.email));
+      // Redirect to home page
+      router.push(`/${locale}`);
     } catch (err) {
       setErrors({ email: err instanceof Error ? err.message : t('errors.genericError') });
     } finally {

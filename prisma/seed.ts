@@ -164,7 +164,7 @@ async function main() {
   // ============================================
   // SESSIONS
   // ============================================
-  console.log('Creating 15 active sports sessions...');
+  console.log('Creating 20 active sports sessions...');
   
   const sessionsData = [
     {
@@ -232,13 +232,14 @@ async function main() {
   const skillLevels = ['beginner', 'intermediate', 'advanced'];
 
   let sessionCount = 0;
-  for (const sData of sessionsData) {
+  for (let i = 0; i < 20; i++) {
+    const sData = sessionsData[i % sessionsData.length];
     const creator = allUsers[Math.floor(Math.random() * allUsers.length)];
     const sportCenter = sportCenters[Math.floor(Math.random() * sportCenters.length)];
     const skillLevel = skillLevels[Math.floor(Math.random() * skillLevels.length)];
     
-    // Spread the dates across the next 14 days
-    const daysOffset = Math.floor(Math.random() * 14) + 1;
+    // Spread the dates across the next 22 days (until next month 20th)
+    const daysOffset = Math.floor(Math.random() * 22) + 1;
     const hour = Math.floor(Math.random() * 11) + 9; // 9 AM to 8 PM
 
     const session = await prisma.session.create({

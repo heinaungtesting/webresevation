@@ -49,7 +49,7 @@ export default function Navigation() {
     await signOut();
     setShowUserMenu(false);
     setShowMobileMenu(false);
-    router.push('/');
+    router.push(`/${locale}`);
     router.refresh();
   };
 
@@ -158,7 +158,7 @@ export default function Navigation() {
 
                         <div className="py-1">
                           <Link
-                            href="/profile"
+                            href={`/${locale}/profile`}
                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                           >
@@ -166,7 +166,7 @@ export default function Navigation() {
                             {t('profile')}
                           </Link>
                           <Link
-                            href="/favorites"
+                            href={`/${locale}/favorites`}
                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                           >
@@ -174,7 +174,7 @@ export default function Navigation() {
                             {t('favorites')}
                           </Link>
                           <Link
-                            href="/settings"
+                            href={`/${locale}/settings`}
                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                             onClick={() => setShowUserMenu(false)}
                           >
@@ -183,7 +183,7 @@ export default function Navigation() {
                           </Link>
                           {profile?.is_admin && (
                             <Link
-                              href="/admin"
+                              href={`/${locale}/admin`}
                               className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                               onClick={() => setShowUserMenu(false)}
                             >

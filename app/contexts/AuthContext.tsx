@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { csrfPost } from '@/lib/csrfClient';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 
 interface UserProfile {
   avatar_url?: string | null;
@@ -35,6 +35,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
   const router = useRouter();
+  const params = useParams();
+  const locale = typeof params?.locale === 'string' ? params.locale : 'en';
   
   // Add a ref to track if profile was recently fetched
   const lastFetchRef = useRef<number>(0);
@@ -115,7 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     setUser(null);
     setProfile(null);
-    router.push('/');
+    router.push(`/${locale}`);
     router.refresh();
   };
 

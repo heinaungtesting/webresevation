@@ -2,7 +2,6 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { sendWelcomeEmail } from '@/lib/email';
 import { authRateLimiter, createRateLimitHeaders } from '@/lib/rate-limit';
 import { signupSchema, validateRequestBody } from '@/lib/validations';
 
@@ -73,7 +72,7 @@ export async function POST(request: Request) {
             id: data.user.id,
             email: data.user.email!,
             language_preference: language,
-            email_verified: false,
+            email_verified: true,
             // Language exchange fields
             native_language: native_language || null,
             target_language: target_language || null,
@@ -81,13 +80,6 @@ export async function POST(request: Request) {
           },
         });
 
-        // Send welcome email (non-blocking)
-        sendWelcomeEmail(
-          data.user.email!,
-          data.user.email!.split('@')[0] // Use email username as default name
-        ).catch(() => {
-          // Email failure is non-critical, don't block signup
-        });
       } catch (dbError) {
         // CRITICAL: Clean up Supabase auth user to prevent ghost user state
         // This prevents users from existing in Supabase Auth but not in the database
@@ -107,7 +99,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        message: 'Signup successful! Please check your email to verify your account.',
+        message: 'Signup successful!',
         user: data.user,
       },
       {
