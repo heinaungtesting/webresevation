@@ -15,6 +15,8 @@ A real-time sports session platform connecting athletes across Tokyo.
 [![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white)](https://vercel.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
+**English** | [**日本語**](./README.ja.md)
+
 [**🚀 Live Demo**](https://sportsmatch-tokyo.vercel.app) &nbsp;·&nbsp; [**📖 Docs**](./docs) &nbsp;·&nbsp; [**🐛 Issues**](https://github.com/heinaungtesting/webresevation/issues)
 
 </div>
@@ -34,7 +36,6 @@ A real-time sports session platform connecting athletes across Tokyo.
 - [Deployment](#-deployment)
 - [Contributing](#-contributing)
 - [License](#-license)
-- [日本語 (Japanese)](#-日本語-japanese)
 
 ---
 
@@ -454,64 +455,3 @@ This project is licensed under the [MIT License](./LICENSE).
 <div align="center">
 Built with ❤️ in Tokyo 🗼
 </div>
-
----
-
-## 🇯🇵 日本語 (Japanese)
-
-SportsMatch Tokyo は、東京でスポーツのセッション（活動）を **探す・企画する・参加する** ことを簡単にするモダンなフルスタック Web アプリケーションです。プレイヤーは種目・時間・場所で絞り込んで空きセッションを探し、すぐに参加できます。主催者はセッションの作成、参加者管理、当日の運営を行い、参加者とはリアルタイムで連絡を取れます。
-
-### 主なポイント
-
-- Supabase Realtime（WebSocket）による **リアルタイム** チャットと通知
-- `next-intl` のロケールルーティングによる **日英バイリンガル UI**（🇺🇸 English / 🇯🇵 日本語）
-- **ロールベース権限管理**（Player / Organiser / Admin）
-- Vercel での **サーバーレス運用** に最適化
-- 無断欠席（no-show）を減らすための **信頼スコア**（Reliability scoring）
-
-### はじめ方
-
-#### 前提条件
-
-- **Node.js** 18+
-- **npm** 9+
-- [Supabase](https://supabase.com/) プロジェクト（無料枠でOK）
-- [Resend](https://resend.com/) API キー（メール送信用）
-- [Upstash Redis](https://upstash.com/)（任意：未設定の場合はインメモリにフォールバック）
-
-#### 1. クローン
-
-```bash
-git clone https://github.com/heinaungtesting/webresevation.git
-cd webresevation
-```
-
-#### 2. 依存関係のインストール
-
-```bash
-npm install
-```
-
-#### 3. 環境変数
-
-```bash
-cp .env.example .env.local
-```
-
-`.env.local` に必要な値を設定します（例は英語セクションを参照）。
-
-#### 4. DB セットアップ（Prisma）
-
-```bash
-npx prisma generate
-npx prisma migrate deploy
-npx prisma db seed       # (任意)
-```
-
-#### 5. 開発サーバー起動
-
-```bash
-npm run dev
-```
-
-ブラウザで `http://localhost:3000` を開くと、`/en/` へ自動リダイレクトされます。
