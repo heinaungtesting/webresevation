@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ensureUserExists } from '@/lib/ensure-user';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,20 +43,38 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
   const next = sanitizeRedirectPath(searchParams.get('next'));
+  const errorParam = searchParams.get('error');
+  const errorDesc = searchParams.get('error_description');
+
+  // Parse locale from cookies or default to en
+  let locale = 'en';
+  const cookieHeader = request.headers.get('cookie') || '';
+  const match = cookieHeader.match(/NEXT_LOCALE=([^;]+)/);
+  if (match) {
+    locale = match[1];
+  }
+
+  if (errorParam || errorDesc) {
+    console.error('[/api/auth/callback] OAuth provider error:', errorParam, errorDesc);
+    return NextResponse.redirect(`${origin}/${locale}/login?error=OAuthFailed`);
+  }
 
   if (code) {
     const supabase = await createClient();
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.user) {
-      // Update email_verified status in database
+      // Ensure user exists in the Prisma database (especially for first-time OAuth signups)
       try {
+        await ensureUserExists(data.user);
+        
+        // Update email_verified status in database
         await prisma.user.update({
           where: { id: data.user.id },
           data: { email_verified: true },
         });
       } catch (dbError) {
-        console.error('Database update error:', dbError);
+        console.error('Database sync/update error:', dbError);
       }
 
       const forwardedHost = request.headers.get('x-forwarded-host'); // original origin before load balancer
@@ -68,9 +87,11 @@ export async function GET(request: Request) {
       } else {
         return NextResponse.redirect(`${origin}${next}`);
       }
+    } else if (error) {
+      console.error('[/api/auth/callback] exchangeCodeForSession error:', error.message);
     }
   }
 
-  // return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+  // Redirect user to the login page with a clear code error parameter rather than a generic 404 page
+  return NextResponse.redirect(`${origin}/${locale}/login?error=auth-code-error`);
 }

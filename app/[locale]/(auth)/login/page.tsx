@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -24,15 +24,29 @@ export default function LoginPage() {
   const [oauthLoading, setOauthLoading] = useState<'google' | null>(null);
   const supabase = createClient();
 
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const errorParam = searchParams.get('error');
+    if (errorParam === 'OAuthFailed') {
+      setError('OAuth authentication failed. Please make sure Google Login is enabled and configured correctly in the Supabase Dashboard.');
+    } else if (errorParam === 'auth-code-error') {
+      setError('Failed to exchange authorization code for a session. Please try again.');
+    }
+  }, []);
+
   const handleOAuthSignIn = async (provider: 'google') => {
     setError('');
     setOauthLoading(provider);
 
     try {
+      const redirectUrl = typeof window !== 'undefined'
+        ? `${window.location.origin}/api/auth/callback`
+        : `${getAppUrl()}/api/auth/callback`;
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${getAppUrl()}/api/auth/callback`,
+          redirectTo: redirectUrl,
         },
       });
 
