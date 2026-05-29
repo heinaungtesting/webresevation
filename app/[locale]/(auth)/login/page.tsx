@@ -215,6 +215,7 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <Input
+                id="email"
                 label={t('email')}
                 type="email"
                 name="email"
@@ -228,6 +229,7 @@ export default function LoginPage() {
               />
 
               <Input
+                id="password"
                 label={t('password')}
                 type="password"
                 name="password"

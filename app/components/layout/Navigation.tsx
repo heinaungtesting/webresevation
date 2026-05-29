@@ -230,6 +230,7 @@ export default function Navigation() {
             <button
               onClick={() => setShowMobileMenu(true)}
               className="p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+              aria-label="Open mobile menu"
             >
               <Menu className="w-6 h-6" />
             </button>
@@ -239,6 +240,7 @@ export default function Navigation() {
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="flex items-center p-1 rounded-xl hover:bg-slate-100 transition-all duration-200"
+                  aria-label="User menu"
                 >
                   {profile?.avatar_url ? (
                     <img

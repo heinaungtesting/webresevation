@@ -169,7 +169,7 @@ function SessionCard({ session }: SessionCardProps) {
               />
               {session.current_participants > 4 && (
                 <span className="text-xs text-slate-500 ml-1">
-                  and {session.current_participants - 4} more
+                  {t('moreParticipants', { count: session.current_participants - 4 })}
                 </span>
               )}
             </div>
@@ -193,7 +193,7 @@ function SessionCard({ session }: SessionCardProps) {
                 className="min-h-[44px] border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:border-amber-400"
               >
                 <Bell className="w-3.5 h-3.5 mr-1.5" />
-                Waitlist
+                {t('waitlist')}
               </Button>
             </Link>
           ) : (

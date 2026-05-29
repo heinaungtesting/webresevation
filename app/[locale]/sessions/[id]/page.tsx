@@ -205,6 +205,19 @@ export default function SessionDetailPage() {
     );
   }
 
+  const sportConfig: Record<string, string> = {
+    badminton: '🏸',
+    basketball: '🏀',
+    volleyball: '🏐',
+    tennis: '🎾',
+    soccer: '⚽',
+    futsal: '⚽',
+    table_tennis: '🏓',
+    'table-tennis': '🏓',
+    other: '🏃',
+  };
+  const sportEmoji = sportConfig[session.sport_type] ?? sportConfig.other;
+
   const isFull = session.max_participants && session.current_participants >= session.max_participants;
   const spotsLeft = session.max_participants ? session.max_participants - session.current_participants : null;
 
@@ -235,7 +248,7 @@ export default function SessionDetailPage() {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-4xl">🏸</span>
+                    <span className="text-4xl">{sportEmoji}</span>
                     <h1 className="text-3xl font-bold capitalize">
                       {session.sport_type.replace('-', ' ')}
                     </h1>
@@ -252,6 +265,7 @@ export default function SessionDetailPage() {
                       onClick={() => openReportModal('SESSION', session.id, `${session.sport_type} session`)}
                       className="p-2 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
                       title="Report this session"
+                      aria-label="Report this session"
                     >
                       <Flag className="w-5 h-5" />
                     </button>
@@ -427,6 +441,7 @@ export default function SessionDetailPage() {
                           onClick={() => openReportModal('USER', participant.id, participant.display_name || participant.username)}
                           className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all"
                           title="Report user"
+                          aria-label="Report user"
                         >
                           <Flag className="w-4 h-4" />
                         </button>

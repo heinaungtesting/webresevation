@@ -8,6 +8,7 @@ import { formatTime } from '@/lib/utils';
 import { Clock, MapPin } from 'lucide-react';
 import { AvatarGroup } from './ui/Avatar';
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface CompactSessionCardProps {
   session: Session;
@@ -27,6 +28,7 @@ const sportConfig: Record<SportType, { icon: string; gradient: string }> = {
 };
 
 function CompactSessionCard({ session, variant = 'horizontal', className = '' }: CompactSessionCardProps) {
+  const t = useTranslations('sessions');
   const sport = sportConfig[session.sport_type] || sportConfig.other;
   const isFull = Boolean(session.max_participants && session.current_participants >= session.max_participants);
 
@@ -50,7 +52,7 @@ function CompactSessionCard({ session, variant = 'horizontal', className = '' }:
 
       let label = '';
       if (diffMins < 0) {
-        label = 'Started';
+        label = t('started');
         setIsUrgent(false);
       } else if (diffMins < 60) {
         label = `${diffMins}m`;
@@ -97,11 +99,11 @@ function CompactSessionCard({ session, variant = 'horizontal', className = '' }:
 
           {/* Status Badge */}
           {isFull ? (
-            <Badge variant="danger" size="sm" className="shadow-sm">Full</Badge>
+            <Badge variant="danger" size="sm" className="shadow-sm">{t('full')}</Badge>
           ) : spotsLeft && spotsLeft <= 3 ? (
-            <Badge variant="warning" size="sm" className="shadow-sm">{spotsLeft} left</Badge>
+            <Badge variant="warning" size="sm" className="shadow-sm">{t('spots', { count: spotsLeft })}</Badge>
           ) : (
-            <Badge variant="success" size="sm" className="shadow-sm">Open</Badge>
+            <Badge variant="success" size="sm" className="shadow-sm">{t('open')}</Badge>
           )}
         </div>
 
@@ -126,7 +128,7 @@ function CompactSessionCard({ session, variant = 'horizontal', className = '' }:
                   size="xs"
                 />
               ) : (
-                <span className="text-xs text-slate-400">Be the first to join</span>
+                <span className="text-xs text-slate-400">{t('firstToJoin')}</span>
               )}
             </div>
             <div className="text-xs font-semibold text-slate-600">

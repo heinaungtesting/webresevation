@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
 ];
 
 export default function BottomNav() {
-  const pathname = usePathname();
+  const pathname = usePathname() || '';
   const { user } = useAuth();
   const t = useTranslations('nav');
 
@@ -60,7 +60,7 @@ export default function BottomNav() {
                   key={item.href}
                   href={getHref(item.href)}
                   className={`
-                    relative flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl
+                    relative flex flex-col items-center justify-center gap-1 px-1.5 sm:px-3 py-2 rounded-2xl
                     transition-all duration-300 min-w-[64px] min-h-[48px] group
                     ${active
                       ? 'text-primary-600'
@@ -102,7 +102,7 @@ export default function BottomNav() {
             {!user && (
               <Link
                 href={getHref('/login')}
-                className="relative flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-2xl
+                className="relative flex flex-col items-center justify-center gap-1 px-1.5 sm:px-3 py-2 rounded-2xl
                   transition-all duration-300 min-w-[64px] min-h-[48px] group
                   text-slate-400 hover:text-slate-600"
               >

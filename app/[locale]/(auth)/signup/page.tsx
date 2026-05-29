@@ -219,8 +219,9 @@ export default function SignupPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+             <form onSubmit={handleSubmit} className="space-y-5">
               <Input
+                id="email"
                 label={t('email')}
                 type="email"
                 name="email"
@@ -234,6 +235,7 @@ export default function SignupPage() {
 
               <div>
                 <Input
+                  id="password"
                   label={t('password')}
                   type="password"
                   name="password"
@@ -268,6 +270,7 @@ export default function SignupPage() {
               </div>
 
               <Input
+                id="confirmPassword"
                 label={t('confirmPassword')}
                 type="password"
                 name="confirmPassword"

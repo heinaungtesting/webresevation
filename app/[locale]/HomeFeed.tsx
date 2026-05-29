@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import { motion } from 'framer-motion';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { toArray } from '@/lib/utils/toArray';
 import NotificationBell from '@/app/components/notifications/NotificationBell';
 
@@ -65,12 +65,14 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
   const { user, profile } = useAuth();
   const t = useTranslations('home');
   const tSessions = useTranslations('sessions');
+  const locale = useLocale();
+  const [mounted, setMounted] = useState(false);
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  const displayName = profile?.display_name || profile?.username || user?.email?.split('@')[0] || 'there';
+  const displayName = profile?.display_name || profile?.username || user?.email?.split('@')[0] || t('guest');
 
   // Get greeting based on time of day (Fix 4.2 - Hydration Error)
   const [greeting, setGreeting] = useState('');
@@ -80,6 +82,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
     if (hour < 12) setGreeting(t('greeting.morning'));
     else if (hour < 17) setGreeting(t('greeting.afternoon'));
     else setGreeting(t('greeting.evening'));
+    setMounted(true);
   }, [t]);
 
   // Sport filters with translations
@@ -201,8 +204,23 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight" suppressHydrationWarning>
-                  {greeting ? `${greeting}, ` : ''}<span className="text-primary-600">{displayName.split(' ')[0]}</span>
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight min-h-[32px] flex items-center" suppressHydrationWarning>
+                  {!mounted ? (
+                    <span className="h-6 w-32 bg-slate-100 animate-pulse rounded-md inline-block" aria-hidden="true" />
+                  ) : (
+                    locale === 'ja' ? (
+                      <>
+                        {greeting && `${greeting}、`}
+                        <span className="text-primary-600">{displayName.split(' ')[0]}</span>
+                        さん
+                      </>
+                    ) : (
+                      <>
+                        {greeting && `${greeting}, `}
+                        <span className="text-primary-600">{displayName.split(' ')[0]}</span>
+                      </>
+                    )
+                  )}
                 </h1>
                 <p className="text-sm text-slate-500 font-medium">{t('readyForGame')}</p>
               </div>
@@ -335,6 +353,7 @@ export default function HomeFeed({ sessions: initialSessions, happeningNow }: Ho
                   onClick={() => refetch()}
                   className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1"
                   title={t('refresh')}
+                  aria-label={t('refresh')}
                 >
                   <RefreshCw className={cn("w-4 h-4", isFetching && "animate-spin")} />
                 </button>

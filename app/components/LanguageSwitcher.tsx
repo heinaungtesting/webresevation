@@ -12,6 +12,10 @@ export default function LanguageSwitcher() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
+  if (!pathname) {
+    return null;
+  }
+
   const switchLocale = (newLocale: string) => {
     // Remove the current locale from the pathname
     const pathWithoutLocale = pathname.replace(`/${locale}`, '');

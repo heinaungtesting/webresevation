@@ -8,15 +8,18 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, fullWidth = false, type = 'text', ...props }, ref) => {
+  ({ className, label, error, fullWidth = false, type = 'text', id, name, ...props }, ref) => {
+    const inputId = id || name;
     return (
       <div className={cn('flex flex-col gap-1.5', fullWidth && 'w-full')}>
         {label && (
-          <label className="text-sm font-semibold text-slate-700">
+          <label htmlFor={inputId} className="text-sm font-semibold text-slate-700">
             {label}
           </label>
         )}
         <input
+          id={inputId}
+          name={name}
           ref={ref}
           type={type}
           data-date={type === 'date' && props.value ? props.value : undefined}
