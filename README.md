@@ -34,12 +34,13 @@ A real-time sports session platform connecting athletes across Tokyo.
 - [Deployment](#-deployment)
 - [Contributing](#-contributing)
 - [License](#-license)
+- [日本語 (Japanese)](#-日本語-japanese)
 
 ---
 
 ## 🎯 Overview
 
-SportsMatch Tokyo is a modern full-stack web application that makes it effortless to **discover, organise, and join pickup sports sessions** in Tokyo. Players browse open sessions filtered by sport, skill level, date, and session vibe. Organisers create sessions at verified sports centres and manage participants in real time. Every session has its own live group chat — powered by Supabase Realtime — so coordination happens instantly, without refreshing the page.
+SportsMatch Tokyo is a modern full-stack web application that makes it effortless to **discover, organise, and join pickup sports sessions** in Tokyo. Players browse open sessions filtered by sport, time, and location — then join instantly. Organisers can create sessions, manage rosters, and coordinate with participants in real-time.
 
 Key highlights:
 - **Real-time** messaging and notifications via Supabase Realtime WebSockets
@@ -56,7 +57,7 @@ Key highlights:
 |---|---|
 | 🏃 **Player** | Browse & filter sessions · Join / leave · Real-time group chat · Attendance history · Notifications |
 | 👨‍💼 **Organiser** | Create & edit sessions · Manage participants · Waitlist · Mark attendance · Session chat |
-| �� **Admin** | Dashboard analytics · User & centre management · Moderation · Reports |
+| 🛡️ **Admin** | Dashboard analytics · User & centre management · Moderation · Reports |
 
 ---
 
@@ -214,11 +215,11 @@ erDiagram
 
 | Session Feed | Session Detail | Real-time Chat |
 |:---:|:---:|:---:|
-| ![Session feed showing sport filter cards and upcoming sessions](docs/screenshots/session-feed.png) | ![Session detail page with join button and participant list](docs/screenshots/session-detail.png) | ![Live group chat within a session](docs/screenshots/session-chat.png) |
+| ![Session feed showing sport filter cards and upcoming sessions](docs/screenshots/session-feed.png) | ![Session detail page with join button and participant list](docs/screenshots/session-detail.png) | ![Real-time chat interface with typing indicator](docs/screenshots/session-chat.png) |
 
 | Admin Dashboard | User Profile | Mobile View |
 |:---:|:---:|:---:|
-| ![Admin analytics dashboard](docs/screenshots/admin-dashboard.png) | ![User profile with sport preferences](docs/screenshots/user-profile.png) | ![Responsive mobile layout](docs/screenshots/mobile.png) |
+| ![Admin analytics dashboard](docs/screenshots/admin-dashboard.png) | ![User profile with sport preferences](docs/screenshots/user-profile.png) | ![Responsive mobile layout](docs/screenshots/mobile-view.png) |
 
 > 📷 Screenshots will appear here once placed in `docs/screenshots/`. See the [live demo](https://sportsmatch-tokyo.vercel.app) in the meantime.
 
@@ -345,7 +346,7 @@ webresevation/
 │   ├── adr/                     # Architecture Decision Records
 │   └── ARCHITECTURE.md          # System architecture overview
 ├── tests/                       # Vitest unit & integration tests
-├── e2e/                         # Playwright E2E tests
+├── e2e/                        # Playwright E2E tests
 ├── types/                       # Shared TypeScript types
 └── i18n.ts                      # next-intl configuration
 ```
@@ -453,3 +454,64 @@ This project is licensed under the [MIT License](./LICENSE).
 <div align="center">
 Built with ❤️ in Tokyo 🗼
 </div>
+
+---
+
+## 🇯🇵 日本語 (Japanese)
+
+SportsMatch Tokyo は、東京でスポーツのセッション（活動）を **探す・企画する・参加する** ことを簡単にするモダンなフルスタック Web アプリケーションです。プレイヤーは種目・時間・場所で絞り込んで空きセッションを探し、すぐに参加できます。主催者はセッションの作成、参加者管理、当日の運営を行い、参加者とはリアルタイムで連絡を取れます。
+
+### 主なポイント
+
+- Supabase Realtime（WebSocket）による **リアルタイム** チャットと通知
+- `next-intl` のロケールルーティングによる **日英バイリンガル UI**（🇺🇸 English / 🇯🇵 日本語）
+- **ロールベース権限管理**（Player / Organiser / Admin）
+- Vercel での **サーバーレス運用** に最適化
+- 無断欠席（no-show）を減らすための **信頼スコア**（Reliability scoring）
+
+### はじめ方
+
+#### 前提条件
+
+- **Node.js** 18+
+- **npm** 9+
+- [Supabase](https://supabase.com/) プロジェクト（無料枠でOK）
+- [Resend](https://resend.com/) API キー（メール送信用）
+- [Upstash Redis](https://upstash.com/)（任意：未設定の場合はインメモリにフォールバック）
+
+#### 1. クローン
+
+```bash
+git clone https://github.com/heinaungtesting/webresevation.git
+cd webresevation
+```
+
+#### 2. 依存関係のインストール
+
+```bash
+npm install
+```
+
+#### 3. 環境変数
+
+```bash
+cp .env.example .env.local
+```
+
+`.env.local` に必要な値を設定します（例は英語セクションを参照）。
+
+#### 4. DB セットアップ（Prisma）
+
+```bash
+npx prisma generate
+npx prisma migrate deploy
+npx prisma db seed       # (任意)
+```
+
+#### 5. 開発サーバー起動
+
+```bash
+npm run dev
+```
+
+ブラウザで `http://localhost:3000` を開くと、`/en/` へ自動リダイレクトされます。
