@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { prisma } from '@/lib/prisma';
 import { sessionCache, sessionListKey } from '@/lib/cache';
 import HomeFeed from './HomeFeed';

@@ -44,6 +44,7 @@ export async function updateSession(request: NextRequest) {
     '/settings',
     '/admin',
     '/notifications',
+    '/dashboard',
   ];
 
   // Extract locale from pathname (e.g., /en/my-sessions -> my-sessions)

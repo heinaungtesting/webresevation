@@ -11,6 +11,7 @@
 
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
+import { redisTimeoutFetch } from './redis-timeout-fetch';
 
 // ============================================================================
 // Configuration
@@ -58,7 +59,11 @@ function getRedisClient(): Redis | null {
   }
 
   try {
-    redisClient = new Redis({ url, token });
+    redisClient = new Redis({
+      url,
+      token,
+      fetch: redisTimeoutFetch,
+    } as any);
     console.log('[RateLimit] Redis client initialized successfully');
     return redisClient;
   } catch (error) {

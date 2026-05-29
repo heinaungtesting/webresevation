@@ -101,6 +101,7 @@ export async function POST(request: Request) {
       {
         message: 'Signup successful!',
         user: data.user,
+        requiresEmailVerification: !data.session,
       },
       {
         status: 201,

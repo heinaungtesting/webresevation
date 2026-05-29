@@ -76,14 +76,17 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      await csrfPost('/api/auth/signup', {
+      const response = await csrfPost('/api/auth/signup', {
         email: formData.email,
         password: formData.password,
         language: formData.language,
-      });
+      }) as { user: any; requiresEmailVerification: boolean };
 
-      // Redirect to home page
-      router.push(`/${locale}`);
+      if (response && response.requiresEmailVerification) {
+        router.push(`/${locale}/verify-email?email=${encodeURIComponent(formData.email)}`);
+      } else {
+        router.push(`/${locale}`);
+      }
     } catch (err) {
       setErrors({ email: err instanceof Error ? err.message : t('errors.genericError') });
     } finally {

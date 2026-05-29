@@ -13,6 +13,7 @@
  */
 
 import { Redis } from '@upstash/redis';
+import { redisTimeoutFetch } from './redis-timeout-fetch';
 
 // ============================================================================
 // Types
@@ -56,7 +57,11 @@ function getRedis(): Redis | null {
   }
 
   try {
-    redis = new Redis({ url, token });
+    redis = new Redis({
+      url,
+      token,
+      fetch: redisTimeoutFetch,
+    } as any);
     console.log('[Cache] Redis client initialized');
     return redis;
   } catch (error) {
