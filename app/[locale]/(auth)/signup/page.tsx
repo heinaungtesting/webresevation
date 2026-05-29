@@ -68,6 +68,7 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
 
     if (!validateForm()) {
       return;
@@ -339,8 +340,7 @@ export default function SignupPage() {
                 loading={loading}
                 className="mt-6"
               >
-                <Zap className="w-4 h-4 mr-2" />
-                {t('createAccountButton')}
+                {loading ? t('signingUp') : t('createAccountButton')}
               </Button>
             </form>
 

@@ -239,8 +239,8 @@ export default function SettingsPage() {
               loading={saving}
               className="gap-2"
             >
-              <Save className="w-4 h-4" />
-              {t('saveButton')}
+              {!saving && <Save className="w-4 h-4" />}
+              {saving ? t('saving') : t('saveButton')}
             </Button>
           </div>
         </form>

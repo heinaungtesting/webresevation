@@ -531,6 +531,7 @@
       }
     },
     "saveButton": "設定を保存",
+    "saving": "保存中...",
     "legal": {
       "title": "法的情報",
       "terms": {

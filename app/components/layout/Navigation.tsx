@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import Button from '../ui/Button';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useParams, useRouter } from 'next/navigation';
-import { LogOut, Settings, UserCircle, Shield, ChevronDown, Heart, Menu, X, MessageSquare, Home, Search, Ticket } from 'lucide-react';
+import { LogOut, Settings, UserCircle, Shield, ChevronDown, Heart, Menu, X, MessageSquare, Home, Search, Ticket, Loader2 } from 'lucide-react';
 import LanguageSwitcher from '../LanguageSwitcher';
 import NotificationBell from '../notifications/NotificationBell';
 
@@ -20,6 +20,8 @@ export default function Navigation() {
   const locale = typeof params.locale === 'string' ? params.locale : 'en';
   const t = useTranslations('nav');
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
 
   // Get display name for avatar fallback
   const displayName = profile?.display_name || profile?.username || user?.email?.split('@')[0] || 'U';
@@ -46,11 +48,21 @@ export default function Navigation() {
   }, []);
 
   const handleSignOut = async () => {
-    await signOut();
-    setShowUserMenu(false);
-    setShowMobileMenu(false);
-    router.push(`/${locale}`);
-    router.refresh();
+    if (isSigningOut) return;
+    try {
+      setIsSigningOut(true);
+      setSignOutError(null);
+      await signOut();
+      setShowUserMenu(false);
+      setShowMobileMenu(false);
+      router.push(`/${locale}`);
+      router.refresh();
+    } catch (err: any) {
+      console.error('Failed to sign out:', err);
+      setSignOutError(t('signOutFailed') || 'Failed to sign out. Please try again.');
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
   // Prevent scroll when mobile menu is open
@@ -94,13 +106,13 @@ export default function Navigation() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
             <Link
-              href="/"
+              href={`/${locale}`}
               className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 rounded-lg hover:bg-primary-50 transition-all duration-200"
             >
               {t('home')}
             </Link>
             <Link
-              href="/sessions"
+              href={`/${locale}/sessions`}
               className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 rounded-lg hover:bg-primary-50 transition-all duration-200"
             >
               {t('sessions')}
@@ -108,13 +120,13 @@ export default function Navigation() {
             {user && (
               <>
                 <Link
-                  href="/my-sessions"
+                  href={`/${locale}/my-sessions`}
                   className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 rounded-lg hover:bg-primary-50 transition-all duration-200"
                 >
                   {t('mySessions')}
                 </Link>
                 <Link
-                  href="/messages"
+                  href={`/${locale}/messages`}
                   className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary-600 rounded-lg hover:bg-primary-50 transition-all duration-200"
                 >
                   {t('messages')}
@@ -196,10 +208,20 @@ export default function Navigation() {
                         <div className="border-t border-slate-100 pt-1">
                           <button
                             onClick={handleSignOut}
-                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                            disabled={isSigningOut}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <LogOut className="w-4 h-4" suppressHydrationWarning />
-                            {t('signOut')}
+                            {isSigningOut ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" suppressHydrationWarning />
+                                {t('signingOut') || 'Signing out...'}
+                              </>
+                            ) : (
+                              <>
+                                <LogOut className="w-4 h-4" suppressHydrationWarning />
+                                {t('signOut')}
+                              </>
+                            )}
                           </button>
                         </div>
                       </div>
@@ -208,12 +230,12 @@ export default function Navigation() {
                 </>
               ) : (
                 <>
-                  <Link href="/login">
+                  <Link href={`/${locale}/login`}>
                     <Button variant="ghost" size="sm">
                       {t('login')}
                     </Button>
                   </Link>
-                  <Link href="/signup">
+                  <Link href={`/${locale}/signup`}>
                     <Button variant="gradient" size="sm">
                       {t('signUp')}
                     </Button>
@@ -265,7 +287,7 @@ export default function Navigation() {
 
                     <div className="py-1">
                       <Link
-                        href="/profile"
+                        href={`/${locale}/profile`}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                         onClick={() => setShowUserMenu(false)}
                       >
@@ -273,7 +295,7 @@ export default function Navigation() {
                         {t('profile')}
                       </Link>
                       <Link
-                        href="/favorites"
+                        href={`/${locale}/favorites`}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                         onClick={() => setShowUserMenu(false)}
                       >
@@ -281,7 +303,7 @@ export default function Navigation() {
                         {t('favorites')}
                       </Link>
                       <Link
-                        href="/settings"
+                        href={`/${locale}/settings`}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                         onClick={() => setShowUserMenu(false)}
                       >
@@ -290,7 +312,7 @@ export default function Navigation() {
                       </Link>
                       {profile?.is_admin && (
                         <Link
-                          href="/admin"
+                          href={`/${locale}/admin`}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
                           onClick={() => setShowUserMenu(false)}
                         >
@@ -307,17 +329,27 @@ export default function Navigation() {
                     <div className="border-t border-slate-100 pt-1">
                       <button
                         onClick={handleSignOut}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        disabled={isSigningOut}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <LogOut className="w-4 h-4" suppressHydrationWarning />
-                        {t('signOut')}
+                        {isSigningOut ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" suppressHydrationWarning />
+                            {t('signingOut') || 'Signing out...'}
+                          </>
+                        ) : (
+                          <>
+                            <LogOut className="w-4 h-4" suppressHydrationWarning />
+                            {t('signOut')}
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              <Link href="/login">
+              <Link href={`/${locale}/login`}>
                 <Button variant="ghost" size="sm">
                   {t('login')}
                 </Button>
@@ -395,10 +427,20 @@ export default function Navigation() {
               <div className="px-4">
                 <button
                   onClick={handleSignOut}
-                  className="w-full flex items-center justify-center gap-2 py-3 text-base font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+                  disabled={isSigningOut}
+                  className="w-full flex items-center justify-center gap-2 py-3 text-base font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <LogOut className="w-5 h-5" />
-                  {t('signOut')}
+                  {isSigningOut ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" suppressHydrationWarning />
+                      {t('signingOut') || 'Signing out...'}
+                    </>
+                  ) : (
+                    <>
+                      <LogOut className="w-5 h-5" />
+                      {t('signOut')}
+                    </>
+                  )}
                 </button>
               </div>
             )}

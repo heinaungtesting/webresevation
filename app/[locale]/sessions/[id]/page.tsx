@@ -26,7 +26,7 @@ export default function SessionDetailPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [isAttending, setIsAttending] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [activeAction, setActiveAction] = useState<'join' | 'leave' | 'cancel' | 'message' | 'join_waitlist' | 'leave_waitlist' | null>(null);
   const [error, setError] = useState('');
   // Waitlist state
   const [isOnWaitlist, setIsOnWaitlist] = useState(false);
@@ -88,7 +88,7 @@ export default function SessionDetailPage() {
       return;
     }
 
-    setActionLoading(true);
+    setActiveAction('join_waitlist');
     try {
       const data = await csrfPost(`/api/sessions/${params.id}/waitlist`, {});
 
@@ -99,12 +99,12 @@ export default function SessionDetailPage() {
       alert(err.message || 'Failed to join waitlist');
       console.error(err);
     } finally {
-      setActionLoading(false);
+      setActiveAction(null);
     }
   };
 
   const handleLeaveWaitlist = async () => {
-    setActionLoading(true);
+    setActiveAction('leave_waitlist');
     try {
       await csrfDelete(`/api/sessions/${params.id}/waitlist`);
 
@@ -115,7 +115,7 @@ export default function SessionDetailPage() {
       alert(err.message || 'Failed to leave waitlist');
       console.error(err);
     } finally {
-      setActionLoading(false);
+      setActiveAction(null);
     }
   };
 
@@ -125,7 +125,8 @@ export default function SessionDetailPage() {
       return;
     }
 
-    setActionLoading(true);
+    const actionType = isAttending ? 'cancel' : 'join';
+    setActiveAction(actionType);
     try {
       if (isAttending) {
         // Cancel attendance
@@ -149,14 +150,14 @@ export default function SessionDetailPage() {
       alert(err.message || 'An error occurred');
       console.error(err);
     } finally {
-      setActionLoading(false);
+      setActiveAction(null);
     }
   };
 
   const handleOpenChat = async () => {
     if (!session) return;
 
-    setActionLoading(true);
+    setActiveAction('message');
     try {
       // Get or create conversation for this session
       const response = await fetch(`/api/sessions/${session.id}/conversation`);
@@ -172,7 +173,7 @@ export default function SessionDetailPage() {
       alert(err.message || 'Failed to open chat');
       console.error(err);
     } finally {
-      setActionLoading(false);
+      setActiveAction(null);
     }
   };
 
@@ -492,31 +493,19 @@ export default function SessionDetailPage() {
                     variant="danger"
                     fullWidth
                     onClick={handleAttendance}
-                    disabled={actionLoading}
+                    loading={activeAction === 'cancel'}
+                    disabled={activeAction !== null}
                   >
-                    {actionLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        {t('canceling')}
-                      </>
-                    ) : (
-                      t('cancelAttendance')
-                    )}
+                    {activeAction === 'cancel' ? t('canceling') : t('cancelAttendance')}
                   </Button>
                   <Button
                     variant="primary"
                     fullWidth
                     onClick={handleOpenChat}
-                    disabled={actionLoading}
+                    loading={activeAction === 'message'}
+                    disabled={activeAction !== null}
                   >
-                    {actionLoading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        {t('loading')}
-                      </>
-                    ) : (
-                      t('openChatRoom')
-                    )}
+                    {activeAction === 'message' ? t('loading') : t('openChatRoom')}
                   </Button>
                 </div>
               ) : (
@@ -528,9 +517,10 @@ export default function SessionDetailPage() {
                         size="lg"
                         fullWidth
                         onClick={handleAttendance}
-                        disabled={actionLoading}
+                        loading={activeAction === 'join'}
+                        disabled={activeAction !== null}
                       >
-                        {actionLoading ? t('joining') : tSessions('imGoing')}
+                        {activeAction === 'join' ? t('joining') : tSessions('imGoing')}
                       </Button>
                       <p className="text-xs text-gray-500 text-center">
                         {t('free')}
@@ -554,15 +544,11 @@ export default function SessionDetailPage() {
                         variant="outline"
                         fullWidth
                         onClick={handleLeaveWaitlist}
-                        disabled={actionLoading}
+                        loading={activeAction === 'leave_waitlist'}
+                        disabled={activeAction !== null}
                         className="border-amber-300 text-amber-700 hover:bg-amber-50"
                       >
-                        {actionLoading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Leaving...
-                          </>
-                        ) : (
+                        {activeAction === 'leave_waitlist' ? 'Leaving...' : (
                           <>
                             <BellOff className="w-4 h-4 mr-2" />
                             Leave Waitlist
@@ -588,15 +574,11 @@ export default function SessionDetailPage() {
                         size="lg"
                         fullWidth
                         onClick={handleJoinWaitlist}
-                        disabled={actionLoading}
+                        loading={activeAction === 'join_waitlist'}
+                        disabled={activeAction !== null}
                         className="border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
                       >
-                        {actionLoading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Joining...
-                          </>
-                        ) : (
+                        {activeAction === 'join_waitlist' ? 'Joining...' : (
                           <>
                             <Bell className="w-4 h-4 mr-2" />
                             Join Waitlist

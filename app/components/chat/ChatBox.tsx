@@ -33,7 +33,7 @@ export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps)
         const response = await fetch(`/api/conversations/${conversationId}/messages`);
         if (!response.ok) throw new Error('Failed to fetch messages');
         const data = await response.json();
-        setMessages(data.messages || []);
+        setMessages(Array.isArray(data) ? data : data.messages || []);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -47,7 +47,10 @@ export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps)
   // Subscribe to new messages with Supabase Realtime
   // Debounce rapid updates to prevent excessive re-renders
   const handleNewMessage = useCallback((message: any) => {
-    setMessages(prev => [...prev, message]);
+    setMessages((prev) => {
+      if (prev.some((m) => m.id === message.id)) return prev;
+      return [...prev, message];
+    });
 
     // Mark conversation as read when new message arrives
     if (message.sender_id !== currentUserId) {
@@ -100,7 +103,42 @@ export default function ChatBox({ conversationId, currentUserId }: ChatBoxProps)
   };
 
   if (loading) {
-    return <Loading text="Loading messages..." />;
+    return (
+      <div className="flex flex-col h-full animate-pulse p-4 space-y-4">
+        {/* Left message skeleton */}
+        <div className="flex justify-start gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-slate-200" />
+          <div className="space-y-1.5">
+            <div className="h-3 w-16 bg-slate-200 rounded" />
+            <div className="h-10 w-48 bg-slate-200 rounded-2xl rounded-tl-none" />
+          </div>
+        </div>
+        {/* Right message skeleton */}
+        <div className="flex justify-end gap-2.5">
+          <div className="space-y-1.5 flex flex-col items-end">
+            <div className="h-3 w-16 bg-slate-200 rounded" />
+            <div className="h-12 w-64 bg-slate-200 rounded-2xl rounded-tr-none" />
+          </div>
+          <div className="w-8 h-8 rounded-full bg-slate-200" />
+        </div>
+        {/* Left message skeleton */}
+        <div className="flex justify-start gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-slate-200" />
+          <div className="space-y-1.5">
+            <div className="h-3 w-20 bg-slate-200 rounded" />
+            <div className="h-8 w-36 bg-slate-200 rounded-2xl rounded-tl-none" />
+          </div>
+        </div>
+        {/* Right message skeleton */}
+        <div className="flex justify-end gap-2.5">
+          <div className="space-y-1.5 flex flex-col items-end">
+            <div className="h-3 w-12 bg-slate-200 rounded" />
+            <div className="h-10 w-52 bg-slate-200 rounded-2xl rounded-tr-none" />
+          </div>
+          <div className="w-8 h-8 rounded-full bg-slate-200" />
+        </div>
+      </div>
+    );
   }
 
   if (error && messages.length === 0) {

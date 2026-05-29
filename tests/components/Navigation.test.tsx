@@ -63,6 +63,22 @@ describe('Navigation', () => {
     expect(settingsLink).toHaveAttribute('href', '/en/settings');
   });
 
+  it('should render correct localized links in the mobile user dropdown menu', async () => {
+    render(<Navigation />);
+    
+    // Find the mobile user menu avatar button and click it to open the dropdown
+    const avatarButtons = screen.getAllByRole('button', { name: /user menu/i });
+    expect(avatarButtons.length).toBeGreaterThan(0);
+    fireEvent.click(avatarButtons[0]);
+    
+    // Check if the Profile and Settings links have the correct localized hrefs in the mobile dropdown
+    const profileLinks = screen.getAllByText('profile');
+    const settingsLinks = screen.getAllByText('settings');
+    
+    expect(profileLinks[profileLinks.length - 1].closest('a')).toHaveAttribute('href', '/en/profile');
+    expect(settingsLinks[settingsLinks.length - 1].closest('a')).toHaveAttribute('href', '/en/settings');
+  });
+
   it('should call signOut and navigate to localized root when sign out is clicked', async () => {
     render(<Navigation />);
     
@@ -70,16 +86,44 @@ describe('Navigation', () => {
     const userMenuButton = screen.getByText('Test User').closest('button');
     fireEvent.click(userMenuButton!);
     
-    // Find Sign Out button ('signOut' key because of mock)
+    // Find Sign Out button
     const signOutButton = screen.getAllByText('signOut')[0].closest('button');
     expect(signOutButton).not.toBeNull();
     
     fireEvent.click(signOutButton!);
     
     expect(mockSignOut).toHaveBeenCalled();
-    // Wait for the async handleSignOut to complete
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/en');
+    });
+  });
+
+  it('should show loading spinner and disable sign out button during sign out', async () => {
+    let resolveSignOut: () => void = () => {};
+    const signOutPromise = new Promise<void>((resolve) => {
+      resolveSignOut = resolve;
+    });
+    mockSignOut.mockReturnValue(signOutPromise);
+
+    render(<Navigation />);
+    
+    // Open user menu
+    const userMenuButton = screen.getByText('Test User').closest('button');
+    fireEvent.click(userMenuButton!);
+    
+    // Click Sign Out
+    const signOutButton = screen.getAllByText('signOut')[0].closest('button');
+    fireEvent.click(signOutButton!);
+    
+    // Button should be disabled and show loading state
+    expect(signOutButton).toBeDisabled();
+    expect(screen.getAllByText(/signingOut/i).length).toBeGreaterThan(0);
+
+    // Complete sign out
+    resolveSignOut();
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/en');
     });
   });
 });
+

@@ -62,6 +62,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setError('');
     setLoading(true);
 
@@ -74,6 +75,7 @@ export default function LoginPage() {
       router.push(redirectTo);
       router.refresh();
     } catch (err) {
+      console.error('handleSubmit error:', err);
       setError(t('invalidCredentials'));
     } finally {
       setLoading(false);
@@ -267,8 +269,7 @@ export default function LoginPage() {
                 className="mt-6"
                 data-testid="login-button"
               >
-                <Zap className="w-4 h-4 mr-2" />
-                {t('loginButton')}
+                {loading ? t('loggingIn') : t('loginButton')}
               </Button>
             </form>
 

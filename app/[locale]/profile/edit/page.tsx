@@ -294,7 +294,7 @@ export default function ProfileEditPage() {
                 fullWidth
                 className="gap-2"
               >
-                <Save className="w-4 h-4" />
+                {!saving && <Save className="w-4 h-4" />}
                 {saving ? t('edit.saving') : t('edit.saveChanges')}
               </Button>
             </div>

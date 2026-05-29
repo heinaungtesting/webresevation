@@ -527,6 +527,7 @@
       }
     },
     "saveButton": "Save Settings",
+    "saving": "Saving...",
     "legal": {
       "title": "Legal",
       "terms": {

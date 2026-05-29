@@ -1,3 +1,11 @@
+// Set global environment variables before importing any modules to satisfy env validation
+process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://test-supabase-url.com';
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-supabase-key';
+process.env.DATABASE_URL = 'postgresql://localhost:5432/db';
+process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-supabase-service-key';
+process.env.RESEND_API_KEY = 'test-resend-key';
+process.env.CRON_SECRET = 'test-cron-secret-must-be-long-enough';
+
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
