@@ -29,6 +29,13 @@ A real-time sports session platform connecting athletes across Tokyo.
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
 - [Architecture](#-architecture)
+- [📄 Portfolio Description (for screening)](#-portfolio-description-for-screening)
+  - [Project Name](#project-name)
+  - [Development Period](#development-period)
+  - [Purpose / Motivation](#purpose--motivation)
+  - [My Responsibilities](#my-responsibilities)
+  - [What I Focused On / Challenges](#what-i-focused-on--challenges)
+  - [Future Improvements](#future-improvements)
 - [Screenshots](#-screenshots)
 - [Getting Started](#-getting-started)
 - [Project Structure](#-project-structure)
@@ -41,7 +48,7 @@ A real-time sports session platform connecting athletes across Tokyo.
 
 ## 🎯 Overview
 
-SportsMatch Tokyo is a modern full-stack web application that makes it effortless to **discover, organise, and join pickup sports sessions** in Tokyo. Players browse open sessions filtered by sport, time, and location — then join instantly. Organisers can create sessions, manage rosters, and coordinate with participants in real-time.
+SportsMatch Tokyo is a modern full-stack web application that makes it effortless to **discover, organise, and join pickup sports sessions** in Tokyo. Players browse open sessions filtered by spor[...]
 
 Key highlights:
 - **Real-time** messaging and notifications via Supabase Realtime WebSockets
@@ -210,17 +217,70 @@ erDiagram
 
 ---
 
+## 📄 Portfolio Description (for screening)
+
+### Project Name
+
+SportsMatch Tokyo
+
+### Development Period
+
+Start: 2025-11-18  
+End: 2026-04-22
+
+### Purpose / Motivation
+
+SportsMatch Tokyo is a web application built to help people in Tokyo who want to play sports find others to play with and discover sessions they can join.
+
+While joining sports events and playing badminton myself, I felt that **finding teammates**, **coordinating schedules**, and **communicating with participants** can be surprisingly time-consuming. In particular, for foreigners living in Tokyo or people who don't yet have many sports connections, it can be difficult to find a place to join casually.
+
+That motivated me to build a single service where users can handle the full flow: **searching for sessions**, **joining**, **chatting after joining**, **receiving notifications**, and **role-based management**.
+
+Also, because I am aiming for an AI Engineer role, I wanted to develop not only AI-related skills but also the ability to design and implement a web service that solves real user problems end-to-end.
+
+### My Responsibilities
+
+This was an individual project. I handled planning, UI design, data modeling, implementation, testing, publishing on GitHub, and deploying a live demo.
+
+During development I used AI tools for support, but I made the decisions myself—what to build, how to integrate code, how to fix errors, and finally verifying that everything works correctly.
+
+### What I Focused On / Challenges
+
+What I focused on most was not just building features, but making the project closer to a production-ready service.
+
+At first I built core features like browsing sessions and joining. However, I wanted it to be more than a portfolio demo—I wanted it to be usable for real users. So I gradually added authentication, role management, real-time chat, notifications, multilingual support, and admin features.
+
+During development I had to combine multiple technologies such as Next.js App Router, Supabase Auth, PostgreSQL, Prisma, Supabase Realtime, Row-Level Security, environment variables, and Vercel deployment. I repeatedly got stuck on issues like auth state handling, realtime communication, database permissions, API errors, and build errors.
+
+When that happened, I carefully read error messages, checked official documentation, and debugged step-by-step to find the root cause. I also used AI tools, but I did not copy generated code blindly—I reviewed it, adjusted it to fit the current codebase, and verified the behavior myself.
+
+What I kept in mind was not just “it works,” but “it’s readable for others and easy to maintain later.” Because of that, I paid attention to type safety, validation, authentication/authorization, error handling, the README, and deployment instructions.
+
+### Future Improvements
+
+Going forward, my goal is to have real users try the service.
+
+First, I want to create a landing page that explains the service more clearly. Then I want to build a Discord community and recruit beta testers.
+
+In beta testing, I want feedback on session search, the join flow, chat, notifications, and mobile usability. Based on that feedback, I want to improve the product into something more user-friendly.
+
+From a technical perspective, I want to improve session search, stabilize notifications, improve the usability of attendance history screens, enhance the admin dashboard UX, and add more tests.
+
+In the future, I also want to add AI features—for example, recommending sessions based on a user’s sports history and preferences, enabling natural-language session search, and adding an AI assistant for inquiries.
+
+---
+
 ## 📸 Screenshots
 
 > **Live Demo:** [https://sportsmatch-tokyo.vercel.app](https://sportsmatch-tokyo.vercel.app)
 
 | Session Feed | Session Detail | Real-time Chat |
 |:---:|:---:|:---:|
-| ![Session feed showing sport filter cards and upcoming sessions](docs/screenshots/session-feed.png) | ![Session detail page with join button and participant list](docs/screenshots/session-detail.png) | ![Real-time chat interface with typing indicator](docs/screenshots/session-chat.png) |
+| ![Session feed showing sport filter cards and upcoming sessions](docs/screenshots/session-feed.png) | ![Session detail page with join button and participant list](docs/screenshots/session-detai[...]
 
 | Admin Dashboard | User Profile | Mobile View |
 |:---:|:---:|:---:|
-| ![Admin analytics dashboard](docs/screenshots/admin-dashboard.png) | ![User profile with sport preferences](docs/screenshots/user-profile.png) | ![Responsive mobile layout](docs/screenshots/mobile-view.png) |
+| ![Admin analytics dashboard](docs/screenshots/admin-dashboard.png) | ![User profile with sport preferences](docs/screenshots/user-profile.png) | ![Responsive mobile layout](docs/screenshots/mob[...]
 
 > 📷 Screenshots will appear here once placed in `docs/screenshots/`. See the [live demo](https://sportsmatch-tokyo.vercel.app) in the meantime.
 
@@ -321,7 +381,7 @@ webresevation/
 │   │   ├── sessions/            # CRUD + join/leave
 │   │   ├── conversations/       # Messaging & chat
 │   │   ├── users/               # User management
-│   │   ├── admin/               # Admin endpoints
+│   ���   ├── admin/               # Admin endpoints
 │   │   └── auth/                # Supabase auth callback
 │   └── components/
 │       ├── ui/                  # Reusable design-system components
