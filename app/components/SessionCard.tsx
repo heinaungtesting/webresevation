@@ -1,6 +1,6 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Session, SportType, SkillLevel } from '@/types';
 import Badge from './ui/Badge';
@@ -9,7 +9,10 @@ import FavoriteButton from './sessions/FavoriteButton';
 import VibeBadge, { SessionVibe } from './ui/VibeBadge';
 import LanguageFlag from './ui/LanguageFlag';
 import { formatDate } from '@/lib/utils';
-import { Users, Clock, MapPin, ArrowRight, Bell } from 'lucide-react';
+import { csrfPost } from '@/lib/csrfClient';
+import { useAuth } from '@/app/contexts/AuthContext';
+import { getSportName, pickLocalized } from '@/lib/i18n-data';
+import { Users, Clock, MapPin, ArrowRight, Bell, Check } from 'lucide-react';
 import { AvatarGroup } from './ui/Avatar';
 
 interface SessionCardProps {
@@ -37,23 +40,54 @@ const getSkillConfig = (level: SkillLevel, label: string): { color: 'success' | 
 };
 
 function SessionCard({ session }: SessionCardProps) {
-  const params = useParams();
-  const locale = params.locale as string;
-  const t = useTranslations('sessions');
+ const params = useParams();
+ const router = useRouter();
+ const locale = params.locale as string;
+ const t = useTranslations('sessions');
+ const tCommon = useTranslations('common');
+ const { user } = useAuth();
 
-  const sport = sportConfig[session.sport_type] || sportConfig.other;
-  const skill = getSkillConfig(session.skill_level, t(session.skill_level));
-  const isFull = Boolean(session.max_participants && session.current_participants >= session.max_participants);
+ // BUG-004 fix: "I'm Going!" used to be a Link to the detail page — RSVP
+ // never happened. Now: real button that POSTs to /api/attendance when
+ // logged in, and a Link to /login (with redirectTo) when not.
+ const [rsvpState, setRsvpState] = useState<'idle' | 'loading' | 'joined'>('idle');
+ const [participantCount, setParticipantCount] = useState(session.current_participants);
+ const isAttending = rsvpState === 'joined';
 
-  // Calculate participation percentage
-  const participationPercent = session.max_participants
-    ? (session.current_participants / session.max_participants) * 100
-    : 0;
+ const handleRsvp = async (e: React.MouseEvent) => {
+   e.preventDefault();
+   e.stopPropagation();
+   if (rsvpState !== 'idle' || isFull) return;
+   if (!user) {
+     router.push(`/${locale}/login?redirectTo=${encodeURIComponent(`/${locale}/sessions/${session.id}`)}`);
+     return;
+   }
+   setRsvpState('loading');
+   try {
+     await csrfPost('/api/attendance', { session_id: session.id });
+     setRsvpState('joined');
+     setParticipantCount((c) => c + 1);
+   } catch (err) {
+     // Fall back to detail page where the user can try again
+     router.push(`/${locale}/sessions/${session.id}`);
+   } finally {
+     if (rsvpState !== 'joined') setRsvpState('idle');
+   }
+ };
 
-  // Calculate spots left for urgency
-  const spotsLeft = session.max_participants
-    ? session.max_participants - session.current_participants
-    : null;
+ const sport = sportConfig[session.sport_type] || sportConfig.other;
+ const skill = getSkillConfig(session.skill_level, t(session.skill_level));
+ const isFull = Boolean(session.max_participants && participantCount >= session.max_participants);
+
+ // Calculate participation percentage
+ const participationPercent = session.max_participants
+   ? (participantCount / session.max_participants) * 100
+   : 0;
+
+ // Calculate spots left for urgency
+ const spotsLeft = session.max_participants
+   ? session.max_participants - participantCount
+   : null;
 
   return (
     <div className="group relative h-full">
@@ -67,7 +101,7 @@ function SessionCard({ session }: SessionCardProps) {
             </div>
             <div>
               <h3 className="font-semibold text-base text-slate-900 capitalize">
-                {session.sport_type.replace('-', ' ')}
+                {getSportName(session.sport_type, t)}
               </h3>
               <div className="flex items-center gap-1.5 flex-wrap mt-1">
                 <Badge variant={skill.color} size="sm">
@@ -101,7 +135,7 @@ function SessionCard({ session }: SessionCardProps) {
             </div>
             <div className="flex items-center justify-between flex-1">
               <span className="line-clamp-1 font-medium text-sm">
-                {session.sport_center?.name_en || 'Sport Center'}
+                {pickLocalized(session.sport_center, 'name', locale) || t('venueFallback')}
               </span>
               {/* Language indicators */}
               <div className="flex items-center gap-1">
@@ -131,7 +165,7 @@ function SessionCard({ session }: SessionCardProps) {
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
                 <span className="font-medium text-sm">
-                  {session.current_participants}
+                  {participantCount}
                   {session.max_participants && ` / ${session.max_participants}`} {t('going')}
                 </span>
                 {session.max_participants && (
@@ -158,18 +192,18 @@ function SessionCard({ session }: SessionCardProps) {
           </div>
 
           {/* Participant Avatars Preview */}
-          {session.current_participants > 0 && (
+          {participantCount > 0 && (
             <div className="flex items-center gap-2 mt-2">
               <AvatarGroup
-                avatars={Array.from({ length: Math.min(session.current_participants, 5) }, (_, i) => ({
+                avatars={Array.from({ length: Math.min(participantCount, 5) }, (_, i) => ({
                   initials: String.fromCharCode(65 + i),
                 }))}
                 max={4}
                 size="sm"
               />
-              {session.current_participants > 4 && (
+              {participantCount > 4 && (
                 <span className="text-xs text-slate-500 ml-1">
-                  {t('moreParticipants', { count: session.current_participants - 4 })}
+                  {t('moreParticipants', { count: participantCount - 4 })}
                 </span>
               )}
             </div>
@@ -196,17 +230,31 @@ function SessionCard({ session }: SessionCardProps) {
                 {t('waitlist')}
               </Button>
             </Link>
+          ) : isAttending ? (
+            <Button
+              variant="outline"
+              size="sm"
+              fullWidth
+              disabled
+              data-testid="session-card-joined"
+              className="flex-1 min-h-[44px] border-emerald-300 bg-emerald-50 text-emerald-700"
+            >
+              <Check className="w-3.5 h-3.5 mr-1.5" />
+              {t('joined') || 'Joined'}
+            </Button>
           ) : (
-            <Link href={`/${locale}/sessions/${session.id}`} className="flex-1">
-              <Button
-                variant="gradient"
-                size="sm"
-                fullWidth
-                className="min-h-[44px]"
-              >
-                {t('imGoing')}
-              </Button>
-            </Link>
+            <Button
+              variant="gradient"
+              size="sm"
+              fullWidth
+              loading={rsvpState === 'loading'}
+              onClick={handleRsvp}
+              data-testid="session-card-im-going"
+              data-session-id={session.id}
+              className="flex-1 min-h-[44px]"
+            >
+              {t('imGoing')}
+            </Button>
           )}
         </div>
       </div>

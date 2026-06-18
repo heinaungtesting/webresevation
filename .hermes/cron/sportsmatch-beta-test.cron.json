@@ -1,0 +1,13 @@
+{
+  "name": "SportsMatch Tokyo daily beta-test + TDD fix",
+  "schedule": "0 9 * * *",
+  "prompt": "You are running the SportsMatch Tokyo daily beta-test cron. Read the full protocol at /home/hermes/wt-critical-bugs/.hermes/cron/sportsmatch-beta-test.prompt.md and execute it step by step. Operate in the worktree at /home/hermes/wt-critical-bugs. The bug tracker is at BUG_TRACKER.md in the worktree root. The full original bug report is at /home/hermes/reports/sportsmatch-tokyo-beta-report.md. After the fix, send a concise Telegram summary per the format in the protocol. Do NOT push to main. Do NOT modify /home/hermes/reports/sportsmatch-tokyo-beta-report.md. Load the hermes-agent skill for the tool reference.",
+  "skills": ["hermes-agent"],
+  "workdir": "/home/hermes/wt-critical-bugs",
+  "model": {
+    "provider": "minimax",
+    "model": "MiniMax-M3"
+  },
+  "enabled_toolsets": ["terminal", "file", "web", "browser", "git"],
+  "deliver": "telegram"
+}

@@ -119,6 +119,9 @@
     "clearFilters": "フィルターをクリア",
     "viewDetails": "詳細を見る",
     "imGoing": "参加する！",
+    "joined": "参加済み",
+    "joinError": "参加できませんでした。もう一度お試しください。",
+    "venueFallback": "スポーツセンター",
     "open": "募集中",
     "started": "開始済み",
     "full": "満員",
@@ -384,6 +387,18 @@
       "backToLogin": "ログインに戻る",
       "alreadyVerified": "すでに確認済みですか？",
       "loginHere": "ログイン"
+    },
+    "forgotPassword": {
+      "title": "パスワードをお忘れですか？",
+      "subtitle": "メールアドレスを入力してください。再設定リンクをお送りします。",
+      "emailLabel": "メールアドレス",
+      "emailPlaceholder": "you@example.com",
+      "submitButton": "再設定リンクを送信",
+      "sending": "送信中...",
+      "successTitle": "メールをご確認ください",
+      "successMessage": "{email} のアカウントが存在する場合、まもなくパスワード再設定リンクが届きます。",
+      "backToLogin": "ログインに戻る",
+      "helpText": "お困りの場合はお問い合わせください"
     }
   },
   "branding": {
@@ -617,14 +632,14 @@
     }
   },
   "verifyEmail": {
-    "title": "メールを確認してください",
-    "sentTo": "確認リンクを送信しました",
-    "checkInbox": "受信トレイを確認",
-    "clickLink": "メール内の確認リンクをクリックして、アカウントを有効化してください。",
-    "didntReceive": "メールが届きませんでしたか？",
-    "checkSpam": "迷惑メールフォルダを確認してください",
-    "correctEmail": "正しいメールアドレスを入力したか確認してください",
-    "waitMinutes": "数分待って受信トレイを更新してください",
+    "title": "メールをご確認ください",
+    "sentTo": "確認リンクを送信しました：",
+    "checkInbox": "受信箱をご確認ください",
+    "clickLink": "メール内のリンクをクリックしてアカウントを有効化してください。",
+    "didntReceive": "メールが届きませんか？",
+    "checkSpam": "迷惑メールフォルダをご確認ください",
+    "correctEmail": "メールアドレスが正しいかご確認ください",
+    "waitMinutes": "数分待って受信箱を更新してください",
     "backToLogin": "ログインに戻る",
     "alreadyVerified": "すでに確認済みですか？",
     "login": "ログイン"

@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { authRateLimiter, createRateLimitHeaders } from '@/lib/rate-limit';
 import { signupSchema, validateRequestBody } from '@/lib/validations';
+import { mapSupabaseAuthError } from '@/lib/auth-errors';
+import * as Sentry from '@sentry/nextjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,7 +63,12 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      const mapping = mapSupabaseAuthError(error, 'signup');
+      Sentry.captureException(error);
+      return NextResponse.json(
+        { error: mapping.error, code: mapping.code },
+        { status: mapping.status, headers: createRateLimitHeaders(rateLimitResult) }
+      );
     }
 
     // Create user in database
