@@ -15,12 +15,12 @@ one screen, key numbers, next action.
 
 ## Setup
 
-1. **Worktree:** the working directory is `/home/hermes/wt-critical-bugs`
-   (a `git worktree` on branch `fix/critical-bugs-phase1`). The full
-   repo is at `/home/hermes/webreservation`. Always operate in the
-   worktree, never in the main checkout.
-2. **Bug tracker:** read `BUG_TRACKER.md` in the worktree root first.
-   It has the live status of every bug, the public-ready criteria, and
+1. **Working directory:** `/home/hermes/webreservation` (the main repo
+   checkout). The cron always operates on a long-lived branch called
+   `beta-cron` — NEVER on `main` directly. The branch is auto-created
+   on the first run if it doesn't exist.
+2. **Bug tracker:** read `BUG_TRACKER.md` in the repo root first. It
+   has the live status of every bug, the public-ready criteria, and
    the loop protocol. This file is the source of truth.
 3. **Bug report:** `/home/hermes/reports/sportsmatch-tokyo-beta-report.md`
    has the full repro steps, expected/actual, evidence, suggested fix,
@@ -28,10 +28,16 @@ one screen, key numbers, next action.
 
 ## Daily protocol (in this order, no skipping)
 
-### Step 1 — Sync
+### Step 1 — Sync to the right branch
 ```bash
-cd /home/hermes/wt-critical-bugs
+cd /home/hermes/webreservation
 git fetch origin
+# Make sure we're on beta-cron (create it from main if missing)
+git checkout main
+git pull --rebase origin main
+git checkout beta-cron 2>/dev/null || git checkout -b beta-cron
+# Sync with the latest main so we don't fall behind
+git merge --ff-only origin/main 2>/dev/null || git rebase origin/main
 git status
 git log --oneline -5
 ```
@@ -43,7 +49,7 @@ Run the test suite. **Do not skip this** — it tells you which bugs
 have regressed and which are still passing.
 
 ```bash
-cd /home/hermes/wt-critical-bugs
+cd /home/hermes/webreservation
 # If node_modules is missing, install (this may take 1-2 minutes)
 if [ ! -d node_modules ]; then npm ci --no-audit --no-fund; fi
 npm test 2>&1 | tail -80
@@ -88,7 +94,7 @@ For the chosen bug:
 
 **Commit the fix.**
 ```bash
-cd /home/hermes/wt-critical-bugs
+cd /home/hermes/webreservation
 git add -A
 git commit -m "fix(beta-test): BUG-XXX — <short title>
 
@@ -96,8 +102,8 @@ git commit -m "fix(beta-test): BUG-XXX — <short title>
 - Fix: <file>
 - Regression: <how to verify>"
 
-# Push to the branch (NOT main)
-git push origin fix/critical-bugs-phase1
+# Push to beta-cron (NEVER to main)
+git push origin beta-cron
 ```
 
 ### Step 5 — Update the bug tracker
@@ -110,13 +116,23 @@ Commit the tracker update separately:
 ```bash
 git add BUG_TRACKER.md
 git commit -m "chore(tracker): mark BUG-XXX as fixed (commit <sha>)"
-git push origin fix/critical-bugs-phase1
+git push origin beta-cron
 ```
 
-### Step 6 — Decide: continue or stop
+### Step 6 — Switch back to main and decide
 
-After the fix, check `BUG_TRACKER.md` against the public-ready criteria
-in the "Status legend" section.
+After the fix and tracker update are pushed to `beta-cron`:
+
+```bash
+cd /home/hermes/webreservation
+git checkout main
+```
+
+(Don't pull — the user reviews `beta-cron` and merges it to main
+manually. You only run the loop on `beta-cron`.)
+
+Then check `BUG_TRACKER.md` against the public-ready criteria in the
+"Status legend" section.
 
 - **All public-ready criteria are `fixed` AND all tests pass AND no
   regressions in the report**: send a Telegram summary that ends with
@@ -128,9 +144,10 @@ in the "Status legend" section.
 
 ## Hard constraints
 
-- **NEVER push to `main`.** The user reviews the branch and merges.
+- **NEVER push to `main`.** The cron operates on the long-lived
+  `beta-cron` branch; the user reviews and merges to main.
 - **NEVER delete or rewrite git history.** Only `git commit` and
-  `git push origin <branch>`.
+  `git push origin beta-cron`.
 - **NEVER touch `node_modules`, `package-lock.json`, or any generated
   files** (`dist/`, `.next/`, `coverage/`, etc.).
 - **NEVER spend more than 30 minutes on a single bug.** If you can't
