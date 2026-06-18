@@ -42,13 +42,13 @@ are true:
 
 | ID | Area | Title | Status | Regression test | Commit |
 |---|---|---|---|---|---|
-| BUG-001 | Auth | Signup rate-limit mislabeled as "invalid email" | fixed | `tests/lib/auth-errors.test.ts` | this-session |
-| BUG-002 | Auth | `/[locale]/forgot-password` 404 dead-end | fixed | `tests/app/forgot-password.test.tsx` | this-session |
+| BUG-001 | Auth | Signup rate-limit mislabeled as "invalid email" | fixed | `tests/lib/auth-errors.test.ts` | dae387e |
+| BUG-002 | Auth | `/[locale]/forgot-password` 404 dead-end | fixed | `tests/app/forgot-password.test.tsx` | dae387e |
 | BUG-003 | Chat | Half-built chat (backend yes, frontend missing) | verified (link exists) | n/a | pre-existing |
-| BUG-004 | Matching | "I'm Going!" button is a duplicate link | fixed | inline + tests/components/ChatBox.test.tsx | this-session |
-| BUG-005 | i18n | JA locale shows English data | fixed | `tests/lib/i18n-data.test.ts` | this-session |
-| BUG-006 | i18n/a11y | `<html lang="en">` on every page | fixed | `tests/app/layout-html-lang.test.tsx` | this-session |
-| BUG-007 | Observability | Sentry telemetry 403 | fixed (code) | `tests/sentry-init.test.ts` | this-session |
+| BUG-004 | Matching | "I'm Going!" button is a duplicate link | fixed | inline `data-testid="session-card-im-going"` | dae387e |
+| BUG-005 | i18n | JA locale shows English data | fixed | `tests/lib/i18n-data.test.ts` | dae387e |
+| BUG-006 | i18n/a11y | `<html lang="en">` on every page | fixed | `tests/app/layout-html-lang.test.tsx` | dae387e |
+| BUG-007 | Observability | Sentry telemetry 403 | fixed (code) | `tests/sentry-init.test.ts` | dae387e |
 
 ## High-priority bugs (22 — fix in Phase 2 by daily cron)
 
