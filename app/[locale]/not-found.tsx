@@ -1,8 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
 
 export default function NotFoundLocalized() {
+  const t = useTranslations('notFound');
+  const locale = useLocale();
+
   return (
     <div className="min-h-[80vh] flex flex-col items-center justify-center px-4 bg-slate-50 text-center">
       <div className="space-y-6 max-w-md w-full">
@@ -17,24 +21,24 @@ export default function NotFoundLocalized() {
 
         {/* Text Content */}
         <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
-          Page not found
+          {t('title')}
         </h1>
-        
+
         <p className="text-base sm:text-lg text-slate-500 max-w-sm mx-auto">
-          We couldn't track down the page you're looking for. It might have moved or been deleted.
+          {t('description')}
         </p>
 
-        {/* Action Button */}
+        {/* Action Button — stays in the current locale so a /ja user lands on /ja */}
         <div className="pt-6">
-          <Link 
-            href="/"
+          <Link
+            href={`/${locale}`}
             className="inline-flex items-center justify-center px-8 py-3.5 text-sm font-semibold text-white transition-all bg-slate-900 rounded-xl hover:bg-slate-800 hover:scale-105 active:scale-95 shadow-md shadow-slate-900/10"
           >
-            Return Home
-            <svg 
-              className="w-4 h-4 ml-2" 
-              fill="none" 
-              stroke="currentColor" 
+            {t('cta')}
+            <svg
+              className="w-4 h-4 ml-2"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />

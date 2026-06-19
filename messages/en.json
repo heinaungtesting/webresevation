@@ -639,5 +639,10 @@
     "backToLogin": "Back to Login",
     "alreadyVerified": "Already verified?",
     "login": "Log in"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "We couldn't track down the page you're looking for. It might have moved or been deleted.",
+    "cta": "Return Home"
   }
 }
