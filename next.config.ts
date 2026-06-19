@@ -43,6 +43,29 @@ const nextConfig: NextConfig = {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains',
           },
+          {
+            // BUG-027: Baseline Content-Security-Policy. Auth pages accept
+            // passwords, so a missing CSP is a notable security gap. The
+            // policy is intentionally permissive on script/style because
+            // Next.js inlines its boot script and uses inline styles for
+            // streaming SSR; tightening these would break hydration. Image
+            // and connect sources are loosened to 'self' + https: so user
+            // avatars, Google Maps tiles, and Sentry ingest all work.
+            // frame-ancestors 'none' is defense-in-depth against clickjacking
+            // on top of X-Frame-Options: DENY.
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https:",
+              "font-src 'self' data:",
+              "connect-src 'self' https:",
+              "frame-ancestors 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join('; '),
+          },
         ],
       },
       {
