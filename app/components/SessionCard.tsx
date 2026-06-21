@@ -64,15 +64,21 @@ function SessionCard({ session }: SessionCardProps) {
      return;
    }
    setRsvpState('loading');
+   // Use a local flag so the `finally` block can tell success from
+   // failure without depending on `rsvpState` — TypeScript narrows
+   // React state to its latest setter argument inside try blocks,
+   // which makes `rsvpState !== 'joined'` report "no overlap" in finally.
+   let rsvpSucceeded = false;
    try {
      await csrfPost('/api/attendance', { session_id: session.id });
      setRsvpState('joined');
      setParticipantCount((c) => c + 1);
+     rsvpSucceeded = true;
    } catch (err) {
      // Fall back to detail page where the user can try again
      router.push(`/${locale}/sessions/${session.id}`);
    } finally {
-     if (rsvpState !== 'joined') setRsvpState('idle');
+     if (!rsvpSucceeded) setRsvpState('idle');
    }
    };
 
