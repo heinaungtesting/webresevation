@@ -1,3 +1,6 @@
+'use client';
+
+import { useLocale } from 'next-intl';
 import { formatTime } from '@/lib/utils';
 
 interface MessageBubbleProps {
@@ -17,6 +20,7 @@ export default function MessageBubble({
   created_at,
   isOwn,
 }: MessageBubbleProps) {
+  const intlLocale = useLocale();
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}>
       <div className={`flex flex-col max-w-[75%] sm:max-w-[60%]`}>
@@ -37,7 +41,7 @@ export default function MessageBubble({
           </p>
         </div>
         <span className={`text-xs text-gray-500 mt-1 px-2 ${isOwn ? 'text-right' : 'text-left'}`}>
-          {formatTime(created_at)}
+          {formatTime(created_at, intlLocale)}
         </span>
       </div>
     </div>

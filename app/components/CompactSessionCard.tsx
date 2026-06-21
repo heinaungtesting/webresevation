@@ -8,7 +8,7 @@ import { formatTime } from '@/lib/utils';
 import { Clock, MapPin } from 'lucide-react';
 import { AvatarGroup } from './ui/Avatar';
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface CompactSessionCardProps {
   session: Session;
@@ -29,6 +29,7 @@ const sportConfig: Record<SportType, { icon: string; gradient: string }> = {
 
 function CompactSessionCard({ session, variant = 'horizontal', className = '' }: CompactSessionCardProps) {
   const t = useTranslations('sessions');
+  const intlLocale = useLocale();
   const sport = sportConfig[session.sport_type] || sportConfig.other;
   const isFull = Boolean(session.max_participants && session.current_participants >= session.max_participants);
 
@@ -38,7 +39,7 @@ function CompactSessionCard({ session, variant = 'horizontal', className = '' }:
     : null;
 
   // Use state for time-dependent calculations to avoid hydration mismatch
-  const [timeLabel, setTimeLabel] = useState(formatTime(session.date_time));
+  const [timeLabel, setTimeLabel] = useState(formatTime(session.date_time, intlLocale));
   const [isUrgent, setIsUrgent] = useState(false);
 
   useEffect(() => {
@@ -61,7 +62,7 @@ function CompactSessionCard({ session, variant = 'horizontal', className = '' }:
         label = `${diffHours}h ${diffMins % 60}m`;
         setIsUrgent(true);
       } else {
-        label = formatTime(session.date_time);
+        label = formatTime(session.date_time, intlLocale);
         setIsUrgent(false);
       }
       setTimeLabel(label);

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { useAuth } from '@/app/contexts/AuthContext';
 import {
   ArrowLeft,
@@ -45,6 +46,9 @@ interface Pagination {
 
 export default function AdminUsersPage() {
   const router = useRouter();
+  const params = useParams();
+  const intlLocale = useLocale();
+  const locale = (params?.locale as string) || intlLocale;
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
@@ -243,7 +247,7 @@ export default function AdminUsersPage() {
                     )}
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Calendar className="w-4 h-4" />
-                      Joined {formatDate(user.created_at)}
+                      Joined {formatDate(user.created_at, locale)}
                     </div>
                   </div>
 

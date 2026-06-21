@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Session, SportType, SkillLevel } from '@/types';
 import Badge from './ui/Badge';
 import Button from './ui/Button';
@@ -45,6 +45,7 @@ function SessionCard({ session }: SessionCardProps) {
  const locale = params.locale as string;
  const t = useTranslations('sessions');
  const tCommon = useTranslations('common');
+ const intlLocale = useLocale();
  const { user } = useAuth();
 
  // BUG-004 fix: "I'm Going!" used to be a Link to the detail page — RSVP
@@ -73,7 +74,7 @@ function SessionCard({ session }: SessionCardProps) {
    } finally {
      if (rsvpState !== 'joined') setRsvpState('idle');
    }
- };
+   };
 
  const sport = sportConfig[session.sport_type] || sportConfig.other;
  const skill = getSkillConfig(session.skill_level, t(session.skill_level));
@@ -155,7 +156,7 @@ function SessionCard({ session }: SessionCardProps) {
             <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100">
               <Clock className="w-3.5 h-3.5 text-slate-500" />
             </div>
-            <span className="font-medium text-sm">{formatDate(session.date_time)}</span>
+            <span className="font-medium text-sm">{formatDate(session.date_time, intlLocale)}</span>
           </div>
 
           <div className="flex items-center gap-2.5 text-sm text-slate-600">

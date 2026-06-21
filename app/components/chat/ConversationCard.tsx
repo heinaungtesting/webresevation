@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { formatDate, formatTime } from '@/lib/utils';
 import { MessageCircle, Users } from 'lucide-react';
 import Badge from '../ui/Badge';
@@ -39,6 +42,7 @@ export default function ConversationCard({
   conversation,
   currentUserId,
 }: ConversationCardProps) {
+  const intlLocale = useLocale();
   const otherParticipants = conversation.participants.filter(
     (p) => p.user.id !== currentUserId
   );
@@ -79,7 +83,7 @@ export default function ConversationCard({
               </h3>
               {conversation.type === 'session' && conversation.session && (
                 <p className="text-xs text-gray-500">
-                  {formatDate(conversation.session.date_time)}
+                  {formatDate(conversation.session.date_time, intlLocale)}
                 </p>
               )}
             </div>
@@ -98,7 +102,7 @@ export default function ConversationCard({
               {lastMessage.content}
             </p>
             <p className="text-xs text-gray-500 mt-1">
-              {formatTime(lastMessage.created_at)}
+              {formatTime(lastMessage.created_at, intlLocale)}
             </p>
           </div>
         )}

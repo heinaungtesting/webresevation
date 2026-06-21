@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useLocale } from 'next-intl';
 import { useAuth } from '@/app/contexts/AuthContext';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
@@ -34,6 +35,7 @@ export default function ReviewSection({
   hasAttended,
 }: ReviewSectionProps) {
   const { user } = useAuth();
+  const intlLocale = useLocale();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
@@ -225,7 +227,7 @@ export default function ReviewSection({
                       {getUserName(review.user)}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {formatDate(review.created_at)}
+                      {formatDate(review.created_at, intlLocale)}
                     </span>
                   </div>
                   <StarRating rating={review.rating} size="sm" />

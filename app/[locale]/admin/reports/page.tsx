@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { useAuth } from '@/app/contexts/AuthContext';
 import {
   ArrowLeft,
@@ -84,6 +85,9 @@ const REASON_LABELS: Record<string, { label: string; emoji: string }> = {
 
 export default function AdminReportsPage() {
   const router = useRouter();
+  const params = useParams();
+  const intlLocale = useLocale();
+  const locale = (params?.locale as string) || intlLocale;
   const { user: currentUser } = useAuth();
   const [reports, setReports] = useState<Report[]>([]);
   const [counts, setCounts] = useState<StatusCounts>({ PENDING: 0, REVIEWED: 0, RESOLVED: 0, DISMISSED: 0 });
@@ -321,7 +325,7 @@ export default function AdminReportsPage() {
                                 Created by: {report.session.creator?.display_name || report.session.creator?.username || 'Unknown'}
                               </p>
                               <p className="text-xs text-gray-400">
-                                {formatDate(report.session.date_time)}
+                                {formatDate(report.session.date_time, locale)}
                               </p>
                             </div>
                           </div>
@@ -344,7 +348,7 @@ export default function AdminReportsPage() {
                           {report.reporter.display_name || report.reporter.username || report.reporter.email}
                         </span>
                         <span>•</span>
-                        <span>{formatDate(report.created_at)}</span>
+                        <span>{formatDate(report.created_at, locale)}</span>
                       </div>
                     </div>
 

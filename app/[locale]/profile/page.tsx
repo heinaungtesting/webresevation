@@ -12,7 +12,7 @@ import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import UserStats from '@/app/components/profile/UserStats';
 import { formatDate } from '@/lib/utils';
 import { sportIdToSessionKey } from '@/lib/utils/sportTranslation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
 
 const sectionVariants = {
@@ -28,6 +28,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const { user } = useAuth();
   const t = useTranslations('profile');
+  const locale = useLocale();
   const tSessions = useTranslations('sessions');
   const [profile, setProfile] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
@@ -275,7 +276,7 @@ export default function ProfilePage() {
                 )}
                 <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-gray-200 shadow-sm">
                   <Calendar className="w-4 h-4 text-gray-500" />
-                  <span>{t('joined', { date: formatDate(profile.created_at) })}</span>
+                  <span>{t('joined', { date: formatDate(profile.created_at, locale) })}</span>
                 </div>
               </div>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useAuth } from '@/app/contexts/AuthContext';
 import {
   Calendar,
@@ -201,11 +201,11 @@ export default function MyCreatedSessionsPage() {
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Calendar className="w-4 h-4" />
-                          {formatDate(session.date_time)}
+                          {formatDate(session.date_time, locale)}
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Clock className="w-4 h-4" />
-                          {formatTime(session.date_time)} ({session.duration_minutes} {t('minutes')})
+                          {formatTime(session.date_time, locale)} ({session.duration_minutes} {t('minutes')})
                         </div>
                       </div>
 
@@ -271,7 +271,7 @@ export default function MyCreatedSessionsPage() {
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Calendar className="w-4 h-4" />
-                          {formatDate(session.date_time)}
+                          {formatDate(session.date_time, locale)}
                         </div>
                       </div>
                     </div>

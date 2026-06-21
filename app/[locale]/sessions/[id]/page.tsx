@@ -15,7 +15,7 @@ import AttendanceTracker from '@/app/components/sessions/AttendanceTracker';
 import ReportModal from '@/app/components/ReportModal';
 import StudentBadge from '@/app/components/ui/StudentBadge';
 import { csrfPost, csrfDelete } from '@/lib/csrfClient';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function SessionDetailPage() {
   const params = useParams();
@@ -23,6 +23,7 @@ export default function SessionDetailPage() {
   const { user } = useAuth();
   const t = useTranslations('sessionDetail');
   const tSessions = useTranslations('sessions');
+  const locale = useLocale();
   const [session, setSession] = useState<Session | null>(null);
   const [isAttending, setIsAttending] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -291,7 +292,7 @@ export default function SessionDetailPage() {
                 <div className="flex items-center gap-3">
                   <Clock className="w-5 h-5 text-gray-600" />
                   <div>
-                    <p className="font-semibold">{formatDate(session.date_time)}</p>
+                    <p className="font-semibold">{formatDate(session.date_time, locale)}</p>
                     <p className="text-sm text-gray-600">
                       {t('duration', { minutes: session.duration_minutes })}
                     </p>
