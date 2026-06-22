@@ -31,10 +31,13 @@ are true:
 - [x] BUG-005 — JA locale reads *_ja fields
 - [x] BUG-006 — `<html lang={locale}>` per locale
 - [x] BUG-007 — Sentry init env-driven + 403 filter
-- [ ] BUG-027 — CSP header present on auth pages
-- [ ] BUG-021 — 404 page localized
-- [ ] BUG-030 — "log in" labels consistent across the app
-- [ ] BUG-031 — date format locale-correct (JA-style on EN removed)
+- [x] BUG-027 — CSP header present on auth pages (c7e33af)
+- [x] BUG-021 — 404 page localized (0af3e89)
+- [x] BUG-030 — "log in" labels consistent across the app (fea67aa)
+- [x] BUG-031 — date format locale-correct (JA-style on EN removed) (fa720ec)
+
+**PUBLIC_READY=true** — all 7 Critical bugs fixed + all 4 readiness criteria
+fixed. Test suite: 325/325 passing. Build: ✅. No regressions.
 
 ---
 
@@ -67,13 +70,13 @@ are true:
 | BUG-018 | Mobile | Map View button occluded by bottom nav | not-started |
 | BUG-019 | i18n | "Reviews" heading hardcoded English on JA | not-started |
 | BUG-020 | i18n | "Open in Google Maps" hardcoded English | not-started |
-| BUG-021 | i18n | 404 page English-only | not-started |
+| BUG-021 | i18n | 404 page English-only | fixed (`tests/app/not-found-localized.test.tsx`, 0af3e89) |
 | BUG-022 | i18n | JA greeting fragmented by flex layout | not-started |
 | BUG-023 | UX | "Loading reviews..." never resolves | not-started |
 | BUG-024 | SEO | Soft 404 on invalid session IDs | not-started |
 | BUG-025 | UX | "Happening Now" shows 1 card with 0-second window | not-started |
 | BUG-026 | UX | Avatar overflow "and N more" count wrong | not-started |
-| BUG-027 | Security | Content-Security-Policy header missing | not-started |
+| BUG-027 | Security | Content-Security-Policy header missing | fixed (`tests/lib/csp-header.test.ts`, c7e33af) |
 | BUG-028 | Security | PKCE cookie not HttpOnly, 400-day expiry | not-started |
 | BUG-029 | i18n | Login redirectTo drops locale prefix | not-started |
 
@@ -81,8 +84,8 @@ are true:
 
 | ID | Area | Title | Status |
 |---|---|---|---|
-| BUG-030 | i18n | "Log in" labeled three different ways | not-started |
-| BUG-031 | i18n | JA-style date on EN locale | not-started |
+| BUG-030 | i18n | "Log in" labeled three different ways | fixed (`tests/lib/login-labels.test.ts`, fea67aa) |
+| BUG-031 | i18n | JA-style date on EN locale | fixed (`tests/lib/date-locale.test.ts`, fa720ec) |
 | BUG-032 | UX | "Good Morning, there" placeholder | not-started |
 | BUG-033 | i18n | "EN OK" badge flag logic inconsistent | not-started |
 | BUG-034 | i18n | Signup language defaults to EN on /ja/signup | not-started |
